@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Recall", "Libs\Recall\Recall.fsproj", "{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{04A3834D-1C74-498E-972F-E62C426938FC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5E3BB5D0-A29D-45B0-9A4B-60FE9DD93ED8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Tutorial.md = Docs\Tutorial.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{97D87F19-C5BA-4289-A6B5-2336AC2E597D}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3C33842D-FBF9-4D06-B98C-F9E6BF2E9BE3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD} = {04A3834D-1C74-498E-972F-E62C426938FC}
+	EndGlobalSection
+EndGlobal

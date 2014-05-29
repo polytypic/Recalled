@@ -23,8 +23,10 @@ The implementation of Recall is based on two other libraries:
 
 ## Documentation
 
-There will be a tutorial for programming with Infers.  The programming interface
-of Recall is very simple, compromising only three central types and a handful of
+The document
+[Recall or How to Define Computations that can be Recalled](Docs/Tutorial.md)
+provides a tutorial for programming with Recall.  The programming interface of
+Recall is very simple, compromising only three central types and a handful of
 combinators.
 
 ## Download
