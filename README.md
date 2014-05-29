@@ -2,7 +2,7 @@
 
 Recall is a library that implements a simple EDSL in F# for defining persistent,
 incremental, parallel computations such as build systems easily.  Recall is
-inspired, but does not directly copy
+inspired by, but does not directly copy
 
 * Umut Acar's and other's work on
   [Self-Adjusting Computation](http://www.umut-acar.org/self-adjusting-computation),
@@ -11,7 +11,7 @@ inspired, but does not directly copy
 * Neil Mitchell's work on [Shake](http://community.haskell.org/~ndm/shake/) also
   on [GitHub](https://github.com/ndmitchell/shake).
 
-The implementation of Recall is based on two other libraries:
+The implementation of Recall is based on two libraries:
 
 * The [Hopac](https://github.com/VesaKarvonen/Hopac) library makes it easy to
   implement the necessary concurrent, parallel, and asynchronous programming
