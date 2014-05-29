@@ -8,7 +8,8 @@ inspired, but does not directly copy
   [Self-Adjusting Computation](http://www.umut-acar.org/self-adjusting-computation),
   and
 
-* Neil Mitchell's work on [Shake](http://community.haskell.org/~ndm/shake/).
+* Neil Mitchell's work on [Shake](http://community.haskell.org/~ndm/shake/) also
+  on [GitHub](https://github.com/ndmitchell/shake).
 
 The implementation of Recall is based on two other libraries:
 
