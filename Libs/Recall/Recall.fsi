@@ -15,7 +15,7 @@
 /// to be recomputed, because its result may have changed.  Recall makes it easy
 /// for the programmer to write correct logged computations, but does not
 /// strictly enforce correctness.  Strictly enforcing correctness is essentially
-/// impossible to do in a non-pure language in a convenient manner, because it
+/// impossible to do in a impure language in a convenient manner, because it
 /// precludes the use of built-in lambda expressions.  Therefore Recall chooses
 /// convenience over cumbersomeness.  To define a correct logged computation,
 /// the programmer simply needs to make sure that any input that may change the
@@ -30,7 +30,11 @@
 /// use of the cores of the local machine to process other computations.
 namespace Recall
 
+open System
 open Hopac
+
+/// Represents a persistent storage.
+type Log
 
 /// Represents a single primitive step or a sequence of steps of a possibly
 /// logged computation.
@@ -47,7 +51,7 @@ type Update<'x>
 type Logged<'x>
 
 /// Represents a parallel computation with a log.
-type WithLog<'x>
+type WithLog<'x> = Log -> Job<'x>
 
 /// Builder for steppable computations.
 #if DOC
@@ -64,58 +68,54 @@ type WithLog<'x>
 type UpdateBuilder =
   new: unit -> UpdateBuilder
 
-  member Delay: (unit -> Job<Update<'x>>) -> Job<Update<'x>>
+  member Delay: (unit -> Update<'x>) -> Update<'x>
 
-  member Return: 'x -> Job<Update<'x>>
+  member Return: 'x -> Update<'x>
 
-  member ReturnFrom:  Job<Update<'x>> -> Job<Update<'x>>
-  member ReturnFrom: EmbeddedJob<'x>  -> Job<Update<'x>>
+  member ReturnFrom:  Update<'x> -> Update<'x>
+  member ReturnFrom:     Job<'x> -> Update<'x>
 
-  member Bind:  Job<Update<'x>> * ('x -> Job<Update<'y>>) -> Job<Update<'y>>
-  member Bind:  Job<Logged<'x>> * ('x -> Job<Update<'y>>) -> Job<Update<'y>>
-  member Bind:      Logged<'x>  * ('x -> Job<Update<'y>>) -> Job<Update<'y>>
-  member Bind: EmbeddedJob<'x>  * ('x -> Job<Update<'y>>) -> Job<Update<'y>>
+  member Bind:         Update<'x>  * ('x -> Update<'y>) -> Update<'y>
+  member Bind:         Logged<'x>  * ('x -> Update<'y>) -> Update<'y>
+  member Bind: WithLog<Logged<'x>> * ('x -> Update<'y>) -> Update<'y>
+  member Bind:            Job<'x>  * ('x -> Update<'y>) -> Update<'y>
 
 /// Builder for logged computations.  A logged computation is essentially a
 /// steppable computation, whose steps are logged, while it is being executed.
-type LoggedBuilder =
+type [<Class>] LoggedBuilder =
   inherit UpdateBuilder
-  new: unit -> LoggedBuilder
-  member Run: Job<Update<'x>> -> Job<Logged<'x>>
+  member Run: Update<'x> -> WithLog<Logged<'x>>
 
 /// Builder for parallel computations with a log.  A computation with a log is
 /// executed in a context with a log for logging individual logged computations.
 type WithLogBuilder =
   new: unit -> WithLogBuilder
 
-  member Delay: (unit -> Job<WithLog<'x>>) -> Job<WithLog<'x>>
+  member inline Delay: (unit -> WithLog<'x>) -> WithLog<'x>
 
-  member Return: 'x -> Job<WithLog<'x>>
+  member inline Return: 'x -> WithLog<'x>
 
-  member ReturnFrom: Job<WithLog<'x>> -> Job<WithLog<'x>>
-  member ReturnFrom: EmbeddedJob<'x>  -> Job<WithLog<'x>>
+  member inline ReturnFrom: WithLog<'x> -> WithLog<'x>
+  member inline ReturnFrom:     Job<'x> -> WithLog<'x>
 
-  member Bind: Job<WithLog<'x>> * ('x -> Job<WithLog<'y>>) -> Job<WithLog<'y>>
-  member Bind: EmbeddedJob<'x>  * ('x -> Job<WithLog<'y>>) -> Job<WithLog<'y>>
+  member inline Bind: WithLog<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
+  member inline Bind:     Job<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
 
-  member TryFinally: Job<WithLog<'x>> * (unit -> unit) -> Job<WithLog<'x>>
-  member TryWith: Job<WithLog<'x>> * (exn -> Job<WithLog<'x>>) -> Job<WithLog<'x>>
+  member inline TryFinally: WithLog<'x> * (unit -> unit) -> WithLog<'x>
+  member inline TryWith: WithLog<'x> * (exn -> WithLog<'x>) -> WithLog<'x>
 
-  member Using: 'x * ('x -> Job<WithLog<'x>>) -> Job<WithLog<'x>>
+  member inline Using: 'x * ('x -> WithLog<'y>) -> WithLog<'y> when 'x :> IDisposable
 
-  member For: seq<'x> * ('x -> Job<WithLog<unit>>) -> Job<WithLog<unit>>
+  member inline For: seq<'x> * ('x -> WithLog<unit>) -> WithLog<unit>
 
-  member While: (unit -> bool) * Job<WithLog<unit>> -> Job<unit>
+  member inline While: (unit -> bool) * WithLog<unit> -> WithLog<unit>
 
-  member Zero: unit -> Job<WithLog<unit>>
-
-  member ReturnFrom: Job<Logged<'x>> -> Job<WithLog<Logged<'x>>>
-  member Bind: Job<Logged<'x>> * (Logged<'x> -> Job<WithLog<'y>>) -> Job<WithLog<'y>>
+  member inline Zero: unit -> WithLog<unit>
 
 /// Builder for running a parallel computations with a log.
 type [<Class>] RunWithLogBuilder =
   inherit WithLogBuilder
-  member Run: Job<WithLog<'x>> -> Job<'x>
+  member Run: WithLog<'x> -> Job<'x>
 
 /// Operations for defining computations with Recall.
 [<AutoOpen>]
@@ -143,23 +143,23 @@ module Recall =
   /// it may or may not be run to completion.
   ///
   /// In case the log indicates that the recreated computation has no
-  /// dependencies to other logged computations then computation is performed
-  /// every time it is recreated.  This makes it convenient to essentially
-  /// create new primitive operations and is also quite logical as a computation
-  /// that has no inputs must either be a constant or it must use some hidden
-  /// effects to compute its output.
+  /// dependencies to other logged computations then computation is run to
+  /// completion every time it is recreated.  This makes it convenient to
+  /// essentially create new primitive operations and is also quite logical as a
+  /// computation that has no inputs must either be a constant or it must use
+  /// some hidden effects to compute its output.
   ///
   /// If, however, the log has a non empty sequence of dependencies to other
-  /// logged computations, then the recreated computation is performed to
-  /// completion only if the sequence of dependencies changes or the result of
-  /// any one of those logged computations has changed.  This works correctly as
-  /// long as any input that may change the result of the computation are bound
-  /// as other logged computations within the defined logged computation.
+  /// logged computations, then the recreated computation is run to completion
+  /// only if the sequence of dependencies changes or the result of any one of
+  /// those logged computations has changed.  This works correctly as long as
+  /// any input that may change the result of the computation are bound as other
+  /// logged computations within the defined logged computation.
 #endif
-  val log: id: 'id -> LoggedBuilder
+  val log: id: string -> LoggedBuilder
 
   /// Returns an operation for reading the result of a logged computation.
-  val read: Logged<'x> -> Job<WithLog<'x>>
+  val read: Logged<'x> -> Alt<'x>
 
   /// Provides an alternative that becomes enabled if some computation within
   /// the whole logged computation has failed.  This allows long running
