@@ -27,8 +27,10 @@ The implementation of Recall is based on two libraries:
 The document
 [Recall or How to Define Computations that can be Recalled](Docs/Tutorial.md)
 provides a tutorial for programming with Recall.  The programming interface of
-Recall is very simple, compromising only three central types and a handful of
-combinators.
+Recall is very simple, compromising only a few central types and associated
+computation builders and a handful of combinators.  See the
+[Recall Library Reference](http://vesakarvonen.github.io/Recall/Recall.html) for
+details.
 
 ## Download
 
