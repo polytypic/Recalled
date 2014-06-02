@@ -15,8 +15,8 @@ The implementation of Recall is based on two libraries:
 
 * The [Hopac](https://github.com/VesaKarvonen/Hopac) library makes it easy to
   implement the necessary concurrent, parallel, and asynchronous programming
-  patterns and also makes it practical to spawn each build computation as a
-  separate lightweight thread.
+  patterns and also makes it practical to spawn each computation as a separate
+  lightweight thread.
 
 * The [Infers](https://github.com/VesaKarvonen/Infers) library makes it easy to
   implement the necessary datatype generic operations, such as serialization
