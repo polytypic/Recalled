@@ -15,26 +15,28 @@ Let's examine how Recall can be used via a concrete toy example, meant to be
 simple enough to be easily worked through without having to spend much time with
 any kind of problem domain specific details
 
+### Straightforward ordinary functions
+
 Suppose that you have a file containing a list of files with one path per line.
 Each file listed in that file contains a list of integers stored with one
 integer per line.  You wish to write a program that takes the name of the file
 containing the list of files and computes the total sum of all the integers in
 the files.
 
-### A straightforward ordinary function
-
-Here is a straightforward function for that purpose:
+Here is a straightforward pair of functions for that purpose:
 
 ```fsharp
+let sumLinesOfFile (intListPath: string) : int =
+  let intList = File.ReadAllLines intListPath
+  intList
+  |> Array.sumBy (fun intText -> int intText
+
 let sumLinesOfFiles (fileListPath: string) : int =
   let fileList = File.ReadAllLines fileListPath
 
   let sums =
     fileList
-    |> Array.map (fun intListPath ->
-       let intList = File.ReadAllLines intListPath
-       intList
-       |> Array.sumBy (fun intText -> int intText))
+    |> Array.map sumLinesOfFile
 
   let total =
     sums
@@ -43,14 +45,15 @@ let sumLinesOfFiles (fileListPath: string) : int =
   total
 ```
 
-There is nothing special about the above `sumLinesOfFiles` function.
+There is nothing special about the above `sumLinesOfFiles` function or the
+helper `sumLinesOfFile`.
 
-The idea is that you are using this function to compute the sum whenever you
-need it&mdash;without necessarily even knowing whether any file has actually
-changed.  Wouldn't it be nice if your program could be modified to avoid
-needless recomputation?  For example, if just one file changes or a new file is
-added, it would nice if only the sum for that would be (re)computed and the
-total would be computed from previously known sums and so on.
+The idea is that you are using the `sumLinesOfFiles` function to compute the sum
+whenever you need it&mdash;without necessarily even knowing whether any file has
+actually changed.  Wouldn't it be nice if your program could be modified to
+avoid needless recomputation?  For example, if just one file changes or a new
+file is added, it would nice if only the sum for that would be (re)computed and
+the total would be computed from previously known sums and so on.
 
 ### Working incrementally
 
@@ -195,7 +198,7 @@ Fortunately even though the syntax computational expressions tries to reduce the
 syntactic difference, the exclamation marks conveniently point out the places
 where special computation effects happen.
 
-### A straightforward persistent and incremental computation
+### Straightforward persistent and incremental computations?
 
 Continuing with out toy, we now have the building blocks to define a
 `sumLinesOfFiles` computation:
@@ -223,7 +226,7 @@ One can define it straightforwardly using it just basic monadic operations.
 
 At this point you might want to compare this new persistent and incremental
 version of `sumLinesOfFiles` to the original
-[ordinary function](#a-straightforward-ordinary-function).
+[ordinary functions](#straightforward-ordinary-functions).
 
 On the first run, the above computation would be performed to completion.  On
 subsequent runs, assuming nothing has changed, the `lastWriteTimeUtc` of the
