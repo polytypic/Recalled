@@ -162,8 +162,8 @@ let readAllLines path = update {
 
 The above `readAllLines` is a *partial* logged computation.  It differs from the
 previous computations in that it uses the `update` computation builder and the
-final result of the computation is not logged&mdash.  An *update* is essentially
-a primitive step or a sequence of steps used as part of logged computation.  In
+final result of the computation is not logged.  An *update* is essentially a
+primitive step or a sequence of steps used as part of a logged computation.  In
 fact, the previous computations defined using `logAs` also consisted of updates.
 
 Getting back to `readAllLines`, we could, of course, easily log the result if we
@@ -194,13 +194,13 @@ as you'd read ordinary code.
 
 Speaking of readability, one potential worry might be that it might not be
 obvious that there are computational effects, namely logging, going on.
-Fortunately even though the syntax computational expressions tries to reduce the
-syntactic difference, the exclamation marks conveniently point out the places
-where special computation effects happen.
+Fortunately, even though the syntax of computational expressions tries to reduce
+the syntactic differences, the exclamation marks conveniently point out the
+places where special computational effects happen.
 
 ### Straightforward persistent and incremental computations?
 
-Continuing with out toy, we now have the building blocks to define a
+Continuing with our toy, we now have the building blocks to define a
 `sumLinesOfFiles` computation:
 
 ```fsharp
