@@ -1,4 +1,4 @@
-# How to Define Computations that can be Recalled
+# Defining Computations that can be Recalled
 
 Recall is a library, an
 [EDSL](http://en.wikipedia.org/wiki/Domain-specific_language) of a sort, that

@@ -10,7 +10,7 @@ available via [NuGet](http://www.nuget.org/).
 
 ## Documentation
 
-The document [How to Define Computations that can be Recalled](Docs/Tutorial.md)
+The document [Defining Computations that can be Recalled](Docs/Tutorial.md)
 provides a tutorial for programming with Recall.  The programming interface of
 Recall is very simple, compromising only a few central types and associated
 computation builders and a handful of combinators.  See the
