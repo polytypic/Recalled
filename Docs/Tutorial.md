@@ -221,8 +221,9 @@ The one new operation used in the above definition is the `Array.mapLogged`
 function.  As its name suggests, it just runs a number of logged computations.
 One can define it straightforwardly using it just basic monadic operations.
 
-At this point you might want to scroll back up and compare this new persistent
-and incremental version of `sumLinesOfFiles` to the original ordinary function.
+At this point you might want to compare this new persistent and incremental
+version of `sumLinesOfFiles` to the original
+[ordinary function](#a-straightforward-ordinary-function).
 
 On the first run, the above computation would be performed to completion.  On
 subsequent runs, assuming nothing has changed, the `lastWriteTimeUtc` of the
