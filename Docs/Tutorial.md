@@ -1,19 +1,23 @@
 # Recall or How to Define Computations that can be Recalled
 
-Recall is a library, an EDSL of a sort, that can be used to define persistent,
-incremental, parallel computations such as build systems.  Recall isn't really a
-ready made traditional build system as such.  The core of Recall is very minimal
-and doesn't even contain built-in functionality, like operations for checking
-file modification dates, characteristics to build systems.  However, such
-operations can be implemented in a straightforward manner and, in particular,
-*forward build systems*, that go from inputs to outputs or sources to targets,
-can be more or less directly programmed using Recall.
+Recall is a library, an
+[EDSL](http://en.wikipedia.org/wiki/Domain-specific_language) of a sort, that
+can be used to define *persistent*, *incremental*, *parallel* computations such
+as [build systems](http://en.wikipedia.org/wiki/Build_automation).  Recall isn't
+really a ready made
+[traditional build system](http://en.wikipedia.org/wiki/List_of_build_automation_software)
+as such.  The core of Recall is very minimal and doesn't even contain built-in
+functionality, like operations for checking file modification dates,
+characteristics to build systems.  However, such operations can be implemented
+in a straightforward manner and, in particular, *forward build systems*, that go
+from inputs to outputs or sources to targets, can be more or less directly
+programmed using Recall.
 
 ## A toy example
 
 Let's examine how Recall can be used via a concrete toy example, meant to be
-simple enough to be easily worked through without having to spend much time with
-any kind of problem domain specific details
+simple enough to be easily worked through without having to spend any time with
+problem domain specific details
 
 ### Straightforward ordinary functions
 
@@ -149,6 +153,19 @@ When Recall reruns the modified version of `sumLinesOfFile`, it first reruns the
 that nothing has changed so it simply recovers the previously logged result of
 `sumLinesOfFile`.
 
+This is also where Recall differs from most traditional build systems and is
+more like an adaptation of
+[Self-Adjusting Computation](http://www.umut-acar.org/self-adjusting-computation).
+Traditional build systems often have some specific built-in primitive kinds of
+dependencies such as dependencies to files.  Upon rebuilds those systems use
+their built-in primitives to check dependencies such as checking file
+modification dates or, say, MD5 hashes of file contents.  In Recall,
+recomputations are triggered by changes in the result *values* produced by the
+computations.  This makes Recall particularly convenient for working with
+ordinary host-language functions, while many existing build systems try to
+primarily make it easy to work with external programs that read and write
+*files*.
+
 ### Partial updates
 
 Let's then continue with a computation for reading all lines of a file:
@@ -251,8 +268,8 @@ sums can be computed in parallel.  Recall basically starts every logged
 computation as a separate lightweight thread, but when a new computation is
 started the execution of the current computation immediately waits for the
 started computation to finish.  In this case we can use the function
-`Array.Parallel.mapLogged` to let `Recall` know it can produce the results in
-parallel:
+`Array.Parallel.mapLogged` to let `Recall` know it is free to compute the
+results in parallel:
 
 ```fsharp
 let sumLinesOfFiles (fileListPath: string) =
