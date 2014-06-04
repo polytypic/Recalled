@@ -34,7 +34,9 @@ let sumLinesOfFile (intListPath: string) : int =
   let intList = File.ReadAllLines intListPath
   intList
   |> Array.sumBy (fun intText -> int intText
+```
 
+```fsharp
 let sumLinesOfFiles (fileListPath: string) : int =
   let fileList = File.ReadAllLines fileListPath
 
