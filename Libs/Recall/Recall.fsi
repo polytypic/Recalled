@@ -53,6 +53,9 @@ type Logged<'x>
 /// Represents a parallel computation with a log.
 type WithLog<'x> = Log -> Job<'x>
 
+/// Represents a digest of a computation.
+type Digest
+
 /// Builder for steppable computations.
 #if DOC
 ///
@@ -80,6 +83,14 @@ type UpdateBuilder =
   member Bind: WithLog<Logged<'x>> * ('x -> Update<'y>) -> Update<'y>
   member Bind:            Job<'x>  * ('x -> Update<'y>) -> Update<'y>
 
+  member Combine: Update<unit> * Update<'x> -> Update<'x>
+
+  member For: seq<'x> * ('x -> Update<unit>) -> Update<unit>
+
+  member While: (unit -> bool) * Update<unit> -> Update<unit>
+
+  member Zero: unit -> Update<unit>
+
 /// Builder for logged computations.  A logged computation is essentially a
 /// steppable computation, whose steps are logged, while it is being executed.
 type [<Class>] LoggedBuilder =
@@ -99,7 +110,10 @@ type WithLogBuilder =
   member inline ReturnFrom:     Job<'x> -> WithLog<'x>
 
   member inline Bind: WithLog<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
+  member        Bind:  Update<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
   member inline Bind:     Job<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
+
+  member inline Combine: WithLog<unit> * WithLog<'x> -> WithLog<'x>
 
   member inline TryFinally: WithLog<'x> * (unit -> unit) -> WithLog<'x>
   member inline TryWith: WithLog<'x> * (exn -> WithLog<'x>) -> WithLog<'x>
@@ -117,6 +131,10 @@ type [<Class>] RunWithLogBuilder =
   inherit WithLogBuilder
   member Run: WithLog<'x> -> Job<'x>
 
+module Seq =
+  module Par =
+    val mapLogged: ('x -> WithLog<Logged<'y>>) -> seq<'x> -> Update<seq<'y>>
+
 /// Operations for defining computations with Recall.
 [<AutoOpen>]
 module Recall =
@@ -133,9 +151,9 @@ module Recall =
   val logged: WithLogBuilder
 
   /// Returns a builder for creating a new logged computation with the given
-  /// identity, which must be unique.  The result of the computation is
-  /// persisted to a computation log along with dependencies to other logged
-  /// computations.
+  /// identity.  Computations with the same identity are assumed to be the same
+  /// computations.  The result of the computation is persisted to a computation
+  /// log along with dependencies to other logged computations.
 #if DOC
   ///
   /// The first time a logged computations is created, it is always run to
@@ -156,7 +174,25 @@ module Recall =
   /// any input that may change the result of the computation are bound as other
   /// logged computations within the defined logged computation.
 #endif
-  val log: id: string -> LoggedBuilder
+  val logAs: id: string -> LoggedBuilder
+
+  /// Returns a builder for creating a new logged computation.  The computation
+  /// is given an automatically determined identity.
+  val log: LoggedBuilder
+
+  /// Returns a special logged computation that logs the given value.
+  val watch: 'x -> Update<unit>
+
+  /// A builder for defining updates or partial logged computations whose
+  /// results are not logged.
+  val update: UpdateBuilder
+
+  /// Provides a digest of the current point in a logged computation.  The
+  /// digest includes the identity of the current computation as well as digests
+  /// of all the dependencies of the current computation.  A digest can be used
+  /// as a convenient end result of a logged computation and also can be used as
+  /// a key to identify the point in the computation.
+  val digest: Update<Digest>
 
   /// Returns an operation for reading the result of a logged computation.
   val read: Logged<'x> -> Alt<'x>

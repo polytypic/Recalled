@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\Recall.XML</DocumentationFile>
+    <NoWarn>0050</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Recall.XML</DocumentationFile>
+    <NoWarn>0050</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -59,6 +61,9 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
+    <Compile Include="Util.fs" />
+    <Compile Include="PU.fsi" />
+    <Compile Include="PU.fs" />
     <Compile Include="Recall.fsi" />
     <Compile Include="Recall.fs" />
     <None Include="packages.config" />
@@ -66,19 +71,19 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Hopac">
-      <HintPath>..\..\packages\Hopac.0.0.0.13\lib\net451\Hopac.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.15\lib\net451\Hopac.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Hopac.Core">
-      <HintPath>..\..\packages\Hopac.0.0.0.13\lib\net451\Hopac.Core.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.15\lib\net451\Hopac.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Infers">
-      <HintPath>..\..\packages\Infers.0.0.0.0\lib\net451\Infers.dll</HintPath>
+      <HintPath>..\..\packages\Infers.0.0.0.1\lib\net451\Infers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Infers.Rep">
-      <HintPath>..\..\packages\Infers.0.0.0.0\lib\net451\Infers.Rep.dll</HintPath>
+      <HintPath>..\..\packages\Infers.0.0.0.1\lib\net451\Infers.Rep.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
