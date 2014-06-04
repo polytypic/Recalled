@@ -109,8 +109,8 @@ The above `sumLinesOfFile` computation works, but it doesn't buy us anything.
 Can you see why?
 
 Of course, it should be mentioned that in the context of this toy example we are
-not interested robustness details like checking whether a file actually contains
-integers like we expect.
+not interested in robustness details such as checking whether a file actually
+contains integers like we expect.  That is not the problem.
 
 The real problem with the above `sumLinesOfFile` computation is that it always
 computes the sum&mdash;whether or not the file has changed.  Fortunately this is
@@ -126,16 +126,16 @@ let sumLinesOfFile path = logAs ("sumLinesOfFile: " + path) {
 }
 ```
 
-What we changed is that now the `sumLinesOfFile` computation depends on the
+What we changed is that now the `sumLinesOfFile` computation *depends on* the
 `lastWriteTimeUtc` computation.  Recall sees and essentially logs the result of
 the `lastWriteTimeUtc` computation even though the result of `lastWriteTimeUtc`
 isn't explicitly used by `sumLinesOfFile`.
 
 ### The essence of Recall
 
-The essence of Recall is that it operations under the assumption that
-programmers make sure that all input that may have an effect on the output of a
-computation is logged for Recall to see.  This may sound like a difficult
+The essence of Recall is that it operates under the fundamental assumption that
+the programmer makes sure that all input that may have an effect on the output
+of a computation is logged for Recall to see.  This may sound like a difficult
 requirement to fulfill, but it is, in fact, fairly trivial, because any data
 that may have an effect on the output can just be logged as part of a
 computation using operations like `logAs`, which we have been using already, but
@@ -151,9 +151,9 @@ surrounding computation, for the logged data.
 
 When Recall reruns the modified version of `sumLinesOfFile`, it first reruns the
 `lastWriteTimeUtc` computation, which is the only dependency of
-`sumLinesOfFile`.  Assuming the result of that hasn't changed, Recall decides
-that nothing has changed so it simply recovers the previously logged result of
-`sumLinesOfFile`.
+`sumLinesOfFile`.  Assuming the result of that hasn't changed, Recall decides,
+based on the fundamental assumption, that nothing has changed so it simply
+recovers the previously logged result of `sumLinesOfFile`.
 
 This is also where Recall differs from most traditional build systems and is
 more like an adaptation of
@@ -290,4 +290,5 @@ let sumLinesOfFiles (fileListPath: string) =
   }
 ```
 
-This concludes the toy example.
+This concludes the toy example.  By the way, can you see now how the name
+*"Recall"* is descriptive of Recall in at least two essential ways?
