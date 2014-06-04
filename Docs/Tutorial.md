@@ -33,7 +33,7 @@ Here is a straightforward pair of functions for that purpose:
 let sumLinesOfFile (intListPath: string) : int =
   let intList = File.ReadAllLines intListPath
   intList
-  |> Array.sumBy (fun intText -> int intText
+  |> Array.sumBy (fun intText -> int intText)
 ```
 
 ```fsharp
@@ -78,7 +78,7 @@ The above definition uses the `logAs` combinator to define a persisted
 computation.  The idea of the `logAs` combinator is that it defines a named
 computation, that can be later identified, and whose execution is *logged*, so
 that that its result, and other details, can be later recovered&mdash;possibly
-in a another run of the same or modified program.  That is right.  Recall is
+in another run of the same or modified program.  That is right.  Recall is
 designed in such a way that a programmer can easily incrementally modify a
 working program so that on subsequent runs Recall reuses whatever it can and
 modified computations get rerun as necessary.
