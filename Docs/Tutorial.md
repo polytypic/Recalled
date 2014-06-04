@@ -241,11 +241,11 @@ let sumLinesOfFiles (fileListPath: string) =
 
 The one new operation used in the above definition is the `Array.mapLogged`
 function.  As its name suggests, it just runs a number of logged computations.
-One can define it straightforwardly using it just basic monadic operations.
+One can define it straightforwardly using just basic monadic operations.
 
 At this point you might want to compare this new persistent and incremental
 version of `sumLinesOfFiles` to the original
-[ordinary functions](#straightforward-ordinary-functions).
+[ordinary function](#straightforward-ordinary-functions).
 
 On the first run, the above computation would be performed to completion.  On
 subsequent runs, assuming nothing has changed, the `lastWriteTimeUtc` of the
@@ -253,7 +253,7 @@ subsequent runs, assuming nothing has changed, the `lastWriteTimeUtc` of the
 disk.  Then the `lastWriteTimeUtc` computations for the individual files would
 be run.  Everything else would simply be recreated based on the logged data.
 
-Here are a couple of questions that an astute reader should have no trouble
+Here are a couple of questions that the astute reader should have no trouble
 answering:
 
 * Describe what would happen if the last write time of one the files being
