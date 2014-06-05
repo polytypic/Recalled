@@ -13,9 +13,7 @@ module PU =
     abstract Dopickle: BinaryWriter * 'a -> unit
     abstract Unpickle: BinaryReader -> 'a
 
-  type [<AbstractClass>] ProductPU<'e, 'es, 'p> =
-    abstract Dopickle: BinaryWriter * byref<'e> -> unit
-    abstract Unpickle: BinaryReader * byref<'e> -> unit
+  type ProductPU<'e, 'es, 'p>
 
   type UnionPU<'c, 'cs, 'u>
 

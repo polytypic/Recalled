@@ -17,9 +17,11 @@ module PU =
     override t.Dopickle (w, x) = t.impl.Dopickle (w, x)
     override t.Unpickle r = t.impl.Unpickle r
 
-  type [<AbstractClass>] ProductPU<'e, 'es, 'p> () =
+  type [<AbstractClass>] ByRefPU<'e, 'es, 'p> () =
     abstract Dopickle: BinaryWriter * byref<'e> -> unit
     abstract Unpickle: BinaryReader * byref<'e> -> unit
+
+  type ProductPU<'e, 'es, 'p> = P of ByRefPU<'e, 'es, 'p>
 
   let inline mk (unpickle: BinaryReader -> 'a)
                 (dopickle: BinaryWriter -> 'a -> unit) : PU<'a> =
@@ -43,22 +45,22 @@ module PU =
           xs |> Seq.iter (fun x -> e.Dopickle (w, x)))
 
   let inline mkElemOrField (t: PU<'e>) =
-    {new ProductPU<'e, 'p, 't> () with
-      override p.Dopickle (w, e) = t.Dopickle (w, e)
-      override p.Unpickle (r, e) = e <- t.Unpickle (r)}
+    P {new ByRefPU<'e, 'p, 't> () with
+        override p.Dopickle (w, e) = t.Dopickle (w, e)
+        override p.Unpickle (r, e) = e <- t.Unpickle (r)}
 
-  let inline mkProduct (f:  ProductPU<    'f,       And<'f, 'fs>, 'r>)
-                       (fs: ProductPU<        'fs ,         'fs , 'r>)
-                          : ProductPU<And<'f, 'fs>, And<'f, 'fs>, 'r> =
-    {new ProductPU<And<'f, 'fs>, And<'f, 'fs>, 'r> () with
-      override p.Dopickle (w, ffs) =
-       f.Dopickle (w, &ffs.Elem)
-       fs.Dopickle (w, &ffs.Rest)
-      override p.Unpickle (r, ffs) =
-       f.Unpickle (r, &ffs.Elem)
-       fs.Unpickle (r, &ffs.Rest)}
+  let inline mkProduct (P f:  ProductPU<    'f,       And<'f, 'fs>, 'r>)
+                       (P fs: ProductPU<        'fs ,         'fs , 'r>)
+                            : ProductPU<And<'f, 'fs>, And<'f, 'fs>, 'r> =
+    P {new ByRefPU<And<'f, 'fs>, And<'f, 'fs>, 'r> () with
+        override p.Dopickle (w, ffs) =
+         f.Dopickle (w, &ffs.Elem)
+         fs.Dopickle (w, &ffs.Rest)
+        override p.Unpickle (r, ffs) =
+         f.Unpickle (r, &ffs.Elem)
+         fs.Unpickle (r, &ffs.Rest)}
 
-  let inline mkTupleOrNonRecursiveRecord (m: AsProduct<'p, 't>) (p: ProductPU<'p, 'p, 't>) =
+  let inline mkTupleOrNonRecursiveRecord (m: AsProduct<'p, 't>) (P p: ProductPU<'p, 'p, 't>) =
     mk (fun r ->
           let mutable px = defaultof<_>
           p.Unpickle (r, &px)
