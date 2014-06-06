@@ -133,13 +133,13 @@ isn't explicitly used by `sumLinesOfFile`.
 
 ### The essence of Recall
 
-The essence of Recall is that it operates under the fundamental assumption that
-the programmer makes sure that all input that may have an effect on the output
-of a computation is logged for Recall to see.  This may sound like a difficult
-requirement to fulfill, but it is, in fact, fairly trivial, because any data
-that may have an effect on the output can just be logged as part of a
-computation using operations like `logAs`, which we have been using already, but
-also other operations like `log` and `watch`
+Recall operates under the fundamental assumption that the programmer makes sure
+that all input that may have an effect on the output of a computation is logged
+for Recall to see.  This may sound like a difficult requirement to fulfill, but
+it is, in fact, fairly trivial, because any data that may have an effect on the
+output can just be logged as part of a computation using operations like
+`logAs`, which we have been using already, but also other operations like `log`
+and `watch`
 
 ```fsharp
 let! _ = log { ... ; return ... }
