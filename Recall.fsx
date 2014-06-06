@@ -36,66 +36,74 @@ module MD5 =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-let lastWriteTimeUtc (path: string) =
-  logAs ("lastWriteTimeUtc: " + path) {
-    return File.GetLastWriteTimeUtc path
-  }
+let lastWriteTimeUtc (path: string) = logAs ("lastWriteTimeUtc: " + path) {
+  return File.GetLastWriteTimeUtc path
+}
 
-let md5 path =
-  logAs ("md5: " + path) {
-    let! _ = lastWriteTimeUtc path
-    return MD5.ofFile path
-  }
+let readAllLines path = update {
+  let! _ = lastWriteTimeUtc path
+  return File.ReadAllLines path
+}
 
-type FileInfo = {LastWriteTimeUtc: DateTime; MD5: array<byte>}
+let sumLinesOfFile path = logAs ("sumLinesOfFile: " + path) {
+  let! intLines = readAllLines path
+  let sum =
+    intLines
+    |> Seq.sumBy (fun intLine -> int intLine)
+  return sum
+}
 
-let fileInfo (path: string) =
-  logAs ("fileInfo: " + path) {
-    let! ticks = lastWriteTimeUtc path
-    return {LastWriteTimeUtc = ticks; MD5 = MD5.ofFile path}
-  }
+let sumLinesOfFiles (filesPath: string) = logAs ("sumLinesOfFiles: " + filesPath) {
+  let! filePaths = readAllLines filesPath
+
+  let! sums =
+    filePaths
+    |> Seq.mapWithLog (sumLinesOfFile >> wait)
+
+  let total = sums |> Seq.sum
+
+  return total
+}
+
+let sumProgram =
+  let sum = run <| recall ".recall" {
+    return! sumLinesOfFiles "foo" |> wait }
+  printfn "Sum: %d" sum
+  0
 
 ////////////////////////////////////////////////////////////////////////////////
 
-let readAllLines path =
-  update {
-    let! _ = md5 path
-    return File.ReadAllLines path
-  }
+let sumLinesOfFilesPar (filesPath: string) = logAs ("sumLinesOfFiles: " + filesPath) {
+  let! filePaths = readAllLines filesPath
 
-let hashes fileListPath hashFilePath =
-  logAs (sprintf "hashes: %s -> %s" fileListPath hashFilePath) {
-    let! fileList = readAllLines fileListPath
+  let! loggedSums =
+    filePaths
+    |> Seq.mapWithLog sumLinesOfFile
 
-    let! md5s = fileList |> Seq.Par.mapLogged md5
+  let! sums =
+    loggedSums
+    |> Seq.mapJob readAsJob
 
-    do use outputStream =
-         new FileStream (hashFilePath, FileMode.Create, FileAccess.Write)
-       use outputWriter = new StreamWriter (outputStream)
-       for md5 in md5s do
-         outputWriter.WriteLine (MD5.toString md5)
+  let total = sums |> Seq.sum
 
-    return! digest
-  }
+  return total
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 let copy (source: string) (target: string) =
   logAs (sprintf "copy: %s -> %s" source target) {
-    let! sourceInfo = fileInfo source
-    let! () = log {
-      do if not (File.Exists target) ||
-           File.GetLastAccessTimeUtc target <> sourceInfo.LastWriteTimeUtc then
-           File.Copy (source, target, true)
-      return ()
+    let! sourceInfo = lastWriteTimeUtc source |> wait
+    let! _ = log {
+      return if not (File.Exists target) ||
+               File.GetLastAccessTimeUtc target <> sourceInfo then
+               File.Copy (source, target, true)
     }
     return! digest
   }
 
-let copyFiles =
-  recall ".recall" {
-    let! _ = copy "foo" "bar"
-    return ()
-  }
+let copyFiles = recall ".recall" {
+  return! copy "foo" "bar"
+}
 
 ////////////////////////////////////////////////////////////////////////////////

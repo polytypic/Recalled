@@ -223,25 +223,25 @@ Continuing with our toy, we now have the building blocks to define a
 `sumLinesOfFiles` computation:
 
 ```fsharp
-let sumLinesOfFiles (fileListPath: string) =
-  logAs ("sumLinesOfFiles: " + fileListPath) {
-    let! fileList = readAllLines fileListPath
+let sumLinesOfFiles (fileListPath: string) = logAs ("sumLinesOfFiles: " + fileListPath) {
+  let! fileList = readAllLines fileListPath
 
-    let! sums =
-      fileList
-      |> Array.mapLogged sumLinesOfFile
+  let! sums =
+    fileList
+    |> Seq.mapWithLog (sumLinesOfFile >> wait)
 
-    let total =
-      sums
-      |> Array.sum
+  let total =
+    sums
+    |> Array.sum
 
-    return total
-  }
+  return total
+}
 ```
 
-The one new operation used in the above definition is the `Array.mapLogged`
-function.  As its name suggests, it just runs a number of logged computations.
-One can define it straightforwardly using just basic monadic operations.
+The two new operations used in the above definition are the `Seq.mapWithLog` and
+`wait`.  `Seq.mapWithLog` just runs a number of computations with a log.
+`wait`, on the other hand, makes a logged computation wait until its result is
+ready.
 
 At this point you might want to compare this new persistent and incremental
 version of `sumLinesOfFiles` to the original
@@ -251,7 +251,8 @@ On the first run, the above computation would be performed to completion.  On
 subsequent runs, assuming nothing has changed, the `lastWriteTimeUtc` of the
 `fileListPath` file would be computed and then the `fileList` would be read from
 disk.  Then the `lastWriteTimeUtc` computations for the individual files would
-be run.  Everything else would simply be recreated based on the logged data.
+be run one at a time.  Everything else would simply be recreated based on the
+logged data.
 
 Here are a couple of questions that the astute reader should have no trouble
 answering:
@@ -267,28 +268,46 @@ answering:
 There is one simple improvement we can make to the `sumLinesOfFiles`
 computation.  The sums of individual files do not depend on each other, so those
 sums can be computed in parallel.  Recall basically starts every logged
-computation as a separate lightweight thread, but when a new computation is
-started the execution of the current computation immediately waits for the
-started computation to finish.  In this case we can use the function
-`Array.Parallel.mapLogged` to let `Recall` know it is free to compute the
-results in parallel:
+computation as a separate lightweight thread and you explicitly have to wait if
+you need to access the result.  In this case we don't need the results
+immediately.  We could just as well first start all the computations and then
+read their results.
 
 ```fsharp
-let sumLinesOfFiles (fileListPath: string) =
-  logAs ("sumLinesOfFiles: " + fileListPath) {
-    let! fileList = readAllLines fileListPath
+let sumLinesOfFiles (fileListPath: string) = logAs ("sumLinesOfFiles: " + fileListPath) {
+  let! fileList = readAllLines fileListPath
 
-    let! sums =
-      fileList
-      |> Array.Parallel.mapLogged sumLinesOfFile
+  let! loggedSums =
+    fileList
+    |> Seq.mapWithLog sumLinesOfFile
 
-    let total =
-      sums
-      |> Array.sum
+  let! sums =
+    loggedSums
+    |> Seq.mapJob readAsJob
 
-    return total
-  }
+  let total =
+    sums
+    |> Array.sum
+
+  return total
+}
 ```
 
-This concludes the toy example.  By the way, can you see now how the name
-*"Recall"* is descriptive of Recall in at least two essential ways?
+This concludes the toy example, almost.  We haven't yet looked at how these
+computation can be run.
+
+### Running a logged computation
+
+Logged computation are built upon the lightweight jobs of
+[Hopac](https://github.com/VesaKarvonen/Hopac) and the `recall` operation of
+Recall, when given path to a directory for the log data, returns a job than can
+be `run` using Hopac:
+
+```fsharp
+let sum : int = run <| recall ".recall" {
+  return! sumLinesOfFiles "foo" |> wait
+}
+```
+
+By the way, can you see now how the name *"Recall"* is descriptive of Recall in
+at least two essential ways?

@@ -62,8 +62,11 @@
   </Target>
   <ItemGroup>
     <Compile Include="Util.fs" />
+    <Compile Include="InterfaceTypes.fsi" />
+    <Compile Include="InterfaceTypes.fs" />
     <Compile Include="PU.fsi" />
     <Compile Include="PU.fs" />
+    <Compile Include="LoggedMap.fs" />
     <Compile Include="Recall.fsi" />
     <Compile Include="Recall.fs" />
     <None Include="packages.config" />

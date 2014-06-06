@@ -53,9 +53,6 @@ type Logged<'x>
 /// Represents a parallel computation with a log.
 type WithLog<'x> = Log -> Job<'x>
 
-/// Represents a digest of a computation.
-type Digest
-
 /// Builder for steppable computations.
 #if DOC
 ///
@@ -76,18 +73,14 @@ type UpdateBuilder =
   member Return: 'x -> Update<'x>
 
   member ReturnFrom:  Update<'x> -> Update<'x>
+  member ReturnFrom: WithLog<'x> -> Update<'x>
   member ReturnFrom:     Job<'x> -> Update<'x>
 
-  member Bind:         Update<'x>  * ('x -> Update<'y>) -> Update<'y>
-  member Bind:         Logged<'x>  * ('x -> Update<'y>) -> Update<'y>
-  member Bind: WithLog<Logged<'x>> * ('x -> Update<'y>) -> Update<'y>
-  member Bind:            Job<'x>  * ('x -> Update<'y>) -> Update<'y>
+  member Bind:  Update<'x> * ('x -> Update<'y>) -> Update<'y>
+  member Bind: WithLog<'x> * ('x -> Update<'y>) -> Update<'y>
+  member Bind:     Job<'x> * ('x -> Update<'y>) -> Update<'y>
 
   member Combine: Update<unit> * Update<'x> -> Update<'x>
-
-  member For: seq<'x> * ('x -> Update<unit>) -> Update<unit>
-
-  member While: (unit -> bool) * Update<unit> -> Update<unit>
 
   member Zero: unit -> Update<unit>
 
@@ -110,7 +103,6 @@ type WithLogBuilder =
   member inline ReturnFrom:     Job<'x> -> WithLog<'x>
 
   member inline Bind: WithLog<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
-  member        Bind:  Update<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
   member inline Bind:     Job<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
 
   member inline Combine: WithLog<unit> * WithLog<'x> -> WithLog<'x>
@@ -131,9 +123,10 @@ type [<Class>] RunWithLogBuilder =
   inherit WithLogBuilder
   member Run: WithLog<'x> -> Job<'x>
 
+/// Additional operations for sequences.
 module Seq =
-  module Par =
-    val mapLogged: ('x -> WithLog<Logged<'y>>) -> seq<'x> -> Update<seq<'y>>
+  /// Maps an operation with a log over the given sequence.
+  val mapWithLog: ('x -> WithLog<'y>) -> seq<'x> -> WithLog<ResizeArray<'y>>
 
 /// Operations for defining computations with Recall.
 [<AutoOpen>]
@@ -161,7 +154,7 @@ module Recall =
   /// it may or may not be run to completion.
   ///
   /// In case the log indicates that the recreated computation has no
-  /// dependencies to other logged computations then computation is run to
+  /// dependencies to other logged computations then the computation is run to
   /// completion every time it is recreated.  This makes it convenient to
   /// essentially create new primitive operations and is also quite logical as a
   /// computation that has no inputs must either be a constant or it must use
@@ -180,7 +173,7 @@ module Recall =
   /// is given an automatically determined identity.
   val log: LoggedBuilder
 
-  /// Returns a special logged computation that logs the given value.
+  /// Returns a computation that logs the given value as a dependency.
   val watch: 'x -> Update<unit>
 
   /// A builder for defining updates or partial logged computations whose
@@ -194,8 +187,15 @@ module Recall =
   /// a key to identify the point in the computation.
   val digest: Update<Digest>
 
-  /// Returns an operation for reading the result of a logged computation.
-  val read: Logged<'x> -> Alt<'x>
+  /// Returns an alternative for reading the result of a logged computation.
+  val readAsAlt: Logged<'x> -> Alt<'x>
+
+  /// Returns a job for reading the result of a logged computation.
+  val readAsJob: Logged<'x> -> Job<'x>
+
+  /// Returns an operation with a log that directly waits for the result of the
+  /// logged operation.
+  val wait: WithLog<Logged<'x>> -> WithLog<'x>
 
   /// Provides an alternative that becomes enabled if some computation within
   /// the whole logged computation has failed.  This allows long running
@@ -208,4 +208,4 @@ module Recall =
   /// of computations that perform long running embedded asynchronous
   /// operations.
 #endif
-  val getCancelAlt: Update<Alt<unit>>
+  val getCancelAlt: WithLog<Alt<unit>>
