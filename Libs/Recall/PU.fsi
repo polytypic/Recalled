@@ -63,7 +63,7 @@ type [<InferenceRules>] PU =
   member case: Case<  'ls, 'cs, 'u> * ProductPU<'ls, 'ls, 'u> -> UnionPU<  'ls, 'cs, 'u>
 
   member plus: UnionPU<       'c      , Choice<'c, 'cs>, 'u>
-              * UnionPU<           'cs ,            'cs , 'u>
+             * UnionPU<           'cs ,            'cs , 'u>
             -> UnionPU<Choice<'c, 'cs>, Choice<'c, 'cs>, 'u>
 
   member union: Rep * Union<'u> * AsChoice<'c, 'u> * UnionPU<'c, 'c, 'u> -> PU<'u>
@@ -74,6 +74,6 @@ type [<InferenceRules>] PU =
 
   member times: ProductPU<    'e      , And<'e, 'es>, 't>
               * ProductPU<        'es ,         'es , 't>
-              -> ProductPU<And<'e, 'es>, And<'e, 'es>, 't>
+             -> ProductPU<And<'e, 'es>, And<'e, 'es>, 't>
 
   member product: Rep * Product<'t> * AsProduct<'p, 't> * ProductPU<'p, 'p, 't> -> PU<'t>
