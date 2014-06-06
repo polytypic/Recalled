@@ -95,6 +95,7 @@ module LoggedMap =
       let remPath = remFile logDir
 
       let! remDataPromise = Promise.queue <| job {
+        // XXX Optimize
         let! buffer = readAllBytes remPath
         let n = buffer.Length / 4
         let data = Array.zeroCreate (n+1)
@@ -138,16 +139,20 @@ module LoggedMap =
 
       // Find out which concurrent find operations were unsatisfied.
       let unsatisfied = ResizeArray<_> ()
+
       // Must keep map locked...
       do Monitor.Enter t.dict
+
       do for kvI in t.dict do
            let entry = kvI.Value
            if not (IVar.Now.isFull entry.var) then
              unsatisfied.Add kvI
          for kvI in unsatisfied do
            t.dict.Remove kvI.Key |> ignore
-      do Monitor.Exit t.dict
+
       /// ...until can declare read phase ready.
+      do! t.ready <-= None
+      do Monitor.Exit t.dict
 
       /// Answer the unsatisfied finds.
       do! unsatisfied
@@ -161,8 +166,6 @@ module LoggedMap =
 
       let remWriter = openWriter remPath
       let addWriter = openWriter addPath
-
-      do! t.ready <-= None
 
       printfn "Log: %d" (!t.addIdx)
 

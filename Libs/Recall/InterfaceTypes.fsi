@@ -12,7 +12,17 @@ open System.IO
 type Digest = struct
     val Lo: uint64
     val Hi: uint64
+
     new: lo: uint64 * hi: uint64 -> Digest
+    new: bytes: array<byte> -> Digest
+
+    static member Zero: Digest
+
+    static member (^^^): Digest * Digest -> Digest
+
+    static member Bytes: array<byte> -> Digest
+    static member String: string -> Digest
+    static member Stream: Stream -> Digest
   end
 
 /// Represents a capability to serialize values of type `'x`.

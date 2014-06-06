@@ -1,7 +1,9 @@
 ﻿namespace Recall
 
+open System
 open System.Collections.Concurrent
 open Hopac
+open Hopac.Infixes
 open Hopac.Alt.Infixes
 open Hopac.Job.Infixes
 open Hopac.Extensions
@@ -9,23 +11,23 @@ open Hopac.Extensions
 exception CanceledOnFailure
 
 type Logged =
-  abstract Id: unit -> string
-  abstract Key: unit -> Digest
-  abstract Digest: unit -> IVar<Digest>
+  abstract Id: string
+  abstract Key: Digest
+  abstract Digest: IVar<Digest>
 
 type Log = {
     Failed: IVar<unit>
     Latch: Latch
     Failures: ResizeArray<exn>
-    Old: LoggedMap<Digest, array<byte> * array<Digest> * Digest>
+    Old: LoggedMap<Digest, array<byte> * Digest * array<Digest>>
     New: ConcurrentDictionary<Digest, Logged>
   }
 
 type [<Sealed>] Logged<'x> =
   interface Logged with
-    override this.Id () = this.id
-    override this.Key () = this.key
-    override this.Digest () = this.digest
+    override this.Id = this.id
+    override this.Key = this.key
+    override this.Digest = this.digest
   val id: string
   val key: Digest
   val digest: IVar<Digest>
@@ -37,8 +39,9 @@ type Update<'x> =
   | Value of 'x
   | Job of Job<Update<'x>>
   | Required of Logged * Job<Update<'x>>
-  | Logged of (Log -> Job<Update<'x>>)
-  | Digest of (Digest -> Job<Update<'x>>)
+  | GetLog of (Log -> Job<Update<'x>>)
+  | GetDigest of (Digest -> Job<Update<'x>>)
+  | GetThis of (Log -> Logged -> int -> Job<Update<'x>>)
 
 type WithLog<'x> = Log -> Job<'x>
 
@@ -52,7 +55,7 @@ type UpdateBuilder () =
   member this.ReturnFrom (xU: Update<'x>) : Update<'x> =
     xU
   member this.ReturnFrom (xW: WithLog<'x>) : Update<'x> =
-    Logged (fun log -> xW log |>> Value)
+    GetLog (fun log -> xW log |>> Value)
   member this.ReturnFrom (xJ: Job<'x>) : Update<'x> =
     Job (xJ |>> Value)
 
@@ -62,10 +65,11 @@ type UpdateBuilder () =
      | Value x -> x2yU x
      | Job xUJ -> Job (cont xUJ)
      | Required (l, xUJ) -> Required (l, cont xUJ)
-     | Logged l2xUJ -> Logged (fun l -> l2xUJ l |> cont)
-     | Digest d2xUJ -> Digest (fun d -> d2xUJ d |> cont)
+     | GetLog l2xUJ -> GetLog (fun l -> l2xUJ l |> cont)
+     | GetDigest d2xUJ -> GetDigest (fun d -> d2xUJ d |> cont)
+     | GetThis lliJ -> GetThis (fun log logged i -> lliJ log logged i |> cont)
   member this.Bind (xW: WithLog<'x>, x2yU: 'x -> Update<'y>) : Update<'y> =
-    Logged (fun log -> xW log |>> x2yU)
+    GetLog (fun log -> xW log |>> x2yU)
   member this.Bind (xJ: Job<'x>, x2yU:'x -> Update<'y>) : Update<'y> =
     Job (xJ |>> x2yU)
 
@@ -74,15 +78,156 @@ type UpdateBuilder () =
 
   member this.Zero () : Update<unit> = Value ()
 
-type LoggedBuilder (id) =
-  inherit UpdateBuilder ()
-  member this.Run (xU: Update<'x>) : WithLog<Logged<'x>> =
-    fun log -> failwith "XXX"
+module internal Do =
+  let asLogged (log: Log) (id: string) (xU: Update<'x>) : Job<Logged<'x>> =
+    Job.delay <| fun () ->
+      Latch.Now.increment log.Latch
 
-type WatchBuilder () =
+      let key = Digest.String id
+
+      let logged = Logged<'x> (id, key)
+      let was = log.New.GetOrAdd (key, logged :> Logged)
+
+      if not (LanguagePrimitives.PhysicalEquality was (logged :> Logged)) then
+        match was with
+         | :? Logged<'x> as logged' ->
+           // Someone got here first.
+           Latch.decrement log.Latch >>% logged'
+         | _ ->
+           Job.tryFinallyJob
+             (Job.thunk (fun () -> failwithf "Id digest collision: %s %s!" was.Id logged.id))
+             (Latch.decrement log.Latch)
+      else
+        let xPU = PU.Get ()
+
+        let newDeps = ResizeArray<Logged> ()
+
+        let cancel () =
+          IVar.fillFailure logged.digest CanceledOnFailure >>.
+          Latch.decrement log.Latch
+
+        let failure (e: exn) =
+          match e with
+           | CanceledOnFailure ->
+             cancel ()
+           | e ->
+             let e' = Exception (sprintf "Failure building %s" id, e)
+             lock log.Failures <| fun () -> log.Failures.Add e'
+             IVar.tryFill log.Failed () >>.
+             IVar.fillFailure logged.digest e' >>.
+             Latch.decrement log.Latch
+
+        let finish digest =
+          logged.digest <-= digest >>= fun () ->
+          Latch.decrement log.Latch
+
+        let rec depDigest sum i =
+          if newDeps.Count <= i then
+            Job.result sum
+          else
+            newDeps.[i].Digest >>= fun dig ->
+            depDigest (sum ^^^ dig) (i+1)  /// XXX Combine more robustly?
+
+        let complete oldPickle x =
+          logged.value <- x
+          let pickleStream = new System.IO.MemoryStream ()
+          xPU.Dopickle (new System.IO.BinaryWriter (pickleStream), x)
+          pickleStream.Position <- 0L
+          let digest = Digest.Stream pickleStream
+          let pickle = pickleStream.ToArray ()
+          match oldPickle with
+           | Some oldPickle when oldPickle = pickle ->
+             // Nothing changed.
+             finish digest
+           | _ ->
+             // Store barely enough data to be able to check next time.
+             depDigest Digest.Zero 0 >>= fun depDigest ->
+             let depKeys = Array.init newDeps.Count (fun i -> newDeps.[i].Key)
+             LoggedMap.add log.Old key (pickle, depDigest, depKeys) >>= fun () ->
+             finish digest
+
+        let rec build oldPickle xU =
+          if IVar.Now.isFull log.Failed then
+            cancel ()
+          else
+            match xU with
+             | Value x ->
+               complete oldPickle x
+             | Job xUJ ->
+               xUJ >>= build oldPickle
+             | Required (newDep, xUJ) ->
+               newDeps.Add newDep
+               xUJ >>= build oldPickle
+             | GetLog log2xUJ ->
+               log2xUJ log >>= build oldPickle
+             | GetDigest digest2xUJ ->
+               failwith "XXX Implement intermediate digest"
+             | GetThis lli2xUJ ->
+               lli2xUJ log logged newDeps.Count >>= build oldPickle
+
+        let reuse (oldPickle: array<byte>) =
+          let pickleStream = new System.IO.MemoryStream (oldPickle)
+          logged.value <- xPU.Unpickle (new System.IO.BinaryReader (pickleStream))
+          pickleStream.Position <- 0L
+          finish (Digest.Stream pickleStream)
+
+        Job.queue
+         (Job.tryWith
+           (LoggedMap.tryFind log.Old key >>= function
+             | None ->
+               // Previously unknown.
+               build None xU
+             | Some (oldPickle, depDigest, [||]) ->
+               // Primitive computation.
+               build (Some oldPickle) xU
+             | Some (oldPickle, oldDepDigest, oldDeps) ->
+               // Previously run.
+               newDeps.Capacity <- oldDeps.Length
+
+               let rec checkDeps xU =
+                 if oldDeps.Length <= newDeps.Count then
+                   // Check digest.
+                   depDigest Digest.Zero 0 >>= fun newDepDigest ->
+                   if newDepDigest = oldDepDigest then
+                     reuse oldPickle
+                   else
+                     build None xU // Something has changed.
+                 else
+                   if IVar.Now.isFull log.Failed then
+                     cancel ()
+                   else
+                     match xU with
+                      | Value x ->
+                        complete None x // Dependencies dropped.
+                      | Job xUJ ->
+                        xUJ >>= checkDeps
+                      | Required (newDep, xUJ) ->
+                        let oldDepKey = oldDeps.[newDeps.Count]
+                        newDeps.Add newDep
+                        if newDep.Key <> oldDepKey then
+                          build None xU // New dependency.
+                        else
+                          checkDeps xU
+                      | GetLog log2xUJ ->
+                        log2xUJ log >>= checkDeps
+                      | GetDigest digest2xUJ ->
+                        failwith "XXX Implement intermediate digest"
+                      | GetThis lli2xUJ ->
+                        lli2xUJ log logged newDeps.Count >>= checkDeps
+               checkDeps xU)
+           failure) >>%
+        logged
+
+type LogBuilder () =
   inherit UpdateBuilder ()
-  member this.Run (xU: Update<'x>) : WithLog<Logged<'x>> =
-    fun log -> failwith "XXX"
+  member this.Run (xU: Update<'x>) : Update<Logged<'x>> =
+    GetThis <| fun log logged i ->
+    Do.asLogged log (sprintf "%d: %s" i logged.Id) xU |>> Value
+
+type LogAsBuilder (id) =
+  inherit UpdateBuilder ()
+  member this.Run (xU: Update<'x>) : WithLog<Logged<'x>> = fun log ->
+    Do.asLogged log id xU
 
 type WithLogBuilder () =
   member inline this.Delay (u2xW: unit -> WithLog<'x>) : WithLog<'x> =
@@ -121,10 +266,28 @@ type WithLogBuilder () =
   member inline this.Zero () : WithLog<unit> =
     fun log -> Job.unit ()
 
-type RunWithLogBuilder (log: Log) =
+type RunWithLogBuilder (logDir: string) =
   inherit WithLogBuilder ()
-  member this.Run (xW: WithLog<'x>) : Job<'x> =
-    xW log
+  member this.Run (xW: WithLog<'x>) : Job<'x> = job {
+    let domPU = PU.Get ()
+    let codPU = PU.Get ()
+    let! loggedMap = LoggedMap.create logDir domPU codPU
+    let latch = Latch.Now.create 1
+    let log =
+      {Failed = ivar ()
+       Latch = latch
+       Failures = ResizeArray<_> ()
+       Old = loggedMap
+       New = ConcurrentDictionary<_, _> ()}
+    let! result = xW log
+    let! () = Latch.decrement latch
+    let! () = Latch.await latch
+    let! () = LoggedMap.close log.Old
+    do lock log.Failures <| fun () ->
+       if log.Failures.Count > 0 then
+         raise (AggregateException log.Failures)
+    return result
+  }
 
 module Seq =
   let mapWithLog (x2yW: 'x -> WithLog<'y>) (xs: seq<'x>) : WithLog<ResizeArray<'y>> =
@@ -133,20 +296,23 @@ module Seq =
 [<AutoOpen>]
 module Recall =
   let recall (logDir: string) : RunWithLogBuilder =
-    failwith "XXX"
+    RunWithLogBuilder (logDir)
 
   let logged = WithLogBuilder ()
 
-  let logAs (id: string) : LoggedBuilder = LoggedBuilder (Some id)
-  let log : LoggedBuilder = LoggedBuilder (None)
-
-  let watch (x: 'x) : Update<unit> =
-    Value () // XXX
-
   let update = UpdateBuilder ()
 
+  let logAs (id: string) : LogAsBuilder = LogAsBuilder (id)
+
+  let log : LogBuilder = LogBuilder ()
+
+  let watch (x: 'x) : Update<unit> = update { // XXX Optimize
+    let! _ = log { return x }
+    return ()
+  }
+
   let digest: Update<Digest> =
-    Digest (fun digest -> Job.result (Value digest))
+    GetDigest (fun digest -> Job.result (Value digest))
 
   let readAsAlt (xL: Logged<'x>) : Alt<'x> =
     xL.digest |>>? fun _ -> xL.value

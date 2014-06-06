@@ -86,9 +86,13 @@ type UpdateBuilder =
 
 /// Builder for logged computations.  A logged computation is essentially a
 /// steppable computation, whose steps are logged, while it is being executed.
-type [<Class>] LoggedBuilder =
+type [<Class>] LogAsBuilder =
   inherit UpdateBuilder
   member Run: Update<'x> -> WithLog<Logged<'x>>
+
+type [<Class>] LogBuilder =
+  inherit UpdateBuilder
+  member Run: Update<'x> -> Update<Logged<'x>>
 
 /// Builder for parallel computations with a log.  A computation with a log is
 /// executed in a context with a log for logging individual logged computations.
@@ -167,11 +171,11 @@ module Recall =
   /// any input that may change the result of the computation are bound as other
   /// logged computations within the defined logged computation.
 #endif
-  val logAs: id: string -> LoggedBuilder
+  val logAs: id: string -> LogAsBuilder
 
   /// Returns a builder for creating a new logged computation.  The computation
   /// is given an automatically determined identity.
-  val log: LoggedBuilder
+  val log: LogBuilder
 
   /// Returns a computation that logs the given value as a dependency.
   val watch: 'x -> Update<unit>
