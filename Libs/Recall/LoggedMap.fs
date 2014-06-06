@@ -128,14 +128,12 @@ module LoggedMap =
              | Nothing ->
                t.dict.Add (k, entry)
              | Just request ->
-               if IVar.Now.isFull entry.var then
+               if IVar.Now.isFull request.var then
                  failwith "Bug"
                request.idx <- entry.idx
                entry.var <- request.var
           if not (IVar.Now.isFull entry.var) then
             do! entry.var <-= v
-          else
-            return ()
 
       // Find out which concurrent find operations were unsatisfied.
       let unsatisfied = ResizeArray<_> ()
@@ -167,7 +165,7 @@ module LoggedMap =
       let remWriter = openWriter remPath
       let addWriter = openWriter addPath
 
-      printfn "Log: %d" (!t.addIdx)
+      // printfn "Log: %d" (!t.addIdx)
 
       return!
         Job.foreverServer
@@ -184,7 +182,7 @@ module LoggedMap =
                addWriter.Close ()
                reply <-= ())
            (fun e ->
-             printf "Log: %A %s\n" e e.StackTrace
+             printf "Log: %A %s\n" e e.StackTrace // XXX More robust error handling
              Job.unit ()))
 
     with e ->

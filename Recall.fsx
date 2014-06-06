@@ -65,7 +65,7 @@ let sumLinesOfFiles (filesPath: string) = logAs ("sumLinesOfFiles: " + filesPath
   return total
 }
 
-let sumProgram =
+let sumProgram () =
   let sum = run <| recall ".recall" {
     return! sumLinesOfFiles "foo" |> wait }
   printfn "Sum: %d" sum
@@ -107,3 +107,13 @@ let copyFiles = recall ".recall" {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+let rec fib n = logAs (sprintf "fib: %d" n) {
+  if n < 2L then
+    return n
+  else
+    let! x = fib (n-2L)
+    let! y = fib (n-1L) |> wait
+    let! x = readAsJob x
+    return x + y
+}
