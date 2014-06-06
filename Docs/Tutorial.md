@@ -168,6 +168,24 @@ ordinary host-language functions, while many existing build systems try to
 primarily make it easy to work with external programs that read and write
 *files*.
 
+#### Getting sidetracked on values
+
+Speaking of the ability to work with ordinary functions that return ordinary
+values, here is an example of a computation that is surely familiar:
+
+```fsharp
+let rec fib n = logAs (sprintf "fib: %d" n) {
+  if n < 2L then
+    return n
+  else
+    let! x = fib (n-2L) |> wait
+    let! y = fib (n-1L) |> wait
+    return x + y
+}
+```
+
+What would be the time and space complexity of the above computation?
+
 ### Partial updates
 
 Let's then continue with a computation for reading all lines of a file:
