@@ -167,9 +167,9 @@ type [<InferenceRules>] PU () =
                   : UnionPU<'ls, 'cs, 'u> = memoize <| fun () -> 
     U [mkTupleOrNonRecursiveRecord m p]
 
-  member this.plus (U c:  UnionPU<    'c,       Choice<'c, 'cs>, 'u>,
-                    U cs: UnionPU<        'cs ,            'cs , 'u>)
-                      : UnionPU<Choice<'c, 'cs>, Choice<'c, 'cs>, 'u> = memoize <| fun () -> 
+  member this.plus (U c:  UnionPU<       'c,       Choice<'c, 'cs>, 'u>,
+                    U cs: UnionPU<           'cs ,            'cs , 'u>)
+                        : UnionPU<Choice<'c, 'cs>, Choice<'c, 'cs>, 'u> = memoize <| fun () -> 
     U (c @ cs)
 
   member this.union (_: Rep,
