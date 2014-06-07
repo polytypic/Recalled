@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Recall</id>
+    <id>Recalled</id>
     <version>0.0.0.0</version>
-    <title>PPrint</title>
+    <title>Recalled</title>
     <summary>A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.</summary>
     <authors>Vesa Karvonen</authors>
     <owners>Vesa Karvonen</owners>
