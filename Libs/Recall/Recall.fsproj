@@ -61,6 +61,7 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
+    <Compile Include="Assembly.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="InterfaceTypes.fsi" />
     <Compile Include="InterfaceTypes.fs" />
@@ -74,19 +75,19 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Hopac">
-      <HintPath>..\..\packages\Hopac.0.0.0.15\lib\net451\Hopac.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.21\lib\net451\Hopac.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Hopac.Core">
-      <HintPath>..\..\packages\Hopac.0.0.0.15\lib\net451\Hopac.Core.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.21\lib\net451\Hopac.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Infers">
-      <HintPath>..\..\packages\Infers.0.0.0.1\lib\net451\Infers.dll</HintPath>
+      <HintPath>..\..\packages\Infers.0.0.0.2\lib\net451\Infers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Infers.Rep">
-      <HintPath>..\..\packages\Infers.0.0.0.1\lib\net451\Infers.Rep.dll</HintPath>
+      <HintPath>..\..\packages\Infers.0.0.0.2\lib\net451\Infers.Rep.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

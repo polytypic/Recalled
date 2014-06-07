@@ -40,6 +40,12 @@ let lastWriteTimeUtc (path: string) = logAs ("lastWriteTimeUtc: " + path) {
   return File.GetLastWriteTimeUtc path
 }
 
+let md5 (path: string) = logAs ("md5: " + path) {
+  let! _ = lastWriteTimeUtc path
+  let md5 = MD5.ofFile path
+  return md5
+}
+
 let readAllLines path = update {
   let! _ = lastWriteTimeUtc path
   return File.ReadAllLines path
@@ -90,7 +96,7 @@ let sumLinesOfFilesPar (filesPath: string) = logAs ("sumLinesOfFiles: " + filesP
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+(*
 let copy (source: string) (target: string) =
   logAs (sprintf "copy: %s -> %s" source target) {
     let! sourceInfo = lastWriteTimeUtc source |> wait
@@ -105,7 +111,7 @@ let copy (source: string) (target: string) =
 let copyFiles = recall ".recall" {
   return! copy "foo" "bar"
 }
-
+*)
 ////////////////////////////////////////////////////////////////////////////////
 
 let rec fib n = logAs (sprintf "fib: %d" n) {

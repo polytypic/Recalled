@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Recall</id>
+    <version>0.0.0.0</version>
+    <title>PPrint</title>
+    <summary>A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.</summary>
+    <authors>Vesa Karvonen</authors>
+    <owners>Vesa Karvonen</owners>
+    <licenseUrl>https://github.com/VesaKarvonen/Recall/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/VesaKarvonen/Recall</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.</description>
+    <releaseNotes>This is an experimental release.</releaseNotes>
+    <copyright>© Vesa Karvonen</copyright>
+    <tags>f# fsharp parallel build</tags>
+  </metadata>
+  <files>
+    <file src="..\Libs\Recall\bin\Release\Recall.dll" target="lib\net451" />
+    <file src="..\Libs\Recall\bin\Release\Recall.xml" target="lib\net451" />
+  </files>
+</package>

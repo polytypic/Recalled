@@ -67,7 +67,7 @@ type WithLog<'x> = Log -> Job<'x>
 #endif
 type UpdateBuilder =
   new: unit -> UpdateBuilder
-
+    
   member Delay: (unit -> Update<'x>) -> Update<'x>
 
   member Return: 'x -> Update<'x>
@@ -184,12 +184,12 @@ module Recall =
   /// results are not logged.
   val update: UpdateBuilder
 
-  /// Provides a digest of the current point in a logged computation.  The
-  /// digest includes the identity of the current computation as well as digests
-  /// of all the dependencies of the current computation.  A digest can be used
-  /// as a convenient end result of a logged computation and also can be used as
-  /// a key to identify the point in the computation.
-  val digest: Update<Digest>
+//  /// Provides a digest of the current point in a logged computation.  The
+//  /// digest includes the identity of the current computation as well as digests
+//  /// of all the dependencies of the current computation.  A digest can be used
+//  /// as a convenient end result of a logged computation and also can be used as
+//  /// a key to identify the point in the computation.
+//  val digest: Update<Digest>
 
   /// Returns an alternative for reading the result of a logged computation.
   val readAsAlt: Logged<'x> -> Alt<'x>

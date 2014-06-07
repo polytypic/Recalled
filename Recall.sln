@@ -22,6 +22,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3C33842D-FBF9-4D06-B98C-F9E6BF2E9BE3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{8658D9E5-45F8-4012-AC01-1D03CD469F6F}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet\Recall.nuspec = NuGet\Recall.nuspec
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{26D384E2-3A4D-40FB-86AA-118245A83838}"
 	ProjectSection(SolutionItems) = preProject
