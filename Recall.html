@@ -38,6 +38,12 @@ font-weight: bold;
     <b>val</b> Lo<b>:</b> uint64
     <b>val</b> Hi<b>:</b> uint64
     <b>new</b><b>:</b> lo<b>:</b> uint64 <b>*</b> hi<b>:</b> uint64 <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
+    <b>new</b><b>:</b> bytes<b>:</b> array<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
+    <b>static</b> <b>member</b> Zero<b>:</b> <a href="#def:type Recall.Digest">Digest</a>
+    <b>static</b> <b>member</b> (<b>^^^</b>)<b>:</b> <a href="#def:type Recall.Digest">Digest</a> <b>*</b> <a href="#def:type Recall.Digest">Digest</a> <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
+    <b>static</b> <b>member</b> Bytes<b>:</b> array<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
+    <b>static</b> <b>member</b> String<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
+    <b>static</b> <b>member</b> Stream<b>:</b> Stream <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
   <b>end</b>
 </pre>
 <pre><b>[&lt;</b>AbstractClass<b>&gt;]</b> 
@@ -76,13 +82,13 @@ font-weight: bold;
   <b>member</b> case<b>:</b> Case<b>&lt;</b>Empty, <i>'cs</i>, <i>'u</i><b>&gt;</b>                           <b>-&gt;</b> UnionPU<b>&lt;</b>Empty, <i>'cs</i>, <i>'u</i><b>&gt;</b>
   <b>member</b> case<b>:</b> Case<b>&lt;</b>  <i>'ls</i>, <i>'cs</i>, <i>'u</i><b>&gt;</b> <b>*</b> ProductPU<b>&lt;</b><i>'ls</i>, <i>'ls</i>, <i>'u</i><b>&gt;</b> <b>-&gt;</b> UnionPU<b>&lt;</b>  <i>'ls</i>, <i>'cs</i>, <i>'u</i><b>&gt;</b>
   <b>member</b> plus<b>:</b> UnionPU<b>&lt;</b>       <i>'c</i>      , Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'u</i><b>&gt;</b>
-              <b>*</b> UnionPU<b>&lt;</b>           <i>'cs</i> ,            <i>'cs</i> , <i>'u</i><b>&gt;</b>
+             <b>*</b> UnionPU<b>&lt;</b>           <i>'cs</i> ,            <i>'cs</i> , <i>'u</i><b>&gt;</b>
             <b>-&gt;</b> UnionPU<b>&lt;</b>Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'u</i><b>&gt;</b>
   <b>member</b> union<b>:</b> Rep <b>*</b> Union<b>&lt;</b><i>'u</i><b>&gt;</b> <b>*</b> AsChoice<b>&lt;</b><i>'c</i>, <i>'u</i><b>&gt;</b> <b>*</b> UnionPU<b>&lt;</b><i>'c</i>, <i>'c</i>, <i>'u</i><b>&gt;</b> <b>-&gt;</b> PU<b>&lt;</b><i>'u</i><b>&gt;</b>
   <b>member</b> elem<b>:</b> Elem<b>&lt;</b><i>'e</i>, <i>'p</i>, <i>'t</i><b>&gt;</b> <b>*</b> PU<b>&lt;</b><i>'e</i><b>&gt;</b> <b>-&gt;</b> ProductPU<b>&lt;</b><i>'e</i>, <i>'p</i>, <i>'t</i><b>&gt;</b>
   <b>member</b> times<b>:</b> ProductPU<b>&lt;</b>    <i>'e</i>      , And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
               <b>*</b> ProductPU<b>&lt;</b>        <i>'es</i> ,         <i>'es</i> , <i>'t</i><b>&gt;</b>
-              <b>-&gt;</b> ProductPU<b>&lt;</b>And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+             <b>-&gt;</b> ProductPU<b>&lt;</b>And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
   <b>member</b> product<b>:</b> Rep <b>*</b> Product<b>&lt;</b><i>'t</i><b>&gt;</b> <b>*</b> AsProduct<b>&lt;</b><i>'p</i>, <i>'t</i><b>&gt;</b> <b>*</b> ProductPU<b>&lt;</b><i>'p</i>, <i>'p</i>, <i>'t</i><b>&gt;</b> <b>-&gt;</b> PU<b>&lt;</b><i>'t</i><b>&gt;</b>
 </pre>
 <pre><b>type</b> <a id="dec:type Recall.Log" href="#def:type Recall.Log">Log</a>
@@ -107,9 +113,14 @@ font-weight: bold;
   <b>member</b> Zero<b>:</b> unit <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>unit<b>&gt;</b>
 </pre>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
-<b>type</b> <a id="dec:type Recall.LoggedBuilder" href="#def:type Recall.LoggedBuilder">LoggedBuilder</a>  <b>=</b>
+<b>type</b> <a id="dec:type Recall.LogAsBuilder" href="#def:type Recall.LogAsBuilder">LogAsBuilder</a>  <b>=</b>
   inherit <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
   <b>member</b> Run<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b>
+</pre>
+<pre><b>[&lt;</b>Class<b>&gt;]</b> 
+<b>type</b> LogBuilder <b>=</b>
+  inherit <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
+  <b>member</b> Run<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b>
 </pre>
 <pre><b>type</b> <a id="dec:type Recall.WithLogBuilder" href="#def:type Recall.WithLogBuilder">WithLogBuilder</a>  <b>=</b>
   <b>new</b><b>:</b> unit <b>-&gt;</b> <a href="#def:type Recall.WithLogBuilder">WithLogBuilder</a>
@@ -139,11 +150,10 @@ font-weight: bold;
 <b>module</b> <a id="dec:module Recall.Recall" href="#def:module Recall.Recall">Recall</a>  <b>=</b>
   <b>val</b> <a id="dec:val Recall.Recall.recall" href="#def:val Recall.Recall.recall">recall</a><b>:</b> logDir<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.RunWithLogBuilder">RunWithLogBuilder</a>
   <b>val</b> <a id="dec:val Recall.Recall.logged" href="#def:val Recall.Recall.logged">logged</a><b>:</b> <a href="#def:type Recall.WithLogBuilder">WithLogBuilder</a>
-  <b>val</b> <a id="dec:val Recall.Recall.logAs" href="#def:val Recall.Recall.logAs">logAs</a><b>:</b> id<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.LoggedBuilder">LoggedBuilder</a>
-  <b>val</b> <a id="dec:val Recall.Recall.log" href="#def:val Recall.Recall.log">log</a><b>:</b> <a href="#def:type Recall.LoggedBuilder">LoggedBuilder</a>
+  <b>val</b> <a id="dec:val Recall.Recall.logAs" href="#def:val Recall.Recall.logAs">logAs</a><b>:</b> id<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.LogAsBuilder">LogAsBuilder</a>
+  <b>val</b> <a id="dec:val Recall.Recall.log" href="#def:val Recall.Recall.log">log</a><b>:</b> LogBuilder
   <b>val</b> <a id="dec:val Recall.Recall.watch" href="#def:val Recall.Recall.watch">watch</a><b>:</b> <i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>unit<b>&gt;</b>
   <b>val</b> <a id="dec:val Recall.Recall.update" href="#def:val Recall.Recall.update">update</a><b>:</b> <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
-  <b>val</b> <a id="dec:val Recall.Recall.digest" href="#def:val Recall.Recall.digest">digest</a><b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><a href="#def:type Recall.Digest">Digest</a><b>&gt;</b>
   <b>val</b> <a id="dec:val Recall.Recall.readAsAlt" href="#def:val Recall.Recall.readAsAlt">readAsAlt</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Alt<b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>val</b> <a id="dec:val Recall.Recall.readAsJob" href="#def:val Recall.Recall.readAsJob">readAsJob</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>val</b> <a id="dec:val Recall.Recall.wait" href="#def:val Recall.Recall.wait">wait</a><b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
@@ -175,13 +185,13 @@ font-weight: bold;
 </pre>
 <div class="nested"><p> Returns a previously generated serialization capability or attempts to one for a given type.</div>
 <pre><b>member</b> plus<b>:</b> UnionPU<b>&lt;</b>       <i>'c</i>      , Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'u</i><b>&gt;</b>
-            <b>*</b> UnionPU<b>&lt;</b>           <i>'cs</i> ,            <i>'cs</i> , <i>'u</i><b>&gt;</b>
+           <b>*</b> UnionPU<b>&lt;</b>           <i>'cs</i> ,            <i>'cs</i> , <i>'u</i><b>&gt;</b>
           <b>-&gt;</b> UnionPU<b>&lt;</b>Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'u</i><b>&gt;</b>
 </pre>
 <div class="nested"></div>
 <pre><b>member</b> times<b>:</b> ProductPU<b>&lt;</b>    <i>'e</i>      , And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
             <b>*</b> ProductPU<b>&lt;</b>        <i>'es</i> ,         <i>'es</i> , <i>'t</i><b>&gt;</b>
-            <b>-&gt;</b> ProductPU<b>&lt;</b>And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+           <b>-&gt;</b> ProductPU<b>&lt;</b>And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
 </pre>
 <div class="nested"></div>
 </div>
@@ -201,9 +211,13 @@ font-weight: bold;
 </pre>
 <div class="nested"><p> Builder for steppable computations.</p><p> Note that steppable computations allow only a limited set of computational patterns, because a steppable computation is not guaranteed to be run to completion.  Specifically, while a single step of a computation is guaranteed to be run to completion after it has been started, a sequence of steps is not guaranteed to be run to completion.  Because of this, constructs such as <code><b>use</b></code> cannot be given meaningful semantics.  However, within a single step, even one defined as a job, such constructs can be used.</div>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
-<b>type</b> <a id="def:type Recall.LoggedBuilder" href="#dec:type Recall.LoggedBuilder">LoggedBuilder</a>  <b>=</b>
+<b>type</b> <a id="def:type Recall.LogAsBuilder" href="#dec:type Recall.LogAsBuilder">LogAsBuilder</a>  <b>=</b>
 </pre>
 <div class="nested"><p> Builder for logged computations.  A logged computation is essentially a steppable computation, whose steps are logged, while it is being executed.</div>
+<pre><b>[&lt;</b>Class<b>&gt;]</b> 
+<b>type</b> LogBuilder <b>=</b>
+</pre>
+<div class="nested"></div>
 <pre><b>type</b> <a id="def:type Recall.WithLogBuilder" href="#dec:type Recall.WithLogBuilder">WithLogBuilder</a>  <b>=</b>
 </pre>
 <div class="nested"><p> Builder for parallel computations with a log.  A computation with a log is executed in a context with a log for logging individual logged computations.</div>
@@ -226,10 +240,10 @@ font-weight: bold;
 <pre><b>val</b> <a id="def:val Recall.Recall.logged" href="#dec:val Recall.Recall.logged">logged</a><b>:</b> <a href="#def:type Recall.WithLogBuilder">WithLogBuilder</a>
 </pre>
 <div class="nested"><p> A builder for parallel computations with a log.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.logAs" href="#dec:val Recall.Recall.logAs">logAs</a><b>:</b> id<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.LoggedBuilder">LoggedBuilder</a>
+<pre><b>val</b> <a id="def:val Recall.Recall.logAs" href="#dec:val Recall.Recall.logAs">logAs</a><b>:</b> id<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.LogAsBuilder">LogAsBuilder</a>
 </pre>
 <div class="nested"><p> Returns a builder for creating a new logged computation with the given identity.  Computations with the same identity are assumed to be the same computations.  The result of the computation is persisted to a computation log along with dependencies to other logged computations.</p><p> The first time a logged computations is created, it is always run to completion.  When a logged computation with the same identity is recreated it may or may not be run to completion.</p><p> In case the log indicates that the recreated computation has no dependencies to other logged computations then the computation is run to completion every time it is recreated.  This makes it convenient to essentially create new primitive operations and is also quite logical as a computation that has no inputs must either be a constant or it must use some hidden effects to compute its output.</p><p> If, however, the log has a non empty sequence of dependencies to other logged computations, then the recreated computation is run to completion only if the sequence of dependencies changes or the result of any one of those logged computations has changed.  This works correctly as long as any input that may change the result of the computation are bound as other logged computations within the defined logged computation.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.log" href="#dec:val Recall.Recall.log">log</a><b>:</b> <a href="#def:type Recall.LoggedBuilder">LoggedBuilder</a>
+<pre><b>val</b> <a id="def:val Recall.Recall.log" href="#dec:val Recall.Recall.log">log</a><b>:</b> LogBuilder
 </pre>
 <div class="nested"><p> Returns a builder for creating a new logged computation.  The computation is given an automatically determined identity.</div>
 <pre><b>val</b> <a id="def:val Recall.Recall.watch" href="#dec:val Recall.Recall.watch">watch</a><b>:</b> <i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>unit<b>&gt;</b>
@@ -238,9 +252,6 @@ font-weight: bold;
 <pre><b>val</b> <a id="def:val Recall.Recall.update" href="#dec:val Recall.Recall.update">update</a><b>:</b> <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
 </pre>
 <div class="nested"><p> A builder for defining updates or partial logged computations whose results are not logged.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.digest" href="#dec:val Recall.Recall.digest">digest</a><b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><a href="#def:type Recall.Digest">Digest</a><b>&gt;</b>
-</pre>
-<div class="nested"><p> Provides a digest of the current point in a logged computation.  The digest includes the identity of the current computation as well as digests of all the dependencies of the current computation.  A digest can be used as a convenient end result of a logged computation and also can be used as a key to identify the point in the computation.</div>
 <pre><b>val</b> <a id="def:val Recall.Recall.readAsAlt" href="#dec:val Recall.Recall.readAsAlt">readAsAlt</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Alt<b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
 <div class="nested"><p> Returns an alternative for reading the result of a logged computation.</div>
