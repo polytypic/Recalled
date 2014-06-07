@@ -61,6 +61,8 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
     <Compile Include="Assembly.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="InterfaceTypes.fsi" />
@@ -70,8 +72,6 @@
     <Compile Include="LoggedMap.fs" />
     <Compile Include="Recall.fsi" />
     <Compile Include="Recall.fs" />
-    <None Include="packages.config" />
-    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Hopac">

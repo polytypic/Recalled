@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Recalled</id>
-    <version>0.0.0.2</version>
+    <version>0.0.0.3</version>
     <title>Recalled</title>
     <summary>A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.</summary>
     <authors>Vesa Karvonen</authors>
