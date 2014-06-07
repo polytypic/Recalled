@@ -1,6 +1,7 @@
 ﻿namespace Recall
 
 open Microsoft.FSharp.Core.Operators.Unchecked
+open System.Numerics
 open System
 open System.IO
 open Infers
@@ -152,6 +153,16 @@ type [<InferenceRules>] PU () =
         let lo = r.ReadUInt64 ()
         let hi = r.ReadUInt64 ()
         Digest (lo, hi)}
+
+  member this.BigInteger: PU<BigInteger> = memoize <| fun () ->
+    {new PU<BigInteger> () with
+      override this.Dopickle (w: BinaryWriter, x) =
+        let bytes = x.ToByteArray ()
+        w.Write bytes.Length
+        w.Write bytes
+      override this.Unpickle (r: BinaryReader) =
+        let n = r.ReadInt32 ()
+        BigInteger (r.ReadBytes n)}
 
   member this.list (t: PU<'a>) : PU<list<'a>> = memoize <| fun () ->
     mkSeq List.ofArray t

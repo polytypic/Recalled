@@ -1,5 +1,6 @@
 ﻿namespace Recall
 
+open System.Numerics
 open System
 open System.IO
 open Infers
@@ -48,6 +49,8 @@ type [<InferenceRules>] PU =
   member DateTime: PU<DateTime>
 
   member Digest: PU<Digest>
+
+  member BigInteger: PU<BigInteger>
 
   // Special optimizations -----------------------------------------------------
 
