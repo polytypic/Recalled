@@ -135,6 +135,14 @@ module LoggedMap =
           if not (IVar.Now.isFull entry.var) then
             do! entry.var <-= v
 
+      let openWriter path =
+        let s = new FileStream (path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)
+        do s.Seek (0L, SeekOrigin.End) |> ignore
+        new BinaryWriter (s)
+
+      let remWriter = openWriter remPath
+      let addWriter = openWriter addPath
+
       // Find out which concurrent find operations were unsatisfied.
       let unsatisfied = ResizeArray<_> ()
 
@@ -156,16 +164,6 @@ module LoggedMap =
       do! unsatisfied
           |> Seq.iterJob (fun kvI ->
              kvI.Value.var <-= None)
-
-      let openWriter path =
-        let s = new FileStream (path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)
-        do s.Seek (0L, SeekOrigin.End) |> ignore
-        new BinaryWriter (s)
-
-      let remWriter = openWriter remPath
-      let addWriter = openWriter addPath
-
-      // printfn "Log: %d" (!t.addIdx)
 
       return!
         Job.foreverServer
