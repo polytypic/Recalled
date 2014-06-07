@@ -5,8 +5,13 @@ incremental, parallel computations such as build systems.
 
 ## Download
 
-An open-source version of Recall is currently under development and will soon be
+Experimental package [Recalled](http://www.nuget.org/packages/Recalled/) is
 available via [NuGet](http://www.nuget.org/).
+
+Note that the package name differs from the current library name.  For some
+reason NuGet didn't tell me there already was a package by the name Recall when
+I searched for it a couple of months ago.  I will likely rename this whole
+repository and library.
 
 ## Documentation
 
