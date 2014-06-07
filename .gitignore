@@ -3,6 +3,7 @@
 *.suo
 *~
 .\#*
+.recall
 \#*\#
 bin
 gh-pages
