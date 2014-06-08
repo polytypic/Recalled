@@ -8,7 +8,7 @@ incremental, parallel computations such as build systems.
 Experimental package [Recalled](http://www.nuget.org/packages/Recalled/) is
 available via [NuGet](http://www.nuget.org/).  **Recall is not yet ready for
 production use.** I do not expect radical changes to the basic programming
-interface of the library, so you feel free to play with the experimental
+interface of the library, so you should feel free to play with the experimental
 release, but there are several significant performance and robustness
 improvements that I have in mind for the implementation and also some additions
 to the programming interface.
