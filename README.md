@@ -6,7 +6,12 @@ incremental, parallel computations such as build systems.
 ## Download
 
 Experimental package [Recalled](http://www.nuget.org/packages/Recalled/) is
-available via [NuGet](http://www.nuget.org/).
+available via [NuGet](http://www.nuget.org/).  **Recall is not yet ready for
+production use.** I do not expect radical changes to the basic programming
+interface of the library, so you feel free to play with the experimental
+release, but there are several significant performance and robustness
+improvements that I have in mind for the implementation and also some additions
+to the programming interface.
 
 Note that the package name differs from the current library name.  For some
 reason NuGet didn't tell me there already was a package by the name Recall when
@@ -42,7 +47,9 @@ Recall is inspired by, but is significantly different from
   and
 
 * Neil Mitchell's work on [Shake](http://community.haskell.org/~ndm/shake/) also
-  on [GitHub](https://github.com/ndmitchell/shake).
+  on [GitHub](https://github.com/ndmitchell/shake).  Anton Tayanovskyy has also
+  created [FShake](https://github.com/intellifactory/fshake), which is inspired
+  by Shake.
 
 Understanding those works is not at all necessary to use Recall or to understand
 its implementation, but might be of general interest.

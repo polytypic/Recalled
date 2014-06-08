@@ -13,7 +13,7 @@ type UnionPU<'c, 'cs, 'u>
 type [<InferenceRules>] PU =
 
   /// Returns a previously generated serialization capability or attempts to
-  /// one for a given type.
+  /// generate one for a given type.
   static member Get: unit -> PU<'x>
 
   // ---------------------------------------------------------------------------
