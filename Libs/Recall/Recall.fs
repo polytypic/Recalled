@@ -166,10 +166,9 @@ module internal Do =
                lli2xUJ log logged newDeps.Count >>= build oldPickle
 
         let reuse (oldPickle: array<byte>) =
-          let pickleStream = new System.IO.MemoryStream (oldPickle)
-          logged.value <- xPU.Unpickle (new System.IO.BinaryReader (pickleStream))
-          pickleStream.Position <- 0L
-          finish (Digest.Stream pickleStream)
+          let mutable p = 0
+          xPU.Unpickle (oldPickle, &p, &logged.value)
+          finish (Digest.Bytes oldPickle)
 
         Job.queue
          (Job.tryWith

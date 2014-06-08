@@ -7,6 +7,7 @@ open Hopac.Extensions
 open Hopac.Job.Infixes
 open Hopac.Alt.Infixes
 open System
+open System.Diagnostics
 open System.Collections.Generic
 open System.IO
 open System.Text.RegularExpressions
@@ -35,34 +36,39 @@ module LoggedMap =
   let inline inc i = let j = !i + 1 in i := j ; j
 
   let tryFind (t: LoggedMap<'k, 'v>) (k: 'k) : Alt<Option<'v>> = Alt.delay <| fun () ->
-    lock t.dict <| fun () ->
+    Monitor.Enter t.dict
     match t.dict.TryGetValue k with
      | Nothing ->
        if IVar.Now.isFull t.ready then
+         Monitor.Exit t.dict
          asAlt t.ready
        else
          let v = ivar ()
          t.dict.Add (k, {idx = -1; var = v})
+         Monitor.Exit t.dict
          asAlt v
      | Just entry ->
+       Monitor.Exit t.dict
        asAlt entry.var
 
   let add (t: LoggedMap<'k, 'v>) (k: 'k) (v: 'v) =
     t.ready >>= fun _ ->
     let entry = {idx = 0; var = IVar.Now.createFull (Some v)}
     let idx =
-      lock t.dict <| fun () ->
-        let i = inc t.addIdx
-        match t.dict.TryGetValue k with
-         | Nothing ->
-           entry.idx <- i
-           t.dict.Add (k, entry)
-           0
-         | Just old ->
-           let idx = old.idx
-           old.idx <- i
-           old.var <- entry.var
-           idx
+      Monitor.Enter t.dict
+      let i = inc t.addIdx
+      match t.dict.TryGetValue k with
+       | Nothing ->
+         entry.idx <- i
+         t.dict.Add (k, entry)
+         Monitor.Exit t.dict
+         0
+       | Just old ->
+         let idx = old.idx
+         old.idx <- i
+         old.var <- entry.var
+         Monitor.Exit t.dict
+         idx
     t.ioReqs <<-+ Log (idx, k, v)
 
   let close t =
@@ -106,15 +112,19 @@ module LoggedMap =
       }
 
       let! addBuffer = readAllBytes addPath
-      use addStream = new MemoryStream (addBuffer)
-      use addReader = new BinaryReader (addStream)
 
       let! remData = remDataPromise
       let remIdx = ref 0
 
-      while addStream.Position <> addStream.Length do
-        let k = domPU.Unpickle addReader
-        let v = Some (codPU.Unpickle addReader)
+      let addPos = ref 0
+
+      let k = ref Unchecked.defaultof<_>
+      let v = ref Unchecked.defaultof<_>
+
+      while !addPos <> addBuffer.Length do
+        domPU.Unpickle (addBuffer, addPos, k)
+        codPU.Unpickle (addBuffer, addPos, v)
+        let v = Some (!v)
 
         let addIdx = inc t.addIdx
 
@@ -123,17 +133,17 @@ module LoggedMap =
 
         if addIdx < remData.[!remIdx] then
           let entry = {idx = addIdx; var = IVar.Now.createFull v}
-          do lock t.dict <| fun () ->
-            match t.dict.TryGetValue k with
-             | Nothing ->
-               t.dict.Add (k, entry)
-             | Just request ->
-               if IVar.Now.isFull request.var then
-                 failwith "Bug"
-               request.idx <- entry.idx
-               entry.var <- request.var
-          if not (IVar.Now.isFull entry.var) then
-            do! entry.var <-= v
+          do Monitor.Enter t.dict
+          match t.dict.TryGetValue (!k) with
+            | Nothing ->
+              do t.dict.Add (!k, entry)
+                 Monitor.Exit t.dict
+            | Just request ->
+              do Monitor.Exit t.dict
+                 if IVar.Now.isFull request.var then
+                   failwith "Bug"
+                 request.idx <- entry.idx
+              return! request.var <-= v
 
       let openWriter path =
         let s = new FileStream (path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)

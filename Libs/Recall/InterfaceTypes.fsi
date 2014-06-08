@@ -10,8 +10,8 @@ open System.IO
 /// unlikely.
 #endif
 type Digest = struct
-    val Lo: uint64
-    val Hi: uint64
+    val mutable Lo: uint64
+    val mutable Hi: uint64
 
     new: lo: uint64 * hi: uint64 -> Digest
     new: bytes: array<byte> -> Digest
@@ -35,3 +35,6 @@ type [<AbstractClass>] PU<'x> =
 
   /// Reads a value from the given binary reader.
   abstract Unpickle: BinaryReader -> 'x
+
+  /// Read value from given array starting at and updating the given offset.
+  abstract Unpickle: array<byte> * byref<int> * byref<'x> -> unit
