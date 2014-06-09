@@ -1,7 +1,25 @@
 # Recall
 
-Recall is a library that implements a simple EDSL in F# for defining persistent,
-incremental, parallel computations such as build systems.
+Recall is a library that implements a simple
+[EDSL](http://en.wikipedia.org/wiki/Domain-specific_language) in F# for defining
+persistent, incremental, parallel computations such as build systems.
+
+## The elevator speech
+
+Imagine that you have a program that reads some large set of input data and then
+makes some expensive computations based on that data to give you some output
+that you need.  You continuously make small incremental changes to that input
+data and then you need to run the program again to compute the output that you
+need.
+
+It doesn't really matter what the input data is, what those expensive
+computations do or what the output is, but it matters that there are plenty of
+subcomputations, whose results do not change between each run of the program.
+
+Recall is an EDSL that allows you to conveniently write programs that take
+advantage of those unchanged subcomputations to only incrementally compute the
+parts of the whole computation that need to computed due to the incremental
+changes in the input data.
 
 ## Download
 
