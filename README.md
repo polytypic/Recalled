@@ -6,20 +6,24 @@ persistent, incremental, parallel computations such as build systems.
 
 ## The elevator speech
 
-Imagine that you have a program that reads some large set of input data and then
-makes some expensive computations based on that data to give you some output
-that you need.  You continuously make small incremental changes to that input
-data and then you need to run the program again to compute the output that you
-need.
+Imagine that you have a program that reads some *large set of input data* and
+then makes some *expensive computations* based on that data to give you *some
+output* that you need.  You continuously make *small incremental changes* to
+that input data and then you need to *run* and wait for the program *after each
+change* to compute the output that you need.
 
 It doesn't really matter what the input data is, what those expensive
-computations do or what the output is, but it matters that there are plenty of
-subcomputations, whose results do not change between each run of the program.
+computations are or what the output is, but it matters that there are *plenty of
+subcomputations whose results do not change* between each run of the program.
 
 Recall is an EDSL that allows you to conveniently write programs that take
-advantage of those unchanged subcomputations to only incrementally compute the
+advantage of those unchanged subcomputations to only *incrementally* compute the
 parts of the whole computation that need to computed due to the incremental
 changes in the input data.
+
+Instead of having a program whose run time is proportional to the whole input to
+output translation, the Recalled version of the program has *time complexity
+proportional to the changes*.
 
 ## Download
 
