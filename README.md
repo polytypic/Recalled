@@ -22,7 +22,7 @@ parts of the whole computation that need to be computed due to the incremental
 changes in the input data.
 
 Instead of having a program whose run time is proportional to the whole input to
-output translation, the Recalled version of the program has *time complexity
+output translation, the Recalled version of the program has *run time
 proportional to the changes*.
 
 ## Download
