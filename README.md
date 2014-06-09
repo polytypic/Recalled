@@ -18,7 +18,7 @@ subcomputations whose results do not change* between each run of the program.
 
 Recall is an EDSL that allows you to conveniently write programs that take
 advantage of those unchanged subcomputations to only *incrementally* compute the
-parts of the whole computation that need to computed due to the incremental
+parts of the whole computation that need to be computed due to the incremental
 changes in the input data.
 
 Instead of having a program whose run time is proportional to the whole input to
