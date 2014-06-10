@@ -14,7 +14,8 @@ change* to compute the output that you need.
 
 It doesn't really matter what the input data is, what those expensive
 computations are or what the output is, but it matters that there are *plenty of
-subcomputations whose results do not change* between each run of the program.
+subcomputations whose inputs and outputs do not change* between each run of the
+program.
 
 Recall is an EDSL that allows you to conveniently write programs that take
 advantage of those unchanged subcomputations to only *incrementally* compute the
