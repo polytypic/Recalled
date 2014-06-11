@@ -4,7 +4,7 @@ Recall is a library that implements a simple
 [EDSL](http://en.wikipedia.org/wiki/Domain-specific_language) in F# for defining
 persistent, incremental, parallel computations such as build systems.
 
-## The elevator speech
+## The elevator pitch
 
 Imagine that you have a program that reads some *large set of input data* and
 then makes some *expensive computations* based on that data to give you *some
