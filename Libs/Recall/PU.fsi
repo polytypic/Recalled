@@ -56,6 +56,8 @@ type [<InferenceRules>] PU =
 
   member BigInteger: OpenPU<BigInteger>
 
+  member bytes: OpenPU<array<byte>>
+
   // Special optimizations -----------------------------------------------------
 
   member list: OpenPU<'a> -> OpenPU<list<'a>>

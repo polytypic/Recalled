@@ -65,6 +65,33 @@ module internal UtilPU =
            x <- ofNative n
            p}
 
+  let inline mkBytesBy (toBytes: 'x -> array<byte>) (ofBytes: array<byte> -> 'x) : OpenPU<'x> =
+    O {new InternalPU<'x> () with
+         override this.Size (x, p) =
+           let x = toBytes x
+           p
+           |> alignTo sizeof<int>
+           |> incBy (sizeof<int> + x.Length)
+         override this.Dopickle (x, p) =
+           let x = toBytes x
+           let mutable p =
+             p
+             |> alignTo sizeof<int>
+             |> writeIfChanged x.Length
+           for i=0 to x.Length-1 do
+             p <- writeIfChanged x.[i] p
+           p
+         override this.Unpickle (p, x) =
+           let mutable p = alignTo sizeof<int> p
+           let n = read p
+           p <- incBy sizeof<int> p
+           let bs = Array.zeroCreate n
+           for i=0 to n-1 do
+             bs.[i] <- read p
+             p <- incBy sizeof<byte> p
+           x <- ofBytes bs
+           p}
+
   let inline mkConst (value: 'x) =
     {new InternalPU<'x> () with
        override this.Size (x, p) = p
@@ -249,31 +276,10 @@ type [<InferenceRules>] PU () =
            incBy sizeof<uint64> p}
            
   member this.BigInteger: OpenPU<BigInteger> = memoize <| fun () ->
-    O {new InternalPU<BigInteger> () with
-         override this.Size (x, p) =
-           let x = x.ToByteArray ()
-           p
-           |> alignTo sizeof<int>
-           |> incBy (sizeof<int> + x.Length)
-         override this.Dopickle (x, p) =
-           let x = x.ToByteArray ()
-           let mutable p =
-             p
-             |> alignTo sizeof<int>
-             |> writeIfChanged x.Length
-           for i=0 to x.Length-1 do
-             p <- writeIfChanged x.[i] p
-           p
-         override this.Unpickle (p, x) =
-           let mutable p = alignTo sizeof<int> p
-           let n = read p
-           p <- incBy sizeof<int> p
-           let bs = Array.zeroCreate n
-           for i=0 to n-1 do
-             bs.[i] <- read p
-             p <- incBy sizeof<byte> p
-           x <- BigInteger (bs)
-           p}
+    mkBytesBy (fun x -> x.ToByteArray ()) (fun x -> BigInteger (x))
+
+  member this.bytes: OpenPU<array<byte>> = memoize <| fun () ->
+    mkBytesBy id id
 
   member this.list (t: OpenPU<'x>) : OpenPU<list<'x>> = memoize <| fun () ->
     mkSeq List.toArray List.ofArray t
