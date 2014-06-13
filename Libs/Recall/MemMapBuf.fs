@@ -7,6 +7,7 @@ open System.IO.MemoryMappedFiles
 open System.Threading
 open Hopac
 open Hopac.Job.Infixes
+open Hopac.Alt.Infixes
 open Hopac.Infixes
 
 module Cond =
@@ -22,14 +23,14 @@ module Cond =
 
 module MemMapBuf =
   type Req =
-   | Read of (nativeptr<byte> -> Job<unit>)
-   | Append of nativeint * (nativeptr<byte> -> nativeint -> Job<unit>)
+   | Access of (nativeptr<byte> -> Job<unit>)
+   | Append of align: int * size: int * IVar<PtrInt>
    | Close of IVar<unit>
 
   type MemMapBuf = {
       path: string
-      mutable size: nativeint
-      mutable capacity: nativeint
+      mutable size: PtrInt
+      mutable capacity: PtrInt
       mutable file: MemoryMappedFile
       mutable view: MemoryMappedViewAccessor
       mutable ptr: nativeptr<byte>
@@ -37,6 +38,9 @@ module MemMapBuf =
       mutable numAccessors: int
       mutable isFree: IVar<unit>
     }
+
+  let size (buf: MemMapBuf) =
+    buf.size
 
   let doClose buf =
     buf.view.SafeMemoryMappedViewHandle.ReleasePointer ()
@@ -65,28 +69,27 @@ module MemMapBuf =
        Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
        doClose buf
        reply <-= ()
-     | Read read ->
+     | Access access ->
        Interlocked.Increment &buf.numAccessors |> ignore
-       Job.queue (read buf.ptr >>= fun () ->
+       Job.queue (access buf.ptr >>= fun () ->
          Cond.signal buf.isFree (0 = Interlocked.Decrement &buf.numAccessors))
-     | Append (size, append) ->
-       Job.whenDo (buf.capacity - buf.size < size)
+     | Append (align, size, reply) ->
+       let offs = buf.size |> alignTo align
+       let size = int64 size
+       Job.whenDo (buf.capacity - offs < size)
          (Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) |>> fun () ->
           doClose buf
-          doOpenWithCapacity buf (max (buf.size + size) (buf.capacity + buf.capacity))) >>= fun () ->
-       let offs = buf.size
-       buf.size <- buf.size + size
-       Interlocked.Increment &buf.numAccessors |> ignore
-       Job.queue (append buf.ptr (nativeint offs) >>= fun () ->
-          Cond.signal buf.isFree (0 = Interlocked.Decrement &buf.numAccessors))
+          doOpenWithCapacity buf (max (offs + size) (buf.capacity + buf.capacity))) >>= fun () ->
+       buf.size <- offs + size
+       reply <-= offs
 
   let create (path: string) = Job.delay <| fun () ->
     let size =
       if File.Exists path then
         let info = FileInfo (path)
-        nativeint info.Length
+        info.Length
       else
-        0n
+        0L
     let buf = {
       path = path
       size = size
@@ -98,30 +101,28 @@ module MemMapBuf =
       isFree = ivar ()
       reqs = mb ()
     }
-    doOpenWithCapacity buf (if size = 0n then 65536n else size)
+    doOpenWithCapacity buf (if size = 0L then 65536L else size)
     Job.foreverServer (server buf) >>%
     buf
 
-  let close buf = Job.delay <| fun () ->
+  let close buf : Job<Alt<unit>> = Job.delay <| fun () ->
     let reply = ivar ()
-    buf.reqs <<-+ Close reply >>. reply
+    buf.reqs <<-+ Close reply >>% upcast reply
 
-  let readFun buf read = Job.delay <| fun () ->
+  let accessFun buf access = Job.delay <| fun () ->
     let reply = ivar ()
-    let read ptr =
-      try reply <-= read ptr with e -> IVar.fillFailure reply e
-    buf.reqs <<-+ Read read >>. reply
+    let access ptr =
+      try reply <-= access ptr with e -> IVar.fillFailure reply e
+    buf.reqs <<-+ Access access >>. reply
 
-  let readJob buf read = Job.delay <| fun () ->
+  let accessJob buf access = Job.delay <| fun () ->
     let reply = ivar ()
-    let read ptr =
-      Job.tryIn <| Job.delayWith read ptr
+    let access ptr =
+      Job.tryIn <| Job.delayWith access ptr
        <| fun x -> reply <-= x
        <| fun e -> IVar.fillFailure reply e
-    buf.reqs <<-+ Read read >>. reply
+    buf.reqs <<-+ Access access >>. reply
 
-  let appendFun buf size append = Job.delay <| fun () ->
+  let append buf align size = Job.delay <| fun () ->
     let reply = ivar ()
-    let append ptr off =
-      try reply <-= append ptr off with e -> IVar.fillFailure reply e
-    buf.reqs <<-+ Append (size, append) >>. reply
+    buf.reqs <<-+ Append (align, size, reply) >>. reply

@@ -35,7 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Recall.XML</DocumentationFile>
-    <NoWarn>0050</NoWarn>
+    <NoWarn>0050;0009</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -69,6 +69,9 @@
     <Compile Include="InterfaceTypes.fs" />
     <Compile Include="PU.fsi" />
     <Compile Include="PU.fs" />
+    <Compile Include="MemMapBuf.fsi" />
+    <Compile Include="MemMapBuf.fs" />
+    <Compile Include="LoggedMap.fsi" />
     <Compile Include="LoggedMap.fs" />
     <Compile Include="Recall.fsi" />
     <Compile Include="Recall.fs" />

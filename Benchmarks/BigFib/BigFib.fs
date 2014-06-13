@@ -6,13 +6,14 @@ open System.Diagnostics
 open Hopac
 open Recall
 
-let rec fib (n: bigint) = logAs ("fib: " + n.ToString ()) {
+let rec fib n = logAs ("fib: " + n.ToString ()) {
   if n < 2I then
     return n
   else
     let! x = fib (n-1I)
-    let! y = fib (n-2I) |> wait
-    let! x = readAsJob x
+    let! y = fib (n-2I)
+    let! x = read x
+    let! y = read y
     return x + y
 }
 

@@ -6,12 +6,12 @@ open System.IO
 open Infers
 open Infers.Rep
 
+type OpenPU<'x>
 type ProductPU<'e, 'es, 'p>
 type UnionPU<'c, 'cs, 'u>
 
 /// Provides inference rules for a datatype generic serialization capability.
 type [<InferenceRules>] PU =
-
   /// Returns a previously generated serialization capability or attempts to
   /// generate one for a given type.
   static member Get: unit -> PU<'x>
@@ -20,45 +20,49 @@ type [<InferenceRules>] PU =
 
   new: unit -> PU
 
+  // ---------------------------------------------------------------------------
+
+  member toPU: OpenPU<'x> -> PU<'x>
+
   // Rec -----------------------------------------------------------------------
 
-  member fix: unit -> Rec<PU<'x>>
+  member fix: unit -> Rec<OpenPU<'x>>
 
   // Base Types ----------------------------------------------------------------
 
-  member unit: PU<unit>
+  member unit: OpenPU<unit>
 
-  member bool: PU<bool>
+  member bool: OpenPU<bool>
 
-  member int8:  PU<int8>
-  member int16: PU<int16>
-  member int32: PU<int32>
-  member int64: PU<int64>
+  member int8:  OpenPU<int8>
+  member int16: OpenPU<int16>
+  member int32: OpenPU<int32>
+  member int64: OpenPU<int64>
 
-  member uint8:  PU<uint8>
-  member uint16: PU<uint16>
-  member uint32: PU<uint32>
-  member uint64: PU<uint64>
+  member uint8:  OpenPU<uint8>
+  member uint16: OpenPU<uint16>
+  member uint32: OpenPU<uint32>
+  member uint64: OpenPU<uint64>
 
-  member float32: PU<float32>
-  member float64: PU<float>
+  member float32: OpenPU<float32>
+  member float64: OpenPU<float>
 
-  member char: PU<char>
-  member string: PU<string>
+  member char: OpenPU<char>
+  member string: OpenPU<string>
 
-  member DateTime: PU<DateTime>
+  member DateTime: OpenPU<DateTime>
 
-  member Digest: PU<Digest>
+  member Digest: OpenPU<Digest>
 
-  member BigInteger: PU<BigInteger>
+  member BigInteger: OpenPU<BigInteger>
 
   // Special optimizations -----------------------------------------------------
 
-  member list: PU<'a> -> PU<list<'a>>
+  member list: OpenPU<'a> -> OpenPU<list<'a>>
 
   // Refs and Arrays -----------------------------------------------------------
 
-  member array: PU<'a> -> PU<array<'a>>
+  member array: OpenPU<'a> -> OpenPU<array<'a>>
 
   // Discriminated Unions ------------------------------------------------------
 
@@ -69,14 +73,14 @@ type [<InferenceRules>] PU =
              * UnionPU<           'cs ,            'cs , 'u>
             -> UnionPU<Choice<'c, 'cs>, Choice<'c, 'cs>, 'u>
 
-  member union: Rep * Union<'u> * AsChoice<'c, 'u> * UnionPU<'c, 'c, 'u> -> PU<'u>
+  member union: Rep * Union<'u> * AsChoice<'c, 'u> * UnionPU<'c, 'c, 'u> -> OpenPU<'u>
 
   // Tuples and Records --------------------------------------------------------
 
-  member elem: Elem<'e, 'p, 't> * PU<'e> -> ProductPU<'e, 'p, 't>
+  member elem: Elem<'e, 'p, 't> * OpenPU<'e> -> ProductPU<'e, 'p, 't>
 
   member times: ProductPU<    'e      , And<'e, 'es>, 't>
               * ProductPU<        'es ,         'es , 't>
              -> ProductPU<And<'e, 'es>, And<'e, 'es>, 't>
 
-  member product: Rep * Product<'t> * AsProduct<'p, 't> * ProductPU<'p, 'p, 't> -> PU<'t>
+  member product: Rep * Product<'t> * AsProduct<'p, 't> * ProductPU<'p, 'p, 't> -> OpenPU<'t>
