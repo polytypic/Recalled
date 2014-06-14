@@ -78,36 +78,7 @@ module LoggedMap =
     MemMapBuf.accessFun loggedMap.BobBuf (fun ptr ->
       let ptr = NativePtr.ofNativeInt (NativePtr.toNativeInt ptr + nativeint bobOffs)
       bobWrite ptr
-      let pos = ref 0
-      let inline notImplemented () = raise <| NotImplementedException ()
-      let bufStream =
-        {new Stream () with
-          override this.CanRead with get () = true
-          override this.CanSeek with get () = false
-          override this.CanWrite with get () = false
-          override this.Write (_, _, _) = notImplemented ()
-          override this.Seek (_, _) = notImplemented ()
-          override this.Flush () = ()
-          override this.Length with get () = int64 bobSize
-          override this.Position
-            with get () = int64 (!pos)
-             and set v = notImplemented ()
-          override this.SetLength _ = notImplemented ()
-          override this.ReadByte () =
-            let p = !pos
-            if p < bobSize then
-              pos := p + 1
-              int (NativePtr.get ptr p)
-            else
-              -1
-          override this.Read (buffer, offset, count) =
-            let p = !pos
-            let n = min count (bobSize - !pos)
-            for i=0 to n-1 do
-              buffer.[offset+i] <- NativePtr.get ptr (p+i)
-            pos := p + n
-            n}
-      Digest.Stream bufStream) >>= fun (bobDigest: Digest) ->
+      Digest.Bytes (ptr, bobSize)) >>= fun (bobDigest: Digest) ->
 
     MemMapBuf.accessFun loggedMap.AddBuf (fun ptr ->
       let p = int64 (NativePtr.toNativeInt ptr) + addOffs

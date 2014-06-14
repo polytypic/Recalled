@@ -1,5 +1,6 @@
 ﻿namespace Recall
 
+open Microsoft.FSharp.NativeInterop
 open System.IO
 
 /// Represents a digest or hash of some data or value.
@@ -14,15 +15,13 @@ type [<NoComparison; CustomEquality>] Digest = struct
     val mutable Hi: uint64
 
     new: lo: uint64 * hi: uint64 -> Digest
-    new: bytes: array<byte> -> Digest
 
     static member Zero: Digest
 
     static member (^^^): Digest * Digest -> Digest
 
-    static member Bytes: array<byte> -> Digest
+    static member Bytes: nativeptr<byte> * int -> Digest
     static member String: string -> Digest
-    static member Stream: Stream -> Digest
   end
 
 type [<Class>] DigestEqualityComparer =

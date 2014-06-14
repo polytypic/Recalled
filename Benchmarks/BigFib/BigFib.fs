@@ -34,5 +34,5 @@ let main argv =
       n <- n * 2I
     0
   with e ->
-    printfn "%s" e.StackTrace
+    printfn "%s: %s" (e.ToString ()) e.StackTrace
     1

@@ -92,12 +92,12 @@ module internal Do =
 
       if not (LanguagePrimitives.PhysicalEquality was (logged :> Logged)) then
         match was with
-         | :? Logged<'x> as logged' ->
+         | :? Logged<'x> as logged' when logged'.id = id ->
            // Someone got here first.
            Latch.decrement log.Latch >>% logged'
          | _ ->
            Job.tryFinallyJob
-             (Job.thunk (fun () -> failwithf "Id digest collision: %s %s!" was.Id logged.id))
+             (Job.thunk (fun () -> failwithf "Id digest collision: '%s' '%s'" was.Id logged.id))
              (Latch.decrement log.Latch)
       else
         let xPU = PU.Get ()

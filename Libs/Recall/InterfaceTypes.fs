@@ -1,19 +1,9 @@
 ﻿namespace Recall
 
+open Microsoft.FSharp.NativeInterop
 open System
 open System.IO
 open System.Security.Cryptography
-
-module Digester =
-  type State = {
-      MD5: MD5
-      mutable Buffer: array<byte>
-    }
-
-  let md5 =
-    new System.Threading.ThreadLocal<State> (fun () ->
-      {MD5 = MD5.Create ()
-       Buffer = Array.zeroCreate 65536})
 
 type [<NoComparison; CustomEquality>] Digest = struct
     val mutable Lo: uint64
@@ -31,18 +21,17 @@ type [<NoComparison; CustomEquality>] Digest = struct
     static member (^^^) (l: Digest, r: Digest) =
       Digest (l.Lo ^^^ r.Lo, l.Hi ^^^ r.Hi)
 
-    static member Bytes (bytes: array<byte>) : Digest =
-      let md5 = Digester.md5.Value.MD5
-      Digest (md5.ComputeHash bytes)
+    static member Bytes (ptr: nativeptr<byte>, len: int) : Digest =
+      let mutable lo = 0UL
+      let mutable hi = 0UL
+      MurmurHash3.bytes ptr len 0u (&lo) (&hi)
+      Digest (lo, hi)
 
     static member String (string: string) : Digest =
-      let state = Digester.md5.Value
-      let n = System.Text.Encoding.UTF8.GetBytes (string, 0, string.Length, state.Buffer, 0)
-      Digest (state.MD5.ComputeHash (state.Buffer, 0, n))
-      
-    static member Stream (stream: Stream) : Digest =
-      let md5 = Digester.md5.Value.MD5
-      Digest (md5.ComputeHash stream)
+      let mutable lo = 0UL
+      let mutable hi = 0UL
+      MurmurHash3.string string 0u (&lo) (&hi)
+      Digest (lo, hi)
 
     override this.GetHashCode () = int this.Lo
     override this.Equals (other) =
