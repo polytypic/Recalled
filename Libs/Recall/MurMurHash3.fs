@@ -3,7 +3,7 @@
 open System.Runtime.InteropServices
 open Microsoft.FSharp.NativeInterop
 
-module MurmurHash3 =
+module internal MurmurHash3 =
   let inline private ROTL64 (x: uint64) r = (x <<< r) ||| (x >>> (64 - r))
 
   let inline private fmix64 (k: uint64) =
@@ -27,11 +27,14 @@ module MurmurHash3 =
     let c1 = 0x87c37b91114253d5UL
     let c2 = 0x4cf5ad432745937fUL
 
+    let dataAddr = NativePtr.toNativeInt data
+
     let mutable blockPtr : nativeptr<uint64> = 
-      NativePtr.ofNativeInt (NativePtr.toNativeInt data)
+      NativePtr.ofNativeInt dataAddr
     let tail = NativePtr.add data (nblocks*16)
 
     while NativePtr.toNativeInt blockPtr <> NativePtr.toNativeInt tail do
+      // XXX Potentially misaligned.
       let mutable k1 = NativePtr.get blockPtr 0
       let mutable k2 = NativePtr.get blockPtr 1
       blockPtr <- NativePtr.add blockPtr 2

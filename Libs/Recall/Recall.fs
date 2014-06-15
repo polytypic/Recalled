@@ -2,6 +2,7 @@
 
 open Microsoft.FSharp.NativeInterop
 open System
+open System.Collections.Generic
 open System.Collections.Concurrent
 open Hopac
 open Hopac.Infixes
@@ -39,12 +40,13 @@ type Update<'x> =
   | Value of 'x
   | Job of Job<Update<'x>>
   | Required of Logged * Update<'x>
-  | GetLog of (Log -> Update<'x>)
+  | GetLog of (Log -> Job<Update<'x>>)
   | GetDigest of (Digest -> Update<'x>)
-  | GetThis of (Log -> Logged -> int -> Update<'x>)
+  | GetThis of (Log -> Logged -> int -> Job<Update<'x>>)
 
 type WithLog<'x> = Log -> Job<'x>
-type LogAs<'x> = LogAs of WithLog<Logged * 'x>
+type LogAs<'x> = LogAs of (Log -> Job<Logged * 'x>)
+type Log<'x> = Log of (Log -> Logged -> int -> Job<Logged * 'x>)
 
 type UpdateBuilder () =
   member this.Delay (u2xU: unit -> Update<'x>) : Update<'x> =
@@ -57,7 +59,10 @@ type UpdateBuilder () =
     xU
   member this.ReturnFrom (LogAs xAs: LogAs<'x>) : Update<'x> =
     GetLog <| fun log ->
-    Job (xAs log |>> fun (d, x) -> Required (d, Value x))
+    xAs log |>> fun (r, x) -> Required (r, Value x)
+  member this.ReturnFrom (Log xL: Log<'x>) : Update<'x> =
+    GetThis <| fun log logged i ->
+    xL log logged i |>> fun (r, x) -> Required (r, Value x)
   member this.ReturnFrom (xJ: Job<'x>) : Update<'x> =
     Job (xJ |>> Value)
 
@@ -66,12 +71,15 @@ type UpdateBuilder () =
      | Value x -> x2yU x
      | Job xUJ -> Job (xUJ |>> fun xU -> this.Bind (xU, x2yU))
      | Required (l, xU) -> Required (l, this.Bind (xU, x2yU))
-     | GetLog l2xU -> GetLog (fun l -> this.Bind (l2xU l, x2yU))
+     | GetLog l2xUJ -> GetLog (fun l -> l2xUJ l |>> fun xU -> this.Bind (xU, x2yU))
      | GetDigest d2xU -> GetDigest (fun d -> this.Bind (d2xU d, x2yU))
-     | GetThis lliJ -> GetThis (fun log logged i -> this.Bind (lliJ log logged i, x2yU))
+     | GetThis lliJ -> GetThis (fun log logged i -> lliJ log logged i |>> fun xU -> this.Bind (xU, x2yU))
   member this.Bind (LogAs xAs: LogAs<'x>, x2yU: 'x -> Update<'y>) : Update<'y> =
     GetLog <| fun log ->
-    Job (xAs log |>> fun (d, x) -> Required (d, x2yU x))
+    xAs log |>> fun (d, x) -> Required (d, x2yU x)
+  member this.Bind (Log xL: Log<'x>, x2yU: 'x -> Update<'y>) : Update<'y> =
+    GetThis <| fun log logged i ->
+    xL log logged i |>> fun (d, x) -> Required (d, x2yU x)
   member this.Bind (xJ: Job<'x>, x2yU:'x -> Update<'y>) : Update<'y> =
     Job (xJ |>> x2yU)
 
@@ -81,7 +89,7 @@ type UpdateBuilder () =
   member this.Zero () : Update<unit> = Value ()
 
 module internal Do =
-  let asLogged (log: Log) (id: string) (xU: Update<'x>) : Job<Logged<'x>> =
+  let asLogged (log: Log) (id: string) (xU: Update<'x>) : Job<Logged * Logged<'x>> =
     Job.delay <| fun () ->
       Latch.Now.increment log.Latch
 
@@ -94,7 +102,7 @@ module internal Do =
         match was with
          | :? Logged<'x> as logged' when logged'.id = id ->
            // Someone got here first.
-           Latch.decrement log.Latch >>% logged'
+           Latch.decrement log.Latch >>% (logged' :> Logged, logged')
          | _ ->
            Job.tryFinallyJob
              (Job.thunk (fun () -> failwithf "Id digest collision: '%s' '%s'" was.Id logged.id))
@@ -153,11 +161,11 @@ module internal Do =
                newDeps.Add newDep
                build xU
              | GetLog log2xUJ ->
-               build (log2xUJ log)
+               log2xUJ log >>= build
              | GetDigest digest2xUJ ->
                failwith "XXX Implement intermediate digest"
              | GetThis lli2xUJ ->
-               build (lli2xUJ log logged newDeps.Count)
+               lli2xUJ log logged newDeps.Count >>= build
 
         let inline reuse (oldInfo: LoggedMap.Info) =
           finish oldInfo
@@ -196,26 +204,25 @@ module internal Do =
                         else
                           checkDeps xU
                       | GetLog log2xUJ ->
-                        checkDeps (log2xUJ log)
+                        log2xUJ log >>= checkDeps
                       | GetDigest digest2xUJ ->
                         failwith "XXX Implement intermediate digest"
                       | GetThis lli2xUJ ->
-                        checkDeps (lli2xUJ log logged newDeps.Count)
+                        lli2xUJ log logged newDeps.Count >>= checkDeps
                checkDeps xU)
            failure) >>%
-        logged
-
-//type LogBuilder () =
-//  inherit UpdateBuilder ()
-//  member this.Run (xU: Update<'x>) : Update<Logged<'x>> =
-//    GetThis <| fun log logged i ->
-//    Do.asLogged log (sprintf "%d: %s" i logged.Id) xU |>> fun logged ->
-//    Required (logged :> Logged, Job.result (Value logged))
+        (logged :> Logged, logged)
 
 type LogAsBuilder (id) =
   inherit UpdateBuilder ()
   member this.Run (xU: Update<'x>) : LogAs<Logged<'x>> =
-    LogAs <| fun log -> Do.asLogged log id xU |>> fun logged -> (logged :> Logged, logged)
+    LogAs <| fun log -> Do.asLogged log id xU
+
+type LogBuilder () =
+  inherit UpdateBuilder ()
+  member this.Run (xU: Update<'x>) : Log<Logged<'x>> =
+    Log <| fun log logged i ->
+    Do.asLogged log (sprintf "%d: %s" i logged.Id) xU
 
 type WithLogBuilder () =
   member inline this.Delay (u2xW: unit -> WithLog<'x>) : WithLog<'x> =
@@ -249,11 +256,11 @@ type WithLogBuilder () =
   member inline this.Using (x: 'x, x2yW: 'x -> WithLog<'y>) : WithLog<'y> =
     fun log -> Job.using x (fun x -> x2yW x log)
 
-//  member this.For (xs: seq<'x>, x2uW: 'x -> WithLog<unit>) : WithLog<unit> =
-//    WithLog <| fun log -> Seq.iterJob (fun x -> x2uW x |> function WithLog f -> f log) xs
+  member this.For (xs: seq<'x>, x2uW: 'x -> WithLog<unit>) : WithLog<unit> =
+    fun log -> Seq.iterJob (fun x -> x2uW x log) xs
 
-//  member this.While (c: unit -> bool, WithLog uW: WithLog<unit>) : WithLog<unit> =
-//    WithLog <| fun log -> Job.whileDo c (Job.delayWith uW log)
+  member this.While (c: unit -> bool, uW: WithLog<unit>) : WithLog<unit> =
+    fun log -> Job.whileDo c (Job.delayWith uW log)
 
   member inline this.Zero () : WithLog<unit> =
     fun log -> Job.unit ()
@@ -280,10 +287,6 @@ type RunWithLogBuilder (logDir: string) =
     return result
   }
 
-//module Seq =
-//  let mapWithLog (x2yW: 'x -> WithLog<'y>) (xs: seq<'x>) : Update<ResizeArray<'y>> =
-//    failwith "XXX"
-
 [<AutoOpen>]
 module Recall =
   let recall (logDir: string) : RunWithLogBuilder =
@@ -295,12 +298,11 @@ module Recall =
 
   let logAs (id: string) : LogAsBuilder = LogAsBuilder (id)
 
-  //let log : LogBuilder = LogBuilder ()
+  let log : LogBuilder = LogBuilder ()
 
-//  let watch (x: 'x) : Update<unit> = update { // XXX Optimize
-//    let! _ = log { return x }
-//    return ()
-//  }
+  let watch (x: 'x) : Log<unit> =
+    Log <| fun log logged i ->
+    Do.asLogged log (sprintf "%d: %s" i logged.Id) (Value x) |>> fun (d, x) -> (d, ())
 
   let digest: Update<Digest> =
     GetDigest (fun digest -> Value digest)
@@ -309,18 +311,19 @@ module Recall =
     Job (xL.info >>= fun info ->
          match xL.value with
           | Some value ->
+            xL.value <- None
             Job.result (Value value)
           | None ->
             Job.result
              (GetLog (fun log ->
                let xPU = PU.Get ()
-               Job (LoggedMap.readFun log.Old
-                     (fun ptr ->
-                       let ptr =
-                         NativePtr.toNativeInt ptr + nativeint info.BobOffset
-                         |> NativePtr.ofNativeInt
-                       xPU.Unpickle ptr) |>> fun value ->
-                    Value value))))
+               LoggedMap.readFun log.Old
+                (fun ptr ->
+                  let ptr =
+                    NativePtr.toNativeInt ptr + nativeint info.BobOffset
+                    |> NativePtr.ofNativeInt
+                  xPU.Unpickle ptr) |>> fun value ->
+               Value value)))
 
   let wait (LogAs xLW: LogAs<Logged<'x>>) : LogAs<'x> =
     LogAs <| fun log ->
@@ -328,6 +331,7 @@ module Recall =
     xL.info >>= fun info ->
     match xL.value with
      | Some value ->
+       xL.value <- None
        Job.result (d, value)
      | None ->
        let xPU = PU.Get ()
@@ -341,3 +345,20 @@ module Recall =
 
   let getCancelAlt: WithLog<Alt<unit>> =
     fun log -> Job.result (log.Failed :> Alt<_>)
+
+module Seq =
+  let mapUpdate (x2yU: 'x -> Update<'y>) (xs: seq<'x>) : Update<ResizeArray<'y>> =
+    Job << Job.thunk <| fun () ->
+    let xs = xs.GetEnumerator ()
+    let ys = ResizeArray<_> ()
+    let rec loop () =
+      if xs.MoveNext () then
+        update.Bind (x2yU xs.Current, fun y ->
+                     ys.Add y
+                     loop ())
+      else
+        xs.Dispose ()
+        Value ys
+    loop ()
+  let mapLogAs (x2yAs: _ -> LogAs<_>) xs =
+    mapUpdate (x2yAs >> update.ReturnFrom) xs

@@ -63,7 +63,7 @@ let sumLinesOfFiles (filesPath: string) = logAs ("sumLinesOfFiles: " + filesPath
 
   let! sums =
     filePaths
-    |> Seq.mapWithLog (sumLinesOfFile >> wait)
+    |> Seq.mapLogAs (sumLinesOfFile >> wait)
 
   let total = sums |> Seq.sum
 
@@ -83,11 +83,11 @@ let sumLinesOfFilesPar (filesPath: string) = logAs ("sumLinesOfFiles: " + filesP
 
   let! loggedSums =
     filePaths
-    |> Seq.mapWithLog sumLinesOfFile
+    |> Seq.mapLogAs sumLinesOfFile
 
   let! sums =
     loggedSums
-    |> Seq.mapWithLog read
+    |> Seq.mapUpdate read
 
   let total = sums |> Seq.sum
 
@@ -118,7 +118,8 @@ let rec fib n = logAs (sprintf "fib: %d" n) {
     return n
   else
     let! x = fib (n-2L)
-    let! y = fib (n-1L) |> wait
+    let! y = fib (n-1L)
     let! x = read x
+    let! y = read y
     return x + y
 }

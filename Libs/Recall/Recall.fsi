@@ -54,6 +54,7 @@ type Logged<'x>
 type WithLog<'x> = Log -> Job<'x>
 
 type LogAs<'x>
+type Log<'x>
 
 /// Builder for steppable computations.
 #if DOC
@@ -76,10 +77,12 @@ type UpdateBuilder =
 
   member ReturnFrom: Update<'x> -> Update<'x>
   member ReturnFrom:  LogAs<'x> -> Update<'x>
+  member ReturnFrom:    Log<'x> -> Update<'x>
   member ReturnFrom:    Job<'x> -> Update<'x>
 
   member Bind: Update<'x> * ('x -> Update<'y>) -> Update<'y>
   member Bind:  LogAs<'x> * ('x -> Update<'y>) -> Update<'y>
+  member Bind:    Log<'x> * ('x -> Update<'y>) -> Update<'y>
   member Bind:    Job<'x> * ('x -> Update<'y>) -> Update<'y>
 
   member Combine: Update<unit> * Update<'x> -> Update<'x>
@@ -92,9 +95,9 @@ type [<Class>] LogAsBuilder =
   inherit UpdateBuilder
   member Run: Update<'x> -> LogAs<Logged<'x>>
 
-//type [<Class>] LogBuilder =
-//  inherit UpdateBuilder
-//  member Run: Update<'x> -> Log<Logged<'x>>
+type [<Class>] LogBuilder =
+  inherit UpdateBuilder
+  member Run: Update<'x> -> Log<Logged<'x>>
 
 /// Builder for parallel computations with a log.  A computation with a log is
 /// executed in a context with a log for logging individual logged computations.
@@ -120,9 +123,9 @@ type WithLogBuilder =
 
   member inline Using: 'x * ('x -> WithLog<'y>) -> WithLog<'y> when 'x :> IDisposable
 
-//  member For: seq<'x> * ('x -> WithLog<unit>) -> WithLog<unit>
+  member For: seq<'x> * ('x -> WithLog<unit>) -> WithLog<unit>
 
-//  member While: (unit -> bool) * WithLog<unit> -> WithLog<unit>
+  member While: (unit -> bool) * WithLog<unit> -> WithLog<unit>
 
   member inline Zero: unit -> WithLog<unit>
 
@@ -131,10 +134,10 @@ type [<Class>] RunWithLogBuilder =
   inherit WithLogBuilder
   member Run: WithLog<'x> -> Job<'x>
 
-///// Additional operations for sequences.
-//module Seq =
-//  /// Maps an operation with a log over the given sequence.
-//  val mapWithLog: ('x -> WithLog<'y>) -> seq<'x> -> Update<ResizeArray<'y>>
+/// Additional operations for sequences.
+module Seq =
+  val mapUpdate: ('x -> Update<'y>) -> seq<'x> -> Update<ResizeArray<'y>>
+  val mapLogAs: ('x -> LogAs<'y>) -> seq<'x> -> Update<ResizeArray<'y>>
 
 /// Operations for defining computations with Recall.
 [<AutoOpen>]
@@ -177,12 +180,12 @@ module Recall =
 #endif
   val logAs: id: string -> LogAsBuilder
 
-//  /// Returns a builder for creating a new logged computation.  The computation
-//  /// is given an automatically determined identity.
-//  val log: LogBuilder
+  /// Returns a builder for creating a new logged computation.  The computation
+  /// is given an automatically determined identity.
+  val log: LogBuilder
 
-//  /// Returns a computation that logs the given value as a dependency.
-//  val watch: 'x -> Update<unit>
+  /// Returns a computation that logs the given value as a dependency.
+  val watch: 'x -> Log<unit>
 
   /// A builder for defining updates or partial logged computations whose
   /// results are not logged.
