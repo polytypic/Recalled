@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Recalled</id>
-    <version>0.0.0.3</version>
+    <version>0.0.0.4</version>
     <title>Recalled</title>
     <summary>A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.</summary>
     <authors>Vesa Karvonen</authors>
@@ -11,7 +11,7 @@
     <projectUrl>https://github.com/VesaKarvonen/Recall</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.</description>
-    <releaseNotes>This is an experimental release.</releaseNotes>
+    <releaseNotes>This is an experimental release.  You must manually delete files created by previous experimental releases.</releaseNotes>
     <copyright>© Vesa Karvonen</copyright>
     <tags>f# fsharp parallel build</tags>
     <dependencies>

@@ -6,7 +6,7 @@ open System.Runtime.InteropServices
 [<AutoOpen>]
 module AssemblyInfo =
   [<Literal>]
-  let Version = "0.0.0.3"
+  let Version = "0.0.0.4"
 
 [<assembly: AssemblyTitle("Recall")>]
 [<assembly: AssemblyDescription("A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.")>]
