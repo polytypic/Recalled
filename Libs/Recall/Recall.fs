@@ -39,7 +39,7 @@ type [<Sealed>] Logged<'x> =
 type Update<'x> =
   | Value of 'x
   | Job of Job<Update<'x>>
-  | Required of Logged * Update<'x>
+  | Required of Logged * (unit -> Update<'x>)
   | GetLog of (Log -> Job<Update<'x>>)
   | GetDigest of (Digest -> Update<'x>)
   | GetThis of (Log -> Logged -> int -> Job<Update<'x>>)
@@ -59,10 +59,10 @@ type UpdateBuilder () =
     xU
   member this.ReturnFrom (LogAs xAs: LogAs<'x>) : Update<'x> =
     GetLog <| fun log ->
-    xAs log |>> fun (r, x) -> Required (r, Value x)
+    xAs log |>> fun (r, x) -> Required (r, fun () -> Value x)
   member this.ReturnFrom (Log xL: Log<'x>) : Update<'x> =
     GetThis <| fun log logged i ->
-    xL log logged i |>> fun (r, x) -> Required (r, Value x)
+    xL log logged i |>> fun (r, x) -> Required (r, fun () -> Value x)
   member this.ReturnFrom (xJ: Job<'x>) : Update<'x> =
     Job (xJ |>> Value)
 
@@ -70,16 +70,16 @@ type UpdateBuilder () =
     match xU with
      | Value x -> x2yU x
      | Job xUJ -> Job (xUJ |>> fun xU -> this.Bind (xU, x2yU))
-     | Required (l, xU) -> Required (l, this.Bind (xU, x2yU))
+     | Required (l, xU) -> Required (l, fun () -> this.Bind (xU (), x2yU))
      | GetLog l2xUJ -> GetLog (fun l -> l2xUJ l |>> fun xU -> this.Bind (xU, x2yU))
      | GetDigest d2xU -> GetDigest (fun d -> this.Bind (d2xU d, x2yU))
      | GetThis lliJ -> GetThis (fun log logged i -> lliJ log logged i |>> fun xU -> this.Bind (xU, x2yU))
   member this.Bind (LogAs xAs: LogAs<'x>, x2yU: 'x -> Update<'y>) : Update<'y> =
     GetLog <| fun log ->
-    xAs log |>> fun (d, x) -> Required (d, x2yU x)
+    xAs log |>> fun (d, x) -> Required (d, fun () -> x2yU x)
   member this.Bind (Log xL: Log<'x>, x2yU: 'x -> Update<'y>) : Update<'y> =
     GetThis <| fun log logged i ->
-    xL log logged i |>> fun (d, x) -> Required (d, x2yU x)
+    xL log logged i |>> fun (d, x) -> Required (d, fun () -> x2yU x)
   member this.Bind (xJ: Job<'x>, x2yU:'x -> Update<'y>) : Update<'y> =
     Job (xJ |>> x2yU)
 
@@ -159,11 +159,12 @@ module internal Do =
                xUJ >>= build
              | Required (newDep, xU) ->
                newDeps.Add newDep
-               build xU
+               build (xU ())
              | GetLog log2xUJ ->
                log2xUJ log >>= build
-             | GetDigest digest2xUJ ->
-               failwith "XXX Implement intermediate digest"
+             | GetDigest digest2xU ->
+               depDigest key 0 >>= fun digest ->
+               build (digest2xU digest)
              | GetThis lli2xUJ ->
                lli2xUJ log logged newDeps.Count >>= build
 
@@ -181,34 +182,35 @@ module internal Do =
                newDeps.Capacity <- oldInfo.DepKeyDigests.Length
 
                let rec checkDeps xU =
-                 if oldInfo.DepKeyDigests.Length <= newDeps.Count then
-                   depDigest Digest.Zero 0 >>= fun newDepDigest ->
-                   if newDepDigest = oldInfo.DepDigest then
-                     reuse oldInfo
-                   else
-                     build xU
+                 if IVar.Now.isFull log.Failed then
+                   cancel ()
                  else
-                   if IVar.Now.isFull log.Failed then
-                     cancel ()
-                   else
-                     match xU with
-                      | Value x ->
-                        complete x
-                      | Job xUJ ->
-                        xUJ >>= checkDeps
-                      | Required (newDep, xU) ->
-                        let oldDepKey = oldInfo.DepKeyDigests.[newDeps.Count]
-                        newDeps.Add newDep
-                        if newDep.Key <> oldDepKey then
-                          build xU
+                   match xU with
+                    | Value x ->
+                      complete x
+                    | Job xUJ ->
+                      xUJ >>= checkDeps
+                    | Required (newDep, xU) ->
+                      let oldDepKey = oldInfo.DepKeyDigests.[newDeps.Count]
+                      newDeps.Add newDep
+                      if newDep.Key <> oldDepKey then
+                        build (xU ())
+                      else
+                        if oldInfo.DepKeyDigests.Length <= newDeps.Count then
+                          depDigest Digest.Zero 0 >>= fun newDepDigest ->
+                          if newDepDigest = oldInfo.DepDigest then
+                            reuse oldInfo
+                          else
+                            build (xU ())
                         else
-                          checkDeps xU
-                      | GetLog log2xUJ ->
-                        log2xUJ log >>= checkDeps
-                      | GetDigest digest2xUJ ->
-                        failwith "XXX Implement intermediate digest"
-                      | GetThis lli2xUJ ->
-                        lli2xUJ log logged newDeps.Count >>= checkDeps
+                          checkDeps (xU ())
+                    | GetLog log2xUJ ->
+                      log2xUJ log >>= checkDeps
+                    | GetDigest digest2xU ->
+                      depDigest key 0 >>= fun digest ->
+                      build (digest2xU digest)
+                    | GetThis lli2xUJ ->
+                      lli2xUJ log logged newDeps.Count >>= checkDeps
                checkDeps xU)
            failure) >>%
         (logged :> Logged, logged)

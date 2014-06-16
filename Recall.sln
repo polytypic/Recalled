@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{26D384
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BigFib", "Benchmarks\BigFib\BigFib.fsproj", "{9FE70616-AF42-4504-B816-6FFE9AC1238A}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Redefine", "Benchmarks\Redefine\Redefine.fsproj", "{0C56A3F1-1A46-4B27-86EC-50834A620225}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C56A3F1-1A46-4B27-86EC-50834A620225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C56A3F1-1A46-4B27-86EC-50834A620225}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C56A3F1-1A46-4B27-86EC-50834A620225}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C56A3F1-1A46-4B27-86EC-50834A620225}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,5 +61,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD} = {04A3834D-1C74-498E-972F-E62C426938FC}
 		{9FE70616-AF42-4504-B816-6FFE9AC1238A} = {3C33842D-FBF9-4D06-B98C-F9E6BF2E9BE3}
+		{0C56A3F1-1A46-4B27-86EC-50834A620225} = {3C33842D-FBF9-4D06-B98C-F9E6BF2E9BE3}
 	EndGlobalSection
 EndGlobal

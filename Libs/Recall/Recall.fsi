@@ -191,12 +191,19 @@ module Recall =
   /// results are not logged.
   val update: UpdateBuilder
 
-//  /// Provides a digest of the current point in a logged computation.  The
-//  /// digest includes the identity of the current computation as well as digests
-//  /// of all the dependencies of the current computation.  A digest can be used
-//  /// as a convenient end result of a logged computation and also can be used as
-//  /// a key to identify the point in the computation.
-//  val digest: Update<Digest>
+  /// Provides an intermediate digest of the current point in a logged
+  /// computation.
+#if DOC
+  ///
+  /// The intermediate digest includes the identity of the current computation
+  /// as well as digests of the results of all the dependencies of the current
+  /// computation.  If you ask the intermediate digest after logging all
+  /// dependencies and just before computing the result of the current logged
+  /// computation, then the intermediate digest effectively identifies the
+  /// result.  You could, for example, then use the digest to request a
+  /// previously computed result from a server.
+#endif
+  val digest: Update<Digest>
 
   /// Returns an operation with a log that waits for the result of the logged
   /// operation.

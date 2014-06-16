@@ -6,8 +6,14 @@ open System.IO
 open Infers
 open Infers.Rep
 
+/// Represents a capability to serialize values of type `'x` and is open to be
+/// combined and extended.
 type OpenPU<'x>
+
+/// Represents a capability to serialize a part of a product type.
 type ProductPU<'e, 'es, 'p>
+
+/// Represents a capability to serialize a subset of a union type.
 type UnionPU<'c, 'cs, 'u>
 
 /// Provides inference rules for a datatype generic serialization capability.

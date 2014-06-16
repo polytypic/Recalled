@@ -33,6 +33,8 @@ type [<NoComparison; CustomEquality>] Digest = struct
       MurmurHash3.string string 0u (&lo) (&hi)
       Digest (lo, hi)
 
+    override this.ToString () =
+      sprintf "%016x%016x" this.Hi this.Lo
     override this.GetHashCode () = int this.Lo
     override this.Equals (other) =
      match other with
