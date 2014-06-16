@@ -26,6 +26,7 @@ module MemMapBuf =
    | Access of (nativeptr<byte> -> Job<unit>)
    | Append of align: int * size: int * IVar<PtrInt>
    | Close of IVar<unit>
+   | Flush of IVar<unit>
 
   type MemMapBuf = {
       path: string
@@ -41,6 +42,15 @@ module MemMapBuf =
 
   let size (buf: MemMapBuf) =
     buf.size
+
+  module Unsafe =
+    let truncate (buf: MemMapBuf) (size: PtrInt) =
+      if size < 0L then
+        failwith "MemMapBuf.Unsafe.truncate: Negative size"
+      elif buf.size < size then
+        failwithf "MemMapBuf.Unsafe.truncate: Cannot increase buffer size from %d to %d" buf.size size
+      else
+        buf.size <- size
 
   let doClose buf =
     buf.view.SafeMemoryMappedViewHandle.ReleasePointer ()
@@ -65,6 +75,10 @@ module MemMapBuf =
 
   let server buf =
     buf.reqs >>= function
+     | Flush reply ->
+       Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
+       buf.view.Flush ()
+       reply <-= ()
      | Close reply ->
        Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
        doClose buf
@@ -108,6 +122,10 @@ module MemMapBuf =
   let close buf : Job<Alt<unit>> = Job.delay <| fun () ->
     let reply = ivar ()
     buf.reqs <<-+ Close reply >>% upcast reply
+
+  let flush buf : Job<Alt<unit>> = Job.delay <| fun () ->
+    let reply = ivar ()
+    buf.reqs <<-+ Flush reply >>% upcast reply
 
   let accessFun buf access = Job.delay <| fun () ->
     let reply = ivar ()

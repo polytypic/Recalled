@@ -137,9 +137,11 @@ module LoggedMap =
         addEntrySize
     let addEntrySize = int addEntrySize
 
+    let bobSize' = (bobSize + 7) &&& ~~~ 7 // Ensure BobBuf always aligned size
+
     loggedMap.AddIdx >>= fun idx ->
     let idx = idx + 1
-    MemMapBuf.append loggedMap.BobBuf sizeof<int64> bobSize >>= fun bobOffs ->
+    MemMapBuf.append loggedMap.BobBuf sizeof<int64> bobSize' >>= fun bobOffs ->
     MemMapBuf.append loggedMap.AddBuf sizeof<int64> addEntrySize >>= fun addOffs ->
     loggedMap.AddIdx <<-= idx >>= fun () ->
 
@@ -153,6 +155,8 @@ module LoggedMap =
           (depDigest: Digest)
           (bobSize: int)
           (bobWrite: nativeptr<byte> -> unit) : Job<Info> =
+    if 0UL = (keyDigest.Lo ||| keyDigest.Hi) then
+      failwith "Sorry, key digest of Zero not allowed!"
     loggedMap.Ready >>= fun _ ->
     let entry = {Idx = 0; Info = ivar ()}
     Monitor.Enter loggedMap.Dict
@@ -186,6 +190,9 @@ module LoggedMap =
             justAdd loggedMap entry keyDigest depKeyDigests depDigest bobSize bobWrite
 
   type ReadInfo = {
+      mutable remIdx: int
+      mutable pos: int64
+      mutable stop: int64
       mutable addIdx: int
       mutable bobOffset: int64
       mutable keyDigest: Digest
@@ -200,71 +207,154 @@ module LoggedMap =
     |> readTo (&dig.Lo)
     |> readTo (&dig.Hi)
 
+  let rec findLastNon0 ptr cnt =
+    if 0 < cnt && 0 = NativePtr.get ptr (cnt-1) then
+      findLastNon0 ptr (cnt-1)
+    else
+      cnt
+
+  let inline swap (x: byref<'x>) (y: byref<'x>) =
+    let t = x
+    x <- y
+    y <- t
+
+  let partitionMed3 (ptr: nativeptr<int32>) start stop =
+    let inline get i = NativePtr.get ptr i
+    let inline set i x = NativePtr.set ptr i x
+    let inline swp i j =
+      let t = get i
+      set i (get j)
+      set j t
+    let mutable min = get start
+    let mutable mid = get (start + (stop - start) / 2)
+    let mutable max = get (stop - 1)
+    if mid < min then swap &min &mid
+    if max < mid then
+      swap &mid &max
+      if mid < min then swap &min &mid
+    let mutable i = start
+    let mutable j = stop - 1
+    while get j > mid do j <- j-1
+    while get i < mid do i <- i+1
+    while i < j do
+      swp i j
+      j <- j-1 ; while get j > mid do j <- j-1
+      i <- i+1 ; while get i < mid do i <- i+1
+    j+1
+
+  let rec quickSortMed3 (ptr: nativeptr<int32>) start stop =
+    if 2 <= stop - start then
+      let middle = partitionMed3 ptr start stop
+      quickSortMed3 ptr start middle
+      quickSortMed3 ptr middle stop
+
   let server (loggedMap: LoggedMap) = job {
     try
-      do! MemMapBuf.accessJob loggedMap.AddBuf <| fun ptr -> job {
-            let start = int64 (NativePtr.toNativeInt ptr)
-            let stop = start + MemMapBuf.size loggedMap.AddBuf
+      do! MemMapBuf.accessJob loggedMap.RemBuf <| fun remBufPtr -> job {
+          let remBufPtr : nativeptr<int32> =
+            NativePtr.ofNativeInt (NativePtr.toNativeInt remBufPtr)
+          let remBufCnt =
+            int32 (MemMapBuf.size loggedMap.RemBuf / int64 sizeof<int32>)
 
-            let pos = ref start
+          let remBufCnt = findLastNon0 remBufPtr remBufCnt
 
-            let ri : ReadInfo = {
-                addIdx    = 0
-                bobOffset = 0L
-                keyDigest = Unchecked.defaultof<_>
-                bobDigest = Unchecked.defaultof<_>
-                bobSize   = 0
-                numDeps   = 0
-                depDigest = Unchecked.defaultof<_>
-              }
+          do MemMapBuf.Unsafe.truncate loggedMap.RemBuf
+              (int64 sizeof<int32> * int64 remBufCnt)
 
-            while !pos < stop do
+          do quickSortMed3 remBufPtr 0 remBufCnt
 
-              let addOffset = !pos - start
+          let! _ = MemMapBuf.flush loggedMap.RemBuf
 
-              do pos := !pos
-                        |> readDigest &ri.keyDigest
-                        |> readDigest &ri.bobDigest
-                        |> readTo &ri.bobSize
-                        |> readTo &ri.numDeps
+          do! MemMapBuf.accessJob loggedMap.AddBuf <| fun addBufPtr -> job {
+              let addBufBeg = int64 (NativePtr.toNativeInt addBufPtr)
+              let addBufEnd = addBufBeg + MemMapBuf.size loggedMap.AddBuf
 
-              let depKeyDigests = Array.zeroCreate ri.numDeps
-              do if 0 <> ri.numDeps then
-                   for i=0 to ri.numDeps-1 do
-                     pos := !pos |> readDigest (&depKeyDigests.[i])
-                   pos := !pos |> readDigest (&ri.depDigest)
-                 else
-                   ri.depDigest <- Unchecked.defaultof<_>
-
-              do ri.addIdx <- ri.addIdx + 1
-
-              let info = Some {
-                  DepKeyDigests = depKeyDigests
-                  DepDigest = ri.depDigest
-                  BobDigest = ri.bobDigest
-                  BobOffset = ri.bobOffset
-                  BobSize = ri.bobSize
-                  AddOffset = addOffset
+              let ri : ReadInfo = {
+                  remIdx    = 0
+                  pos       = addBufBeg
+                  stop      = addBufEnd - 16L // Allow reading an extra hash
+                  addIdx    = 0
+                  bobOffset = 0L
+                  keyDigest = Unchecked.defaultof<_>
+                  bobDigest = Unchecked.defaultof<_>
+                  bobSize   = 0
+                  numDeps   = 0
+                  depDigest = Unchecked.defaultof<_>
                 }
 
-              do ri.bobOffset <- alignTo sizeof<int64> (incBy ri.bobSize ri.bobOffset)
+              let inline getRem () =
+                let i = ri.remIdx
+                if i < remBufCnt then
+                  NativePtr.get remBufPtr i
+                else
+                  Int32.MaxValue
 
-              let entry = {Idx = ri.addIdx; Info = IVar.Now.createFull info}
+              let inline nextRem () =
+                ri.remIdx <- ri.remIdx + 1
 
-              do Monitor.Enter loggedMap.Dict
-              match loggedMap.Dict.TryGetValue ri.keyDigest with
-               | Nothing ->
-                 do loggedMap.Dict.Add (ri.keyDigest, entry)
-                    Monitor.Exit loggedMap.Dict
-               | Just request ->
-                 do Monitor.Exit loggedMap.Dict
-                    if IVar.Now.isFull request.Info then
-                      failwith "Bug"
-                    request.Idx <- entry.Idx
-                 return! request.Info <-= info
+              while ri.pos < ri.stop do
+                let addOffset = ri.pos - addBufBeg
 
-            do! loggedMap.AddIdx <<-= ri.addIdx
-          }
+                let pos' =
+                  ri.pos
+                  |> readDigest &ri.keyDigest
+
+                if 0UL = (ri.keyDigest.Lo ||| ri.keyDigest.Hi) then
+                  // Apparently log was not closed properly, so cut here
+                  do ri.stop <- ri.pos
+                else
+                  do ri.pos <- pos'
+                               |> readDigest &ri.bobDigest
+                               |> readTo &ri.bobSize
+                               |> readTo &ri.numDeps
+
+                  let depKeyDigests = Array.zeroCreate ri.numDeps
+                  do if 0 <> ri.numDeps then
+                       for i=0 to ri.numDeps-1 do
+                         ri.pos <- ri.pos |> readDigest (&depKeyDigests.[i])
+                       ri.pos <- ri.pos |> readDigest (&ri.depDigest)
+                     else
+                       ri.depDigest <- Unchecked.defaultof<_>
+
+                  let addIdx = ri.addIdx + 1
+                  do ri.addIdx <- addIdx
+
+                  do while getRem () < addIdx do
+                       nextRem ()
+
+                  if getRem () <> addIdx then
+                    let info = Some {
+                        DepKeyDigests = depKeyDigests
+                        DepDigest = ri.depDigest
+                        BobDigest = ri.bobDigest
+                        BobOffset = ri.bobOffset
+                        BobSize = ri.bobSize
+                        AddOffset = addOffset
+                      }
+
+                    do ri.bobOffset <- alignTo sizeof<int64> (incBy ri.bobSize ri.bobOffset)
+
+                    let entry = {Idx = ri.addIdx; Info = IVar.Now.createFull info}
+
+                    do Monitor.Enter loggedMap.Dict
+                    match loggedMap.Dict.TryGetValue ri.keyDigest with
+                     | Nothing ->
+                       do loggedMap.Dict.Add (ri.keyDigest, entry)
+                          Monitor.Exit loggedMap.Dict
+                     | Just request ->
+                       do Monitor.Exit loggedMap.Dict
+                          if IVar.Now.isFull request.Info then
+                            failwith "Bug"
+                          request.Idx <- entry.Idx
+                       return! request.Info <-= info
+
+              do! loggedMap.AddIdx <<-= ri.addIdx
+
+              // Truncate buffers in case they were not properly closed last time.
+              do MemMapBuf.Unsafe.truncate loggedMap.AddBuf (ri.pos - addBufBeg)
+              do MemMapBuf.Unsafe.truncate loggedMap.BobBuf ri.bobOffset
+            }
+        }
 
       // Find out which concurrent find operations were unsatisfied.
       let unsatisfied = ResizeArray<_> ()
