@@ -53,7 +53,12 @@ type Logged<'x>
 /// Represents a parallel computation with a log.
 type WithLog<'x> = Log -> Job<'x>
 
+/// Represents a computation whose result is logged with a user defined
+/// identity.
 type LogAs<'x>
+
+/// Represents a computation whose result is logged and is given an implicitly
+/// created identity based on identity of the surrounding computation.
 type Log<'x>
 
 /// Builder for steppable computations.
@@ -89,12 +94,12 @@ type UpdateBuilder =
 
   member Zero: unit -> Update<unit>
 
-/// Builder for logged computations.  A logged computation is essentially a
-/// steppable computation, whose steps are logged, while it is being executed.
+/// Builder for a computation logged with a user defined identity.
 type [<Class>] LogAsBuilder =
   inherit UpdateBuilder
   member Run: Update<'x> -> LogAs<Logged<'x>>
 
+/// Builder for a computation logged with an implicitly assigned identity.
 type [<Class>] LogBuilder =
   inherit UpdateBuilder
   member Run: Update<'x> -> Log<Logged<'x>>

@@ -3,6 +3,12 @@
 open Hopac
 
 /// Operations on memory mapped buffers.
+#if DOC
+///
+/// This module is mainly for internal use of the Recall library and associated
+/// tools.  Proper use of this module requires intimate knowledge of the
+/// internals of Recall.
+#endif
 module MemMapBuf =
   /// Represents a memory mapped buffer that is persisted to a file.
   type MemMapBuf
@@ -15,8 +21,8 @@ module MemMapBuf =
 
   /// Unsafe operations on memory mapped buffers.
   module Unsafe =
-    /// Reduce size of buffer.  Only safe when memory mapped buffer is not
-    /// concurrenly accessed by other threads.
+    /// Reduce the size of buffer.  This operation is safe only when the memory
+    /// mapped buffer is not concurrenly accessed by other threads.
     val truncate: buf: MemMapBuf -> PtrInt -> unit
 
   /// Closes the memory mapped buffer.  This must be called explicitly and the
@@ -25,16 +31,16 @@ module MemMapBuf =
   val close: buf: MemMapBuf -> Job<Alt<unit>>
 
   /// Waits until the buffer is not being accessed and flushes the buffer.  Note
-  /// that if you call from inside an `accessJob` and wait for the reply then you
-  /// have a deadlock.
+  /// that if you call this from inside an `accessJob` and wait for the reply
+  /// then you have a deadlock.
   val flush: buf: MemMapBuf -> Job<Alt<unit>>
 
   /// Grants access to read/write arbitrarily from/to the buffer for the
   /// duration of the given function.  The function is passed the buffer start
   /// address.  After the function returns, the address will no longer be valid.
   val accessFun: buf: MemMapBuf
-            -> readFun: (nativeptr<byte> -> 'x)
-            -> Job<'x>
+              -> readFun: (nativeptr<byte> -> 'x)
+              -> Job<'x>
 
   /// Grants access to read/write arbitrarily from/to the buffer for the
   /// duration of the given job.  The job is passed the buffer start address.

@@ -7,9 +7,9 @@ open System.Collections.Generic
 /// Represents a digest or hash of some data or value.
 ///
 #if DOC
-/// WARNING:  User code should never need modify digest values.  Recall computes
-/// digests of anything and everything and having the ability to mutate digests
-/// values internally makes a difference.
+/// WARNING:  User code should never need to modify digest values.  Recall
+/// computes digests of anything and everything and having the ability to
+/// mutate digests values internally makes a difference.
 ///
 /// Note that the digest algorithms used with Recall do not need to be
 /// cryptographically secure, but should ideally make collisions highly
@@ -48,28 +48,39 @@ type [<Class>] DigestEqualityComparer =
 /// Represents a capability to serialize values of type `'x`.
 #if DOC
 ///
-/// This class is designed for high-performance serialization with memory mapped
-/// files.  In most cases client code should not need to implement this class
-/// directly as the `PU` class provides inference rules to generate instances of
-/// this class for a wide variety of F# types.
+/// This class has a very low level interface and is designed to make it
+/// possible to implement nearly optimal serialization to and deserialization
+/// from memory mapped files.  This is important, because Recall serializes
+/// all the results of logged computations and potentially deserializes large
+/// numbers of those results.
+///
+/// In most cases client code should not need to implement this class directly
+/// as the `PU` class provides inference rules to generate instances of this
+/// class for a wide variety of F# types.
 #endif
 type [<AbstractClass>] PU<'x> =
   /// Empty default constructor.
   new: unit -> PU<'x>
 
-  /// Compute the pickled size of the given value.
+  /// Compute the serialized size of the given value.
   abstract Size: 'x -> int
 
-  /// Conditionally write value to memory starting at the specified address.
-  /// Memory at the specified address is first read and only written to if it
-  /// differs from the value being written.
+  /// Conditionally serialize given value to memory starting at the specified
+  /// address.
 #if DOC
   ///
   /// The caller is responsible for ensuring that the pointer points to a region
   /// of memory that has at least the number of bytes of space as returned by
-  /// `Size`.
+  /// `Size`.  The `DoPickle` implementation must not write to memory outside of
+  /// that range.
+  ///
+  /// Memory at the specified address should be first read and only written to
+  /// if it differs from the value being written.  This allows the space for a
+  /// previous value of the same type and size to be reused and, at the same
+  /// time, make sure that persistent storage is only written to when the stored
+  /// value is different.
 #endif
   abstract Dopickle: 'x * nativeptr<byte> -> unit
 
-  /// Read value from memory starting at the specified address.
+  /// Deserialize value from memory starting at the specified address.
   abstract Unpickle: nativeptr<byte> -> 'x

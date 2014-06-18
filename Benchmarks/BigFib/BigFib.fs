@@ -1,6 +1,8 @@
 ﻿module BigFib
 
-// This benchmark mainly measures log read time.
+// This benchmark measures log read time and the time it takes to construct
+// logged computations.  These are both important, because both of those are
+// always done.
 
 open System.Diagnostics
 open Hopac
@@ -8,10 +10,15 @@ open Recall
 
 let rec fib n = logAs ("fib: " + n.ToString ()) {
   if n < 2I then
+    // For small `n` this code is always run, because there are not dependencies
+    // to other computations.
     return n
   else
+    // For larger `n` there are dependencies.
     let! x = fib (n-1I)
     let! y = fib (n-2I)
+    // At this point dependencies will be checked and the remainder of the
+    // computation is skipped unless dependencies have changed.
     let! x = read x
     let! y = read y
     return x + y

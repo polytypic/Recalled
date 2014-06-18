@@ -26,18 +26,30 @@ module LoggedMap =
   type LoggedMap
 
   /// Represents information on an entry stored in a logged map.
-  type Info =  {
+#if DOC
+  ///
+  /// Please note that this information is for internal use of the Recall
+  /// library and associated tools.
+#endif
+  type Info = {
+      /// Digests of the identities of the dependencies of the computation.
       DepKeyDigests: array<Digest>
+      /// A combined digest of the results of all the dependencies.
       DepDigest: Digest
+      /// Digest of the result of the computation.
       BobDigest: Digest
+      /// Offset to the serialized result of the computation in the bob buffer
+      /// of the log.
       BobOffset: PtrInt
+      /// Size of the serialized result in bytes.
       BobSize: int
+      /// Offset to the entry in the add buffer of the log.
       AddOffset: PtrInt
     }
 
   /// Creates a new or opens an existing logged map.  In case an existing logged
   /// map is opened, control is returned immediately to the caller, but a
-  /// process runs to reconstructs the logged map in the background.
+  /// process runs to reconstruct the logged map in the background.
   val create: logDir: string
            -> Job<LoggedMap>
 

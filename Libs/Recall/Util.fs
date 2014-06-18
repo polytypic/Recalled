@@ -5,17 +5,13 @@ open Microsoft.FSharp.NativeInterop
 
 ////////////////////////////////////////////////////////////////////////////////
 
-let inline constant x _ = x
-
-////////////////////////////////////////////////////////////////////////////////
-
 let inline (|Just|Nothing|) (got, x) = if got then Just x else Nothing
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type PtrInt = int64
-// Operations on plain int64 values compile to better code than operation the
-// nativeint struct type.
+// Operations on plain int64 values tend to compile to better code (on 64-bit
+// platforms) than operations on the nativeint struct type.
 
 let inline alignTo (s: int) (p: PtrInt) : PtrInt =
   (p + int64 s - 1L) &&& - (int64 s)
