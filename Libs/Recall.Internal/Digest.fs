@@ -1,4 +1,4 @@
-﻿namespace Recall
+﻿namespace Recall.Internal
 
 open Microsoft.FSharp.NativeInterop
 open System
@@ -49,8 +49,3 @@ type [<Class>] DigestEqualityComparer () =
   override this.GetHashCode (dig) = int dig.Lo
   override this.Equals (lhs, rhs) =
     0uL = (lhs.Lo ^^^ rhs.Lo ||| lhs.Hi ^^^ rhs.Hi)
-
-type [<AbstractClass>] PU<'x> () =
-  abstract Size: 'x -> int
-  abstract Dopickle: 'x * nativeptr<byte> -> unit
-  abstract Unpickle: nativeptr<byte> -> 'x

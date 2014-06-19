@@ -1,4 +1,4 @@
-namespace Recall
+namespace Recall.Internal
 
 open Microsoft.FSharp.NativeInterop
 open Hopac

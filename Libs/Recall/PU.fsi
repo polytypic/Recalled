@@ -6,6 +6,46 @@ open System.IO
 open Infers
 open Infers.Rep
 
+/// Represents a capability to serialize values of type `'x`.
+#if DOC
+///
+/// This class has a very low level interface and is designed to make it
+/// possible to implement nearly optimal serialization to and deserialization
+/// from memory mapped files.  This is important, because Recall serializes
+/// all the results of logged computations and potentially deserializes large
+/// numbers of those results.
+///
+/// In most cases client code should not need to implement this class directly
+/// as the `PU` class provides inference rules to generate instances of this
+/// class for a wide variety of F# types.
+#endif
+type [<AbstractClass>] PU<'x> =
+  /// Empty default constructor.
+  new: unit -> PU<'x>
+
+  /// Compute the serialized size of the given value.
+  abstract Size: 'x -> int
+
+  /// Conditionally serialize given value to memory starting at the specified
+  /// address.
+#if DOC
+  ///
+  /// The caller is responsible for ensuring that the pointer points to a region
+  /// of memory that has at least the number of bytes of space as returned by
+  /// `Size`.  The `DoPickle` implementation must not write to memory outside of
+  /// that range.
+  ///
+  /// Memory at the specified address should be first read and only written to
+  /// if it differs from the value being written.  This allows the space for a
+  /// previous value of the same type and size to be reused and, at the same
+  /// time, make sure that persistent storage is only written to when the stored
+  /// value is different.
+#endif
+  abstract Dopickle: 'x * nativeptr<byte> -> unit
+
+  /// Deserialize value from memory starting at the specified address.
+  abstract Unpickle: nativeptr<byte> -> 'x
+
 /// Represents a capability to serialize values of type `'t` and is open to be
 /// combined and extended.
 type OpenPU<'t>
@@ -86,7 +126,7 @@ type [<InferenceRules>] PU =
   member DateTime: OpenPU<DateTime>
 
   /// Serialization capability for the `Digest` type.
-  member Digest: OpenPU<Digest>
+  member Digest: OpenPU<Internal.Digest>
 
   /// Serialization capability for the `BigInteger` type.
   member BigInteger: OpenPU<BigInteger>

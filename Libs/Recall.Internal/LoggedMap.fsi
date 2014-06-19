@@ -1,36 +1,27 @@
-﻿namespace Recall
+﻿namespace Recall.Internal
 
 open Hopac
 
 /// Operations on logged maps.
-#if DOC
-///
-/// This module is mainly for internal use of the Recall library and associated
-/// tools.  Proper use of this module requires intimate knowledge of the
-/// internals of Recall.
-#endif
 module LoggedMap =
   /// Represents a logged map.
 #if DOC
   ///
   /// Recall uses a logged map to log information on computations, including
   /// information on dependencies of computations and and the results of
-  /// computations, stored as separate binary objects or bob.  The term bob
-  /// is used, because storage of both large and small objects is supported.
+  /// computations, stored as separate binary objects or bob.  The term bob is
+  /// used, because efficient storage of both large and small objects is
+  /// supported.
   ///
   /// Operations on logged maps work incrementally.  Operations that change the
-  /// contents of the map append new data to the end of the log files.  When an
+  /// contents of the map generally append new data to the end of the log files,
+  /// although, in some cases, existing storage may be reused directly.  When an
   /// existing logged map is opened, the logged operations are effectively
   /// replayed to reconstruct the contents of the logged map.
 #endif
   type LoggedMap
 
   /// Represents information on an entry stored in a logged map.
-#if DOC
-  ///
-  /// Please note that this information is for internal use of the Recall
-  /// library and associated tools.
-#endif
   type Info = {
       /// Digests of the identities of the dependencies of the computation.
       DepKeyDigests: array<Digest>

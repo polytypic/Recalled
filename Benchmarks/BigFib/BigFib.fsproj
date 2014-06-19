@@ -71,6 +71,11 @@
     <Compile Include="BigFib.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Libs\Recall.Internal\Recall.Internal.fsproj">
+      <Name>Recall.Internal</Name>
+      <Project>{4f566e03-d02b-491e-93d4-e7acea2a4936}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libs\Recall\Recall.fsproj">
       <Name>Recall</Name>
       <Project>{7c29dc2c-bfdb-406f-9af9-b2e2dd763bcd}</Project>

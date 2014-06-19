@@ -1,14 +1,8 @@
-﻿namespace Recall
+﻿namespace Recall.Internal
 
 open Hopac
 
 /// Operations on memory mapped buffers.
-#if DOC
-///
-/// This module is mainly for internal use of the Recall library and associated
-/// tools.  Proper use of this module requires intimate knowledge of the
-/// internals of Recall.
-#endif
 module MemMapBuf =
   /// Represents a memory mapped buffer that is persisted to a file.
   type MemMapBuf

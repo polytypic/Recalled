@@ -1,5 +1,6 @@
 ﻿namespace Recall
 
+open Recall.Internal
 open Microsoft.FSharp.NativeInterop
 open System
 open System.Collections.Generic

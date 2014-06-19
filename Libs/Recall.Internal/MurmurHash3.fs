@@ -1,9 +1,9 @@
-﻿namespace Recall
+﻿namespace Recall.Internal
 
 open System.Runtime.InteropServices
 open Microsoft.FSharp.NativeInterop
 
-module internal MurmurHash3 =
+module MurmurHash3 =
   let inline private ROTL64 (x: uint64) r = (x <<< r) ||| (x >>> (64 - r))
 
   let inline private fmix64 (k: uint64) =
@@ -29,7 +29,7 @@ module internal MurmurHash3 =
 
     let dataAddr = NativePtr.toNativeInt data
 
-    let mutable blockPtr : nativeptr<uint64> = 
+    let mutable blockPtr : nativeptr<uint64> =
       NativePtr.ofNativeInt dataAddr
     let tail = NativePtr.add data (nblocks*16)
 

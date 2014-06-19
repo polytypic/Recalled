@@ -1,11 +1,17 @@
 ﻿namespace Recall
 
+open Recall.Internal
 open Microsoft.FSharp.NativeInterop
 open System.Numerics
 open System
 open System.IO
 open Infers
 open Infers.Rep
+
+type [<AbstractClass>] PU<'x> () =
+  abstract Size: 'x -> int
+  abstract Dopickle: 'x * nativeptr<byte> -> unit
+  abstract Unpickle: nativeptr<byte> -> 'x
 
 type [<AbstractClass>] InternalPU<'x> () =
   abstract Size: byref<'x> * PtrInt -> PtrInt

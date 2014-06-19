@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Recalled</id>
-    <version>0.0.0.4</version>
+    <version>0.0.0.5</version>
     <title>Recalled</title>
     <summary>A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.</summary>
     <authors>Vesa Karvonen</authors>
@@ -22,5 +22,7 @@
   <files>
     <file src="..\Libs\Recall\bin\Release\Recall.dll" target="lib\net451" />
     <file src="..\Libs\Recall\bin\Release\Recall.xml" target="lib\net451" />
+    <file src="..\Libs\Recall\bin\Release\Recall.Internal.dll" target="lib\net451" />
+    <file src="..\Libs\Recall\bin\Release\Recall.Internal.xml" target="lib\net451" />
   </files>
 </package>

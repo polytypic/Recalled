@@ -141,7 +141,12 @@ type [<Class>] RunWithLogBuilder =
 
 /// Additional operations for sequences.
 module Seq =
+  /// Creates an update that maps a given update operation over a sequence and
+  /// returns a new sequence with the results.
   val mapUpdate: ('x -> Update<'y>) -> seq<'x> -> Update<ResizeArray<'y>>
+
+  /// Creates an update that maps a given logged operation over a sequence and
+  /// returns a new sequence with the results.
   val mapLogAs: ('x -> LogAs<'y>) -> seq<'x> -> Update<ResizeArray<'y>>
 
 /// Operations for defining computations with Recall.
@@ -208,7 +213,7 @@ module Recall =
   /// result.  You could, for example, then use the digest to request a
   /// previously computed result from a server.
 #endif
-  val digest: Update<Digest>
+  val digest: Update<Internal.Digest>
 
   /// Returns an operation with a log that waits for the result of the logged
   /// operation.
