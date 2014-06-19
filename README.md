@@ -29,12 +29,11 @@ proportional to the changes*.
 ## Download
 
 Experimental package [Recalled](http://www.nuget.org/packages/Recalled/) is
-available via [NuGet](http://www.nuget.org/).  **Recall is not yet ready for
-production use.** I do not expect radical changes to the basic programming
-interface of the library, so you should feel free to play with the experimental
-release, but there are several significant performance and robustness
-improvements that I have in mind for the implementation and also some additions
-to the programming interface.
+available via [NuGet](http://www.nuget.org/).
+
+I do not expect radical changes to the basic programming interface of the
+library, but there are still a few important robustness improvements that I have
+in mind for the implementation.
 
 Note that the package name differs from the current library name.  For some
 reason NuGet didn't tell me there already was a package by the name Recall when
