@@ -34,62 +34,69 @@ font-weight: bold;
 <p>This document provides a reference manual for the Recall library and is generated from the library source code.</p>
 <h2>Synopsis</h2>
 <pre><b>namespace</b> <a id="dec:namespace Recall" href="#def:namespace Recall">Recall</a></pre>
-<pre><b>type</b> <a id="dec:type Recall.Digest" href="#def:type Recall.Digest">Digest</a>  <b>=</b> <b>struct</b>
-    <b>val</b> Lo<b>:</b> uint64
-    <b>val</b> Hi<b>:</b> uint64
-    <b>new</b><b>:</b> lo<b>:</b> uint64 <b>*</b> hi<b>:</b> uint64 <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
-    <b>new</b><b>:</b> bytes<b>:</b> array<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
-    <b>static</b> <b>member</b> Zero<b>:</b> <a href="#def:type Recall.Digest">Digest</a>
-    <b>static</b> <b>member</b> (<b>^^^</b>)<b>:</b> <a href="#def:type Recall.Digest">Digest</a> <b>*</b> <a href="#def:type Recall.Digest">Digest</a> <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
-    <b>static</b> <b>member</b> Bytes<b>:</b> array<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
-    <b>static</b> <b>member</b> String<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
-    <b>static</b> <b>member</b> Stream<b>:</b> Stream <b>-&gt;</b> <a href="#def:type Recall.Digest">Digest</a>
-  <b>end</b>
-</pre>
 <pre><b>[&lt;</b>AbstractClass<b>&gt;]</b> 
 <b>type</b> <a id="dec:type Recall.PU" href="#def:type Recall.PU">PU</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>=</b>
   <b>new</b><b>:</b> unit <b>-&gt;</b> PU<b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>abstract</b> <a id="dec:abstract Recall.PU.Dopickle" href="#def:abstract Recall.PU.Dopickle">Dopickle</a><b>:</b> BinaryWriter <b>*</b> <i>'x</i> <b>-&gt;</b> unit
-  <b>abstract</b> <a id="dec:abstract Recall.PU.Unpickle" href="#def:abstract Recall.PU.Unpickle">Unpickle</a><b>:</b> BinaryReader <b>-&gt;</b> <i>'x</i>
+  <b>abstract</b> <a id="dec:abstract Recall.PU.Size" href="#def:abstract Recall.PU.Size">Size</a><b>:</b> <i>'x</i> <b>-&gt;</b> int
+  <b>abstract</b> <a id="dec:abstract Recall.PU.Dopickle" href="#def:abstract Recall.PU.Dopickle">Dopickle</a><b>:</b> <i>'x</i> <b>*</b> nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> unit
+  <b>abstract</b> <a id="dec:abstract Recall.PU.Unpickle" href="#def:abstract Recall.PU.Unpickle">Unpickle</a><b>:</b> nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <i>'x</i>
 </pre>
-<pre><b>type</b> ProductPU<b>&lt;</b><i>'e</i>, <i>'es</i>, <i>'p</i><b>&gt;</b>
+<pre><b>type</b> <a id="dec:type Recall.OpenPU" href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;</b>
 </pre>
-<pre><b>type</b> UnionPU<b>&lt;</b><i>'c</i>, <i>'cs</i>, <i>'u</i><b>&gt;</b>
+<pre><b>type</b> <a id="dec:type Recall.ProductPU" href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b><i>'e</i>, <i>'es</i>, <i>'t</i><b>&gt;</b>
+</pre>
+<pre><b>type</b> <a id="dec:type Recall.UnionPU" href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b><i>'c</i>, <i>'cs</i>, <i>'t</i><b>&gt;</b>
 </pre>
 <pre><b>[&lt;</b>InferenceRules<b>&gt;]</b> 
 <b>type</b> <a id="dec:type Recall.PU" href="#def:type Recall.PU">PU</a>  <b>=</b>
-  <b>static</b> <b>member</b> <a id="dec:static member Recall.PU.Get" href="#def:static member Recall.PU.Get">Get</a><b>:</b> unit <b>-&gt;</b> PU<b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>static</b> <b>member</b> <a id="dec:static member Recall.PU.Get" href="#def:static member Recall.PU.Get">Get</a><b>:</b> unit <b>-&gt;</b> PU<b>&lt;</b><i>'t</i><b>&gt;</b>
   <b>new</b><b>:</b> unit <b>-&gt;</b> PU
-  <b>member</b> fix<b>:</b> unit <b>-&gt;</b> Rec<b>&lt;</b>PU<b>&lt;</b><i>'x</i><b>&gt;&gt;</b>
-  <b>member</b> unit<b>:</b> PU<b>&lt;</b>unit<b>&gt;</b>
-  <b>member</b> bool<b>:</b> PU<b>&lt;</b>bool<b>&gt;</b>
-  <b>member</b> int8<b>:</b>  PU<b>&lt;</b>int8<b>&gt;</b>
-  <b>member</b> int16<b>:</b> PU<b>&lt;</b>int16<b>&gt;</b>
-  <b>member</b> int32<b>:</b> PU<b>&lt;</b>int32<b>&gt;</b>
-  <b>member</b> int64<b>:</b> PU<b>&lt;</b>int64<b>&gt;</b>
-  <b>member</b> uint8<b>:</b>  PU<b>&lt;</b>uint8<b>&gt;</b>
-  <b>member</b> uint16<b>:</b> PU<b>&lt;</b>uint16<b>&gt;</b>
-  <b>member</b> uint32<b>:</b> PU<b>&lt;</b>uint32<b>&gt;</b>
-  <b>member</b> uint64<b>:</b> PU<b>&lt;</b>uint64<b>&gt;</b>
-  <b>member</b> float32<b>:</b> PU<b>&lt;</b>float32<b>&gt;</b>
-  <b>member</b> float64<b>:</b> PU<b>&lt;</b>float<b>&gt;</b>
-  <b>member</b> char<b>:</b> PU<b>&lt;</b>char<b>&gt;</b>
-  <b>member</b> string<b>:</b> PU<b>&lt;</b>string<b>&gt;</b>
-  <b>member</b> DateTime<b>:</b> PU<b>&lt;</b>DateTime<b>&gt;</b>
-  <b>member</b> <a href="#def:type Recall.Digest">Digest</a><b>:</b> PU<b>&lt;</b><a href="#def:type Recall.Digest">Digest</a><b>&gt;</b>
-  <b>member</b> list<b>:</b> PU<b>&lt;</b><i>'a</i><b>&gt;</b> <b>-&gt;</b> PU<b>&lt;</b>list<b>&lt;</b><i>'a</i><b>&gt;&gt;</b>
-  <b>member</b> array<b>:</b> PU<b>&lt;</b><i>'a</i><b>&gt;</b> <b>-&gt;</b> PU<b>&lt;</b>array<b>&lt;</b><i>'a</i><b>&gt;&gt;</b>
-  <b>member</b> case<b>:</b> Case<b>&lt;</b>Empty, <i>'cs</i>, <i>'u</i><b>&gt;</b>                           <b>-&gt;</b> UnionPU<b>&lt;</b>Empty, <i>'cs</i>, <i>'u</i><b>&gt;</b>
-  <b>member</b> case<b>:</b> Case<b>&lt;</b>  <i>'ls</i>, <i>'cs</i>, <i>'u</i><b>&gt;</b> <b>*</b> ProductPU<b>&lt;</b><i>'ls</i>, <i>'ls</i>, <i>'u</i><b>&gt;</b> <b>-&gt;</b> UnionPU<b>&lt;</b>  <i>'ls</i>, <i>'cs</i>, <i>'u</i><b>&gt;</b>
-  <b>member</b> plus<b>:</b> UnionPU<b>&lt;</b>       <i>'c</i>      , Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'u</i><b>&gt;</b>
-             <b>*</b> UnionPU<b>&lt;</b>           <i>'cs</i> ,            <i>'cs</i> , <i>'u</i><b>&gt;</b>
-            <b>-&gt;</b> UnionPU<b>&lt;</b>Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'u</i><b>&gt;</b>
-  <b>member</b> union<b>:</b> Rep <b>*</b> Union<b>&lt;</b><i>'u</i><b>&gt;</b> <b>*</b> AsChoice<b>&lt;</b><i>'c</i>, <i>'u</i><b>&gt;</b> <b>*</b> UnionPU<b>&lt;</b><i>'c</i>, <i>'c</i>, <i>'u</i><b>&gt;</b> <b>-&gt;</b> PU<b>&lt;</b><i>'u</i><b>&gt;</b>
-  <b>member</b> elem<b>:</b> Elem<b>&lt;</b><i>'e</i>, <i>'p</i>, <i>'t</i><b>&gt;</b> <b>*</b> PU<b>&lt;</b><i>'e</i><b>&gt;</b> <b>-&gt;</b> ProductPU<b>&lt;</b><i>'e</i>, <i>'p</i>, <i>'t</i><b>&gt;</b>
-  <b>member</b> times<b>:</b> ProductPU<b>&lt;</b>    <i>'e</i>      , And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
-              <b>*</b> ProductPU<b>&lt;</b>        <i>'es</i> ,         <i>'es</i> , <i>'t</i><b>&gt;</b>
-             <b>-&gt;</b> ProductPU<b>&lt;</b>And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
-  <b>member</b> product<b>:</b> Rep <b>*</b> Product<b>&lt;</b><i>'t</i><b>&gt;</b> <b>*</b> AsProduct<b>&lt;</b><i>'p</i>, <i>'t</i><b>&gt;</b> <b>*</b> ProductPU<b>&lt;</b><i>'p</i>, <i>'p</i>, <i>'t</i><b>&gt;</b> <b>-&gt;</b> PU<b>&lt;</b><i>'t</i><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.toPU" href="#def:member Recall.PU.toPU">toPU</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;</b> <b>-&gt;</b> PU<b>&lt;</b><i>'t</i><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.fix" href="#def:member Recall.PU.fix">fix</a><b>:</b> unit <b>-&gt;</b> Rec<b>&lt;</b><a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.unit" href="#def:member Recall.PU.unit">unit</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>unit<b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.bool" href="#def:member Recall.PU.bool">bool</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.bool">bool</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.int8" href="#def:member Recall.PU.int8">int8</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.int8">int8</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.int16" href="#def:member Recall.PU.int16">int16</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.int16">int16</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.int32" href="#def:member Recall.PU.int32">int32</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.int32">int32</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.int64" href="#def:member Recall.PU.int64">int64</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.int64">int64</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.uint8" href="#def:member Recall.PU.uint8">uint8</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.uint8">uint8</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.uint16" href="#def:member Recall.PU.uint16">uint16</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.uint16">uint16</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.uint32" href="#def:member Recall.PU.uint32">uint32</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.uint32">uint32</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.uint64" href="#def:member Recall.PU.uint64">uint64</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.uint64">uint64</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.float32" href="#def:member Recall.PU.float32">float32</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.float32">float32</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.float64" href="#def:member Recall.PU.float64">float64</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>float<b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.char" href="#def:member Recall.PU.char">char</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.char">char</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.string" href="#def:member Recall.PU.string">string</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.string">string</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.DateTime" href="#def:member Recall.PU.DateTime">DateTime</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.DateTime">DateTime</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.Digest" href="#def:member Recall.PU.Digest">Digest</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>Internal<b>.</b><a href="#def:member Recall.PU.Digest">Digest</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.BigInteger" href="#def:member Recall.PU.BigInteger">BigInteger</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.BigInteger">BigInteger</a><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.bytes" href="#def:member Recall.PU.bytes">bytes</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.array">array</a><b>&lt;</b>byte<b>&gt;&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.list" href="#def:member Recall.PU.list">list</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.list">list</a><b>&lt;</b><i>'t</i><b>&gt;&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.array" href="#def:member Recall.PU.array">array</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.array">array</a><b>&lt;</b><i>'t</i><b>&gt;&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.case" href="#def:member Recall.PU.case">case</a><b>:</b> Case<b>&lt;</b>Empty, <i>'cs</i>, <i>'t</i><b>&gt;</b>
+         <b>-&gt;</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b>Empty, <i>'cs</i>, <i>'t</i><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.case" href="#def:member Recall.PU.case">case</a><b>:</b> Case<b>&lt;</b><i>'ls</i>,      <i>'cs</i>, <i>'t</i><b>&gt;</b>
+        <b>*</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b><i>'ls</i>, <i>'ls</i>,      <i>'t</i><b>&gt;</b>
+         <b>-&gt;</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b><i>'ls</i>,      <i>'cs</i>, <i>'t</i><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.plus" href="#def:member Recall.PU.plus">plus</a><b>:</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b>       <i>'c</i>      , Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+             <b>*</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b>           <i>'cs</i> ,            <i>'cs</i> , <i>'t</i><b>&gt;</b>
+            <b>-&gt;</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b>Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.union" href="#def:member Recall.PU.union">union</a><b>:</b> Rep
+            <b>*</b> Union<b>&lt;</b>          <i>'t</i><b>&gt;</b>
+         <b>*</b> AsChoice<b>&lt;</b><i>'cs</i>,      <i>'t</i><b>&gt;</b>
+          <b>*</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b><i>'cs</i>, <i>'cs</i>, <i>'t</i><b>&gt;</b>
+          <b>-&gt;</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>          <i>'t</i><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.elem" href="#def:member Recall.PU.elem">elem</a><b>:</b> Elem<b>&lt;</b><i>'e</i>, <i>'es</i>, <i>'t</i><b>&gt;</b>
+           <b>*</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'e</i>         <b>&gt;</b>
+       <b>-&gt;</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b><i>'e</i>, <i>'es</i>, <i>'t</i><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.times" href="#def:member Recall.PU.times">times</a><b>:</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b>    <i>'e</i>      , And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+              <b>*</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b>        <i>'es</i> ,         <i>'es</i> , <i>'t</i><b>&gt;</b>
+             <b>-&gt;</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b>And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+  <b>member</b> <a id="dec:member Recall.PU.product" href="#def:member Recall.PU.product">product</a><b>:</b> Rep
+            <b>*</b> Product<b>&lt;</b>          <i>'t</i><b>&gt;</b>
+          <b>*</b> AsProduct<b>&lt;</b><i>'es</i>,      <i>'t</i><b>&gt;</b>
+          <b>*</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b><i>'es</i>, <i>'es</i>, <i>'t</i><b>&gt;</b>
+            <b>-&gt;</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>          <i>'t</i><b>&gt;</b>
 </pre>
 <pre><b>type</b> <a id="dec:type Recall.Log" href="#def:type Recall.Log">Log</a>
 </pre>
@@ -97,45 +104,53 @@ font-weight: bold;
 </pre>
 <pre><b>type</b> <a id="dec:type Recall.Logged" href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
-<pre><b>type</b> <a id="dec:type Recall.WithLog" href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>=</b> <a href="#def:type Recall.Log">Log</a> <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+<pre><b>type</b> <a id="dec:type Recall.WithLog" href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>=</b> Log <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+</pre>
+<pre><b>type</b> <a id="dec:type Recall.LogAs" href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+</pre>
+<pre><b>type</b> <a id="dec:type Recall.Log" href="#def:type Recall.Log">Log</a><b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
 <pre><b>type</b> <a id="dec:type Recall.UpdateBuilder" href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>  <b>=</b>
   <b>new</b><b>:</b> unit <b>-&gt;</b> <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
   <b>member</b> Delay<b>:</b> (unit <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Return<b>:</b> <i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b> ReturnFrom<b>:</b>  <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b> ReturnFrom<b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b> ReturnFrom<b>:</b>     Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b> Bind<b>:</b>  <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
-  <b>member</b> Bind<b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
-  <b>member</b> Bind<b>:</b>     Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b>  <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b>    Log<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b>    Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b>  <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b>    Log<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b>    Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
   <b>member</b> Combine<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>unit<b>&gt;</b> <b>*</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Zero<b>:</b> unit <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>unit<b>&gt;</b>
 </pre>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
 <b>type</b> <a id="dec:type Recall.LogAsBuilder" href="#def:type Recall.LogAsBuilder">LogAsBuilder</a>  <b>=</b>
   inherit <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
-  <b>member</b> Run<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b>
+  <b>member</b> Run<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b>
 </pre>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
-<b>type</b> LogBuilder <b>=</b>
+<b>type</b> <a id="dec:type Recall.LogBuilder" href="#def:type Recall.LogBuilder">LogBuilder</a>  <b>=</b>
   inherit <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
-  <b>member</b> Run<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b>
+  <b>member</b> Run<b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Log<b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b>
 </pre>
 <pre><b>type</b> <a id="dec:type Recall.WithLogBuilder" href="#def:type Recall.WithLogBuilder">WithLogBuilder</a>  <b>=</b>
   <b>new</b><b>:</b> unit <b>-&gt;</b> <a href="#def:type Recall.WithLogBuilder">WithLogBuilder</a>
   <b>member</b> Delay<b>:</b> (unit <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Return<b>:</b> <i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> ReturnFrom<b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b>        ReturnFrom<b>:</b>   <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> ReturnFrom<b>:</b>     Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Bind<b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b>        Bind<b>:</b>   <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>
   <b>member</b> Bind<b>:</b>     Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>
   <b>member</b> Combine<b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b> <b>*</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> TryFinally<b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (unit <b>-&gt;</b> unit) <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> TryWith<b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (exn <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Using<b>:</b> <i>'x</i> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b> <b>when</b> <i>'x</i> <b>:&gt;</b> IDisposable
   <b>member</b> For<b>:</b> seq<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b>
-  <b>member</b> While<b>:</b> (unit <b>-&gt;</b> bool) <b>*</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b>
+  <b>member</b> While<b>:</b> (unit <b>-&gt;</b> <a href="#def:member Recall.PU.bool">bool</a>) <b>*</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b>
   <b>member</b> Zero<b>:</b> unit <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b>
 </pre>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
@@ -144,56 +159,163 @@ font-weight: bold;
   <b>member</b> Run<b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
 <pre><b>module</b> <a id="dec:module Recall.Seq" href="#def:module Recall.Seq">Seq</a>  <b>=</b>
-  <b>val</b> <a id="dec:val Recall.Seq.mapWithLog" href="#def:val Recall.Seq.mapWithLog">mapWithLog</a><b>:</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> seq<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>ResizeArray<b>&lt;</b><i>'y</i><b>&gt;&gt;</b>
+  <b>val</b> <a id="dec:val Recall.Seq.mapUpdate" href="#def:val Recall.Seq.mapUpdate">mapUpdate</a><b>:</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> seq<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>ResizeArray<b>&lt;</b><i>'y</i><b>&gt;&gt;</b>
+  <b>val</b> <a id="dec:val Recall.Seq.mapLogAs" href="#def:val Recall.Seq.mapLogAs">mapLogAs</a><b>:</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> seq<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>ResizeArray<b>&lt;</b><i>'y</i><b>&gt;&gt;</b>
 </pre>
 <pre><b>[&lt;</b>AutoOpen<b>&gt;]</b>
 <b>module</b> <a id="dec:module Recall.Recall" href="#def:module Recall.Recall">Recall</a>  <b>=</b>
-  <b>val</b> <a id="dec:val Recall.Recall.recall" href="#def:val Recall.Recall.recall">recall</a><b>:</b> logDir<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.RunWithLogBuilder">RunWithLogBuilder</a>
+  <b>val</b> <a id="dec:val Recall.Recall.recall" href="#def:val Recall.Recall.recall">recall</a><b>:</b> logDir<b>:</b> <a href="#def:member Recall.PU.string">string</a> <b>-&gt;</b> <a href="#def:type Recall.RunWithLogBuilder">RunWithLogBuilder</a>
   <b>val</b> <a id="dec:val Recall.Recall.logged" href="#def:val Recall.Recall.logged">logged</a><b>:</b> <a href="#def:type Recall.WithLogBuilder">WithLogBuilder</a>
-  <b>val</b> <a id="dec:val Recall.Recall.logAs" href="#def:val Recall.Recall.logAs">logAs</a><b>:</b> id<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.LogAsBuilder">LogAsBuilder</a>
-  <b>val</b> <a id="dec:val Recall.Recall.log" href="#def:val Recall.Recall.log">log</a><b>:</b> LogBuilder
-  <b>val</b> <a id="dec:val Recall.Recall.watch" href="#def:val Recall.Recall.watch">watch</a><b>:</b> <i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>unit<b>&gt;</b>
+  <b>val</b> <a id="dec:val Recall.Recall.logAs" href="#def:val Recall.Recall.logAs">logAs</a><b>:</b> id<b>:</b> <a href="#def:member Recall.PU.string">string</a> <b>-&gt;</b> <a href="#def:type Recall.LogAsBuilder">LogAsBuilder</a>
+  <b>val</b> <a id="dec:val Recall.Recall.log" href="#def:val Recall.Recall.log">log</a><b>:</b> <a href="#def:type Recall.LogBuilder">LogBuilder</a>
+  <b>val</b> <a id="dec:val Recall.Recall.watch" href="#def:val Recall.Recall.watch">watch</a><b>:</b> <i>'x</i> <b>-&gt;</b> Log<b>&lt;</b>unit<b>&gt;</b>
   <b>val</b> <a id="dec:val Recall.Recall.update" href="#def:val Recall.Recall.update">update</a><b>:</b> <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
-  <b>val</b> <a id="dec:val Recall.Recall.readAsAlt" href="#def:val Recall.Recall.readAsAlt">readAsAlt</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Alt<b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>val</b> <a id="dec:val Recall.Recall.readAsJob" href="#def:val Recall.Recall.readAsJob">readAsJob</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>val</b> <a id="dec:val Recall.Recall.wait" href="#def:val Recall.Recall.wait">wait</a><b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>val</b> <a id="dec:val Recall.Recall.digest" href="#def:val Recall.Recall.digest">digest</a><b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>Internal<b>.</b><a href="#def:member Recall.PU.Digest">Digest</a><b>&gt;</b>
+  <b>val</b> <a id="dec:val Recall.Recall.read" href="#def:val Recall.Recall.read">read</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>val</b> <a id="dec:val Recall.Recall.wait" href="#def:val Recall.Recall.wait">wait</a><b>:</b> <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>val</b> <a id="dec:val Recall.Recall.getCancelAlt" href="#def:val Recall.Recall.getCancelAlt">getCancelAlt</a><b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
 </pre>
 <h2>Description</h2>
 <pre><b>namespace</b> <a id="def:namespace Recall" href="#dec:namespace Recall">Recall</a>
 </pre>
-<div class="nested"><p> Recall is a library for defining persistent, incremental, parallel computations such as build systems.  The main goals for Recall are to make it convenient to define such computations and to be able to scale such computations.</p><p> The central concept of Recall is that of a logged computation, represented by the <code><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b></code> type constructor.  A logged computation is defined and executed in such a manner that after it has been run to completion, the computation can be recreated, possibly in a separate run of the program, and its result can be recovered without actually running the recreated computation to completion, assuming Recall finds nothing that has changed that could change the result of the computation.</p><p> A correctly defined logged computation is recomputed by Recall if it needs to be recomputed, because its result may have changed.  Recall makes it easy for the programmer to write correct logged computations, but does not strictly enforce correctness.  Strictly enforcing correctness is essentially impossible to do in a impure language in a convenient manner, because it precludes the use of built-in lambda expressions.  Therefore Recall chooses convenience over cumbersomeness.  To define a correct logged computation, the programmer simply needs to make sure that any input that may change the output of a computation is essentially seen by Recall.</p><p> Logged computations are defined and executed using lightweight threads, called jobs, provided by the Hopac library.  This directly allows logged computations to scale to multiple cores to exploit parallelism.  The use of lightweight threads also allows a logged computation to perform long latency operations, e.g. to perform distributed operations over a network of machines or to perform other forms of asynchronous IO, while allowing full use of the cores of the local machine to process other computations.<pre><b>type</b> <a id="def:type Recall.Digest" href="#dec:type Recall.Digest">Digest</a>  <b>=</b> <b>struct</b>
-</pre>
-<div class="nested"><p> Represents a digest or hash of some data or value.</p><p> Note that the digest algorithms used with Recall do not need to be cryptographically secure, but should ideally make collisions highly unlikely.</div>
-<pre><b>[&lt;</b>AbstractClass<b>&gt;]</b> 
+<div class="nested"><p> Recall is a library for defining persistent, incremental, parallel computations such as build systems.  The main goals for Recall are to make it convenient to define such computations and to be able to scale such computations.</p><p> The central concept of Recall is that of a logged computation, represented by the <code><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b></code> type constructor.  A logged computation is defined and executed in such a manner that after it has been run to completion, the computation can be recreated, possibly in a separate run of the program, and its result can be recovered without actually running the recreated computation to completion, assuming Recall finds nothing that has changed that could change the result of the computation.</p><p> A correctly defined logged computation is recomputed by Recall if it needs to be recomputed, because its result may have changed.  Recall makes it easy for the programmer to write correct logged computations, but does not strictly enforce correctness.  Strictly enforcing correctness is essentially impossible to do in a impure language in a convenient manner, because it precludes the use of built-in lambda expressions.  Therefore Recall chooses convenience over cumbersomeness.  To define a correct logged computation, the programmer simply needs to make sure that any input that may change the output of a computation is essentially seen by Recall.</p><p> Logged computations are defined and executed using lightweight threads, called jobs, provided by the Hopac library.  This directly allows logged computations to scale to multiple cores to exploit parallelism.  The use of lightweight threads also allows a logged computation to perform long latency operations, e.g. to perform distributed operations over a network of machines or to perform other forms of asynchronous IO, while allowing full use of the cores of the local machine to process other computations.<pre><b>[&lt;</b>AbstractClass<b>&gt;]</b> 
 <b>type</b> <a id="def:type Recall.PU" href="#dec:type Recall.PU">PU</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>=</b>
 </pre>
-<div class="nested"><p> Represents a capability to serialize values of type <code><i>'x</i></code>.<pre><b>new</b><b>:</b> unit <b>-&gt;</b> PU<b>&lt;</b><i>'x</i><b>&gt;</b>
+<div class="nested"><p> Represents a capability to serialize values of type <code><i>'x</i></code>.</p><p> This class has a very low level interface and is designed to make it possible to implement nearly optimal serialization to and deserialization from memory mapped files.  This is important, because Recall serializes all the results of logged computations and potentially deserializes large numbers of those results.</p><p> In most cases client code should not need to implement this class directly as the <code>PU</code> class provides inference rules to generate instances of this class for a wide variety of F# types.<pre><b>new</b><b>:</b> unit <b>-&gt;</b> PU<b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
 <div class="nested"><p> Empty default constructor.</div>
-<pre><b>abstract</b> <a id="def:abstract Recall.PU.Dopickle" href="#dec:abstract Recall.PU.Dopickle">Dopickle</a><b>:</b> BinaryWriter <b>*</b> <i>'x</i> <b>-&gt;</b> unit
+<pre><b>abstract</b> <a id="def:abstract Recall.PU.Size" href="#dec:abstract Recall.PU.Size">Size</a><b>:</b> <i>'x</i> <b>-&gt;</b> int
 </pre>
-<div class="nested"><p> Writes given value to the specified binary writer.</div>
-<pre><b>abstract</b> <a id="def:abstract Recall.PU.Unpickle" href="#dec:abstract Recall.PU.Unpickle">Unpickle</a><b>:</b> BinaryReader <b>-&gt;</b> <i>'x</i>
+<div class="nested"><p> Compute the serialized size of the given value.</div>
+<pre><b>abstract</b> <a id="def:abstract Recall.PU.Dopickle" href="#dec:abstract Recall.PU.Dopickle">Dopickle</a><b>:</b> <i>'x</i> <b>*</b> nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> unit
 </pre>
-<div class="nested"><p> Reads a value from the given binary reader.</div>
+<div class="nested"><p> Conditionally serialize given value to memory starting at the specified address.</p><p> The caller is responsible for ensuring that the pointer points to a region of memory that has at least the number of bytes of space as returned by <code><a href="#def:abstract Recall.PU.Size">Size</a></code>.  The <code>DoPickle</code> implementation must not write to memory outside of that range.</p><p> Memory at the specified address should be first read and only written to if it differs from the value being written.  This allows the space for a previous value of the same type and size to be reused and, at the same time, make sure that persistent storage is only written to when the stored value is different.</div>
+<pre><b>abstract</b> <a id="def:abstract Recall.PU.Unpickle" href="#dec:abstract Recall.PU.Unpickle">Unpickle</a><b>:</b> nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <i>'x</i>
+</pre>
+<div class="nested"><p> Deserialize value from memory starting at the specified address.</div>
 </div>
+<pre><b>type</b> <a id="def:type Recall.OpenPU" href="#dec:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Represents a capability to serialize values of type <code><i>'t</i></code> and is open to be combined and extended.</div>
+<pre><b>type</b> <a id="def:type Recall.ProductPU" href="#dec:type Recall.ProductPU">ProductPU</a><b>&lt;</b><i>'e</i>, <i>'es</i>, <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Represents a capability to serialize a part of a product type.</div>
+<pre><b>type</b> <a id="def:type Recall.UnionPU" href="#dec:type Recall.UnionPU">UnionPU</a><b>&lt;</b><i>'c</i>, <i>'cs</i>, <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Represents a capability to serialize a subset of a union type.</div>
 <pre><b>[&lt;</b>InferenceRules<b>&gt;]</b> 
 <b>type</b> <a id="def:type Recall.PU" href="#dec:type Recall.PU">PU</a>  <b>=</b>
 </pre>
-<div class="nested"><p> Provides inference rules for a datatype generic serialization capability.<pre><b>static</b> <b>member</b> <a id="def:static member Recall.PU.Get" href="#dec:static member Recall.PU.Get">Get</a><b>:</b> unit <b>-&gt;</b> PU<b>&lt;</b><i>'x</i><b>&gt;</b>
+<div class="nested"><p> Provides inference rules for a datatype generic serialization capability.</p><p> The methods of this class aside from <code><a href="#def:static member Recall.PU.Get">Get</a></code> are ordinarily not called directly by client code, but are rather called indirectly by <code><a href="#def:static member Recall.PU.Get">Get</a></code> to construct the desired serialization capability.</p><p> Please note that the method signatures can be seen as a specification of which types are supported by the inference rules.<pre><b>static</b> <b>member</b> <a id="def:static member Recall.PU.Get" href="#dec:static member Recall.PU.Get">Get</a><b>:</b> unit <b>-&gt;</b> PU<b>&lt;</b><i>'t</i><b>&gt;</b>
 </pre>
-<div class="nested"><p> Returns a previously generated serialization capability or attempts to one for a given type.</div>
-<pre><b>member</b> plus<b>:</b> UnionPU<b>&lt;</b>       <i>'c</i>      , Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'u</i><b>&gt;</b>
-           <b>*</b> UnionPU<b>&lt;</b>           <i>'cs</i> ,            <i>'cs</i> , <i>'u</i><b>&gt;</b>
-          <b>-&gt;</b> UnionPU<b>&lt;</b>Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'u</i><b>&gt;</b>
+<div class="nested"><p> Returns a previously generated serialization capability or attempts to generate one for the specified type <code><i>'t</i></code>.</div>
+<pre><b>new</b><b>:</b> unit <b>-&gt;</b> PU
 </pre>
-<div class="nested"></div>
-<pre><b>member</b> times<b>:</b> ProductPU<b>&lt;</b>    <i>'e</i>      , And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
-            <b>*</b> ProductPU<b>&lt;</b>        <i>'es</i> ,         <i>'es</i> , <i>'t</i><b>&gt;</b>
-           <b>-&gt;</b> ProductPU<b>&lt;</b>And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+<div class="nested"><p> Empty default constructor.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.toPU" href="#dec:member Recall.PU.toPU">toPU</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;</b> <b>-&gt;</b> PU<b>&lt;</b><i>'t</i><b>&gt;</b>
 </pre>
-<div class="nested"></div>
+<div class="nested"><p> Completes the serialization capability for a serializable type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.fix" href="#dec:member Recall.PU.fix">fix</a><b>:</b> unit <b>-&gt;</b> Rec<b>&lt;</b><a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Capability to compute serialization capabilities for recursive types.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.unit" href="#dec:member Recall.PU.unit">unit</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>unit<b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code>unit</code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.bool" href="#dec:member Recall.PU.bool">bool</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.bool">bool</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.bool">bool</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.int8" href="#dec:member Recall.PU.int8">int8</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.int8">int8</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.int8">int8</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.int16" href="#dec:member Recall.PU.int16">int16</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.int16">int16</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.int16">int16</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.int32" href="#dec:member Recall.PU.int32">int32</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.int32">int32</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.int32">int32</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.int64" href="#dec:member Recall.PU.int64">int64</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.int64">int64</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.int64">int64</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.uint8" href="#dec:member Recall.PU.uint8">uint8</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.uint8">uint8</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.uint8">uint8</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.uint16" href="#dec:member Recall.PU.uint16">uint16</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.uint16">uint16</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.uint16">uint16</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.uint32" href="#dec:member Recall.PU.uint32">uint32</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.uint32">uint32</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.uint32">uint32</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.uint64" href="#dec:member Recall.PU.uint64">uint64</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.uint64">uint64</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.uint64">uint64</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.float32" href="#dec:member Recall.PU.float32">float32</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.float32">float32</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.float32">float32</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.float64" href="#dec:member Recall.PU.float64">float64</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>float<b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code>float</code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.char" href="#dec:member Recall.PU.char">char</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.char">char</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.char">char</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.string" href="#dec:member Recall.PU.string">string</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.string">string</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.string">string</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.DateTime" href="#dec:member Recall.PU.DateTime">DateTime</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.DateTime">DateTime</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.DateTime">DateTime</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.Digest" href="#dec:member Recall.PU.Digest">Digest</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>Internal<b>.</b><a href="#def:member Recall.PU.Digest">Digest</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.Digest">Digest</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.BigInteger" href="#dec:member Recall.PU.BigInteger">BigInteger</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.BigInteger">BigInteger</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.BigInteger">BigInteger</a></code> type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.bytes" href="#dec:member Recall.PU.bytes">bytes</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.array">array</a><b>&lt;</b>byte<b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for the <code><a href="#def:member Recall.PU.array">array</a><b>&lt;</b>byte<b>&gt;</b></code> type.  Unlike the general <code><a href="#def:member Recall.PU.array">array</a></code> rule, this version is optimized for arrays of bytes.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.list" href="#dec:member Recall.PU.list">list</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.list">list</a><b>&lt;</b><i>'t</i><b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for lists of serializable values.  Unlike the general rules for arbitrary union types, this version treats the list as a sequence of elements and is typically more efficient.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.array" href="#dec:member Recall.PU.array">array</a><b>:</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'t</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><a href="#def:member Recall.PU.array">array</a><b>&lt;</b><i>'t</i><b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capabability for arrays of serializable values.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.case" href="#dec:member Recall.PU.case">case</a><b>:</b> Case<b>&lt;</b>Empty, <i>'cs</i>, <i>'t</i><b>&gt;</b>
+       <b>-&gt;</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b>Empty, <i>'cs</i>, <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for an empty case of a union type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.case" href="#dec:member Recall.PU.case">case</a><b>:</b> Case<b>&lt;</b><i>'ls</i>,      <i>'cs</i>, <i>'t</i><b>&gt;</b>
+      <b>*</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b><i>'ls</i>, <i>'ls</i>,      <i>'t</i><b>&gt;</b>
+       <b>-&gt;</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b><i>'ls</i>,      <i>'cs</i>, <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for a non-empty case of a union type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.plus" href="#dec:member Recall.PU.plus">plus</a><b>:</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b>       <i>'c</i>      , Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+           <b>*</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b>           <i>'cs</i> ,            <i>'cs</i> , <i>'t</i><b>&gt;</b>
+          <b>-&gt;</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b>Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, Choice<b>&lt;</b><i>'c</i>, <i>'cs</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for multiple cases of a union type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.union" href="#dec:member Recall.PU.union">union</a><b>:</b> Rep
+          <b>*</b> Union<b>&lt;</b>          <i>'t</i><b>&gt;</b>
+       <b>*</b> AsChoice<b>&lt;</b><i>'cs</i>,      <i>'t</i><b>&gt;</b>
+        <b>*</b> <a href="#def:type Recall.UnionPU">UnionPU</a><b>&lt;</b><i>'cs</i>, <i>'cs</i>, <i>'t</i><b>&gt;</b>
+        <b>-&gt;</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>          <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for an arbitrary union type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.elem" href="#dec:member Recall.PU.elem">elem</a><b>:</b> Elem<b>&lt;</b><i>'e</i>, <i>'es</i>, <i>'t</i><b>&gt;</b>
+         <b>*</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b><i>'e</i>         <b>&gt;</b>
+     <b>-&gt;</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b><i>'e</i>, <i>'es</i>, <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for an element of a product type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.times" href="#dec:member Recall.PU.times">times</a><b>:</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b>    <i>'e</i>      , And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+            <b>*</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b>        <i>'es</i> ,         <i>'es</i> , <i>'t</i><b>&gt;</b>
+           <b>-&gt;</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b>And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, And<b>&lt;</b><i>'e</i>, <i>'es</i><b>&gt;</b>, <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for multiple elements of a product type.</div>
+<pre><b>member</b> <a id="def:member Recall.PU.product" href="#dec:member Recall.PU.product">product</a><b>:</b> Rep
+          <b>*</b> Product<b>&lt;</b>          <i>'t</i><b>&gt;</b>
+        <b>*</b> AsProduct<b>&lt;</b><i>'es</i>,      <i>'t</i><b>&gt;</b>
+        <b>*</b> <a href="#def:type Recall.ProductPU">ProductPU</a><b>&lt;</b><i>'es</i>, <i>'es</i>, <i>'t</i><b>&gt;</b>
+          <b>-&gt;</b> <a href="#def:type Recall.OpenPU">OpenPU</a><b>&lt;</b>          <i>'t</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Serialization capability for an arbitrary product type.</div>
 </div>
 <pre><b>type</b> <a id="def:type Recall.Log" href="#dec:type Recall.Log">Log</a>
 </pre>
@@ -204,20 +326,26 @@ font-weight: bold;
 <pre><b>type</b> <a id="def:type Recall.Logged" href="#dec:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
 <div class="nested"><p> Represents a logged computation.</p><p> During a logged computation, binding the value of another logged computation makes the current logged computation dependent on the result of the bound logged computation.  This way Recall learns about the input that may change the output of a computation.</div>
-<pre><b>type</b> <a id="def:type Recall.WithLog" href="#dec:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>=</b> <a href="#def:type Recall.Log">Log</a> <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+<pre><b>type</b> <a id="def:type Recall.WithLog" href="#dec:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>=</b> Log <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
 <div class="nested"><p> Represents a parallel computation with a log.</div>
+<pre><b>type</b> <a id="def:type Recall.LogAs" href="#dec:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Represents a computation whose result is logged with a user defined identity.</div>
+<pre><b>type</b> <a id="def:type Recall.Log" href="#dec:type Recall.Log">Log</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Represents a computation whose result is logged and is given an implicitly created identity based on identity of the surrounding computation.</div>
 <pre><b>type</b> <a id="def:type Recall.UpdateBuilder" href="#dec:type Recall.UpdateBuilder">UpdateBuilder</a>  <b>=</b>
 </pre>
 <div class="nested"><p> Builder for steppable computations.</p><p> Note that steppable computations allow only a limited set of computational patterns, because a steppable computation is not guaranteed to be run to completion.  Specifically, while a single step of a computation is guaranteed to be run to completion after it has been started, a sequence of steps is not guaranteed to be run to completion.  Because of this, constructs such as <code><b>use</b></code> cannot be given meaningful semantics.  However, within a single step, even one defined as a job, such constructs can be used.</div>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
 <b>type</b> <a id="def:type Recall.LogAsBuilder" href="#dec:type Recall.LogAsBuilder">LogAsBuilder</a>  <b>=</b>
 </pre>
-<div class="nested"><p> Builder for logged computations.  A logged computation is essentially a steppable computation, whose steps are logged, while it is being executed.</div>
+<div class="nested"><p> Builder for a computation logged with a user defined identity.</div>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
-<b>type</b> LogBuilder <b>=</b>
+<b>type</b> <a id="def:type Recall.LogBuilder" href="#dec:type Recall.LogBuilder">LogBuilder</a>  <b>=</b>
 </pre>
-<div class="nested"></div>
+<div class="nested"><p> Builder for a computation logged with an implicitly assigned identity.</div>
 <pre><b>type</b> <a id="def:type Recall.WithLogBuilder" href="#dec:type Recall.WithLogBuilder">WithLogBuilder</a>  <b>=</b>
 </pre>
 <div class="nested"><p> Builder for parallel computations with a log.  A computation with a log is executed in a context with a log for logging individual logged computations.</div>
@@ -227,38 +355,41 @@ font-weight: bold;
 <div class="nested"><p> Builder for running a parallel computations with a log.</div>
 <pre><b>module</b> <a id="def:module Recall.Seq" href="#dec:module Recall.Seq">Seq</a>  <b>=</b>
 </pre>
-<div class="nested"><p> Additional operations for sequences.<pre><b>val</b> <a id="def:val Recall.Seq.mapWithLog" href="#dec:val Recall.Seq.mapWithLog">mapWithLog</a><b>:</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> seq<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>ResizeArray<b>&lt;</b><i>'y</i><b>&gt;&gt;</b>
+<div class="nested"><p> Additional operations for sequences.<pre><b>val</b> <a id="def:val Recall.Seq.mapUpdate" href="#dec:val Recall.Seq.mapUpdate">mapUpdate</a><b>:</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> seq<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>ResizeArray<b>&lt;</b><i>'y</i><b>&gt;&gt;</b>
 </pre>
-<div class="nested"><p> Maps an operation with a log over the given sequence.</div>
+<div class="nested"><p> Creates an update that maps a given update operation over a sequence and returns a new sequence with the results.</div>
+<pre><b>val</b> <a id="def:val Recall.Seq.mapLogAs" href="#dec:val Recall.Seq.mapLogAs">mapLogAs</a><b>:</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> seq<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>ResizeArray<b>&lt;</b><i>'y</i><b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Creates an update that maps a given logged operation over a sequence and returns a new sequence with the results.</div>
 </div>
 <pre><b>[&lt;</b>AutoOpen<b>&gt;]</b>
 <b>module</b> <a id="def:module Recall.Recall" href="#dec:module Recall.Recall">Recall</a>  <b>=</b>
 </pre>
-<div class="nested"><p> Operations for defining computations with Recall.<pre><b>val</b> <a id="def:val Recall.Recall.recall" href="#dec:val Recall.Recall.recall">recall</a><b>:</b> logDir<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.RunWithLogBuilder">RunWithLogBuilder</a>
+<div class="nested"><p> Operations for defining computations with Recall.<pre><b>val</b> <a id="def:val Recall.Recall.recall" href="#dec:val Recall.Recall.recall">recall</a><b>:</b> logDir<b>:</b> <a href="#def:member Recall.PU.string">string</a> <b>-&gt;</b> <a href="#def:type Recall.RunWithLogBuilder">RunWithLogBuilder</a>
 </pre>
 <div class="nested"><p> Creates a job that creates a new or reads an existing computation log stored in the specified directory, creates and runs the given update computation and then waits until all the logged computations have either finished successfully or some computations have failed and the rest have been canceled.  In case all computations finished successfully, the result value is produced.  Otherwise an exception is raised with details on the failed computations.</div>
 <pre><b>val</b> <a id="def:val Recall.Recall.logged" href="#dec:val Recall.Recall.logged">logged</a><b>:</b> <a href="#def:type Recall.WithLogBuilder">WithLogBuilder</a>
 </pre>
 <div class="nested"><p> A builder for parallel computations with a log.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.logAs" href="#dec:val Recall.Recall.logAs">logAs</a><b>:</b> id<b>:</b> string <b>-&gt;</b> <a href="#def:type Recall.LogAsBuilder">LogAsBuilder</a>
+<pre><b>val</b> <a id="def:val Recall.Recall.logAs" href="#dec:val Recall.Recall.logAs">logAs</a><b>:</b> id<b>:</b> <a href="#def:member Recall.PU.string">string</a> <b>-&gt;</b> <a href="#def:type Recall.LogAsBuilder">LogAsBuilder</a>
 </pre>
 <div class="nested"><p> Returns a builder for creating a new logged computation with the given identity.  Computations with the same identity are assumed to be the same computations.  The result of the computation is persisted to a computation log along with dependencies to other logged computations.</p><p> The first time a logged computations is created, it is always run to completion.  When a logged computation with the same identity is recreated it may or may not be run to completion.</p><p> In case the log indicates that the recreated computation has no dependencies to other logged computations then the computation is run to completion every time it is recreated.  This makes it convenient to essentially create new primitive operations and is also quite logical as a computation that has no inputs must either be a constant or it must use some hidden effects to compute its output.</p><p> If, however, the log has a non empty sequence of dependencies to other logged computations, then the recreated computation is run to completion only if the sequence of dependencies changes or the result of any one of those logged computations has changed.  This works correctly as long as any input that may change the result of the computation are bound as other logged computations within the defined logged computation.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.log" href="#dec:val Recall.Recall.log">log</a><b>:</b> LogBuilder
+<pre><b>val</b> <a id="def:val Recall.Recall.log" href="#dec:val Recall.Recall.log">log</a><b>:</b> <a href="#def:type Recall.LogBuilder">LogBuilder</a>
 </pre>
 <div class="nested"><p> Returns a builder for creating a new logged computation.  The computation is given an automatically determined identity.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.watch" href="#dec:val Recall.Recall.watch">watch</a><b>:</b> <i>'x</i> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>unit<b>&gt;</b>
+<pre><b>val</b> <a id="def:val Recall.Recall.watch" href="#dec:val Recall.Recall.watch">watch</a><b>:</b> <i>'x</i> <b>-&gt;</b> Log<b>&lt;</b>unit<b>&gt;</b>
 </pre>
 <div class="nested"><p> Returns a computation that logs the given value as a dependency.</div>
 <pre><b>val</b> <a id="def:val Recall.Recall.update" href="#dec:val Recall.Recall.update">update</a><b>:</b> <a href="#def:type Recall.UpdateBuilder">UpdateBuilder</a>
 </pre>
 <div class="nested"><p> A builder for defining updates or partial logged computations whose results are not logged.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.readAsAlt" href="#dec:val Recall.Recall.readAsAlt">readAsAlt</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Alt<b>&lt;</b><i>'x</i><b>&gt;</b>
+<pre><b>val</b> <a id="def:val Recall.Recall.digest" href="#dec:val Recall.Recall.digest">digest</a><b>:</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b>Internal<b>.</b><a href="#def:member Recall.PU.Digest">Digest</a><b>&gt;</b>
 </pre>
-<div class="nested"><p> Returns an alternative for reading the result of a logged computation.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.readAsJob" href="#dec:val Recall.Recall.readAsJob">readAsJob</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+<div class="nested"><p> Provides an intermediate digest of the current point in a logged computation.</p><p> The intermediate digest includes the identity of the current computation as well as digests of the results of all the dependencies of the current computation.  If you ask the intermediate digest after logging all dependencies and just before computing the result of the current logged computation, then the intermediate digest effectively identifies the result.  You could, for example, then use the digest to request a previously computed result from a server.</div>
+<pre><b>val</b> <a id="def:val Recall.Recall.read" href="#dec:val Recall.Recall.read">read</a><b>:</b> <a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
-<div class="nested"><p> Returns a job for reading the result of a logged computation.</div>
-<pre><b>val</b> <a id="def:val Recall.Recall.wait" href="#dec:val Recall.Recall.wait">wait</a><b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+<div class="nested"><p> Returns an operation with a log that waits for the result of the logged operation.</div>
+<pre><b>val</b> <a id="def:val Recall.Recall.wait" href="#dec:val Recall.Recall.wait">wait</a><b>:</b> <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><a href="#def:type Recall.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b> <b>-&gt;</b> <a href="#def:type Recall.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
 <div class="nested"><p> Returns an operation with a log that directly waits for the result of the logged operation.</div>
 <pre><b>val</b> <a id="def:val Recall.Recall.getCancelAlt" href="#dec:val Recall.Recall.getCancelAlt">getCancelAlt</a><b>:</b> <a href="#def:type Recall.WithLog">WithLog</a><b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
