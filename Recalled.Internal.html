@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Recalled.Internal Library Reference</title>
+<style>
+pre {
+border: 1px solid #e0e0e0;
+border-radius: 3px;
+padding: 5px;
+line-height: 160%;
+background: #f7f7f7;
+font-family: "Lucida Console", Monaco, monospace;
+font-size: 72%;
+}
+code {
+border: 1px solid #e0e0e0;
+border-radius: 3px;
+padding: 2px;
+background: #f7f7f7;
+font-family: "Lucida Console", Monaco, monospace;
+font-size: 72%;
+}
+div.nested {
+padding-left: 1.5em;
+}
+a {
+text-decoration: none;
+font-weight: bold;
+}
+</style>
+</head>
+<body><table width="80%" align="center"><tr><td>
+<h1>Recalled.Internal Library Reference</h1>
+<p>This document provides a reference manual for the Recalled.Internal library and is generated from the library source code.</p>
+<h2>Synopsis</h2>
+<pre><b>namespace</b> Recalled<b>.</b><a id="dec:namespace Recalled.Internal" href="#def:namespace Recalled.Internal">Internal</a></pre>
+<pre><b>[&lt;</b>NoComparison; CustomEquality<b>&gt;]</b> 
+<b>type</b> <a id="dec:type Recalled.Internal.Digest" href="#def:type Recalled.Internal.Digest">Digest</a>  <b>=</b> <b>struct</b>
+    <b>val</b> <b>mutable</b> <a id="dec:val Recalled.Internal.Digest.Lo" href="#def:val Recalled.Internal.Digest.Lo">Lo</a><b>:</b> uint64
+    <b>val</b> <b>mutable</b> <a id="dec:val Recalled.Internal.Digest.Hi" href="#def:val Recalled.Internal.Digest.Hi">Hi</a><b>:</b> uint64
+    <b>new</b><b>:</b> lo<b>:</b> uint64 <b>*</b> hi<b>:</b> uint64 <b>-&gt;</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+    <b>static</b> <b>member</b> <a id="dec:static member Recalled.Internal.Digest.Zero" href="#def:static member Recalled.Internal.Digest.Zero">Zero</a><b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+    <b>static</b> <b>member</b> (<a id="dec:static member Recalled.Internal.Digest.^^^" href="#def:static member Recalled.Internal.Digest.^^^">^^^</a>)<b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a> <b>*</b> <a href="#def:type Recalled.Internal.Digest">Digest</a> <b>-&gt;</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+    <b>static</b> <b>member</b> <a id="dec:static member Recalled.Internal.Digest.Bytes" href="#def:static member Recalled.Internal.Digest.Bytes">Bytes</a><b>:</b> ptr<b>:</b> nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>*</b> count<b>:</b> int <b>-&gt;</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+    <b>static</b> <b>member</b> <a id="dec:static member Recalled.Internal.Digest.String" href="#def:static member Recalled.Internal.Digest.String">String</a><b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a> <b>-&gt;</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+  <b>end</b>
+</pre>
+<pre><b>[&lt;</b>Class<b>&gt;]</b> 
+<b>type</b> <a id="dec:type Recalled.Internal.DigestEqualityComparer" href="#def:type Recalled.Internal.DigestEqualityComparer">DigestEqualityComparer</a>  <b>=</b>
+ <b>interface</b> IEqualityComparer<b>&lt;</b><a href="#def:type Recalled.Internal.Digest">Digest</a><b>&gt;</b>
+ <b>new</b><b>:</b> unit <b>-&gt;</b> <a href="#def:type Recalled.Internal.DigestEqualityComparer">DigestEqualityComparer</a>
+</pre>
+<pre><b>module</b> <a id="dec:module Recalled.Internal.LoggedMap" href="#def:module Recalled.Internal.LoggedMap">LoggedMap</a>  <b>=</b>
+  <b>type</b> <a id="dec:type Recalled.Internal.LoggedMap.LoggedMap" href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a>
+  <b>type</b> <a id="dec:type Recalled.Internal.LoggedMap.Info" href="#def:type Recalled.Internal.LoggedMap.Info">Info</a>  <b>=</b> {
+      <a id="dec:field Recalled.Internal.LoggedMap.Info.DepKeyDigests" href="#def:field Recalled.Internal.LoggedMap.Info.DepKeyDigests">DepKeyDigests</a><b>:</b> array<b>&lt;</b><a href="#def:type Recalled.Internal.Digest">Digest</a><b>&gt;</b>
+      <a id="dec:field Recalled.Internal.LoggedMap.Info.DepDigest" href="#def:field Recalled.Internal.LoggedMap.Info.DepDigest">DepDigest</a><b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+      <a id="dec:field Recalled.Internal.LoggedMap.Info.BobDigest" href="#def:field Recalled.Internal.LoggedMap.Info.BobDigest">BobDigest</a><b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+      <a id="dec:field Recalled.Internal.LoggedMap.Info.BobOffset" href="#def:field Recalled.Internal.LoggedMap.Info.BobOffset">BobOffset</a><b>:</b> PtrInt
+      <a id="dec:field Recalled.Internal.LoggedMap.Info.BobSize" href="#def:field Recalled.Internal.LoggedMap.Info.BobSize">BobSize</a><b>:</b> int
+      <a id="dec:field Recalled.Internal.LoggedMap.Info.AddOffset" href="#def:field Recalled.Internal.LoggedMap.Info.AddOffset">AddOffset</a><b>:</b> PtrInt
+    }
+  <b>val</b> <a id="dec:val Recalled.Internal.LoggedMap.create" href="#def:val Recalled.Internal.LoggedMap.create">create</a><b>:</b> logDir<b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a>
+           <b>-&gt;</b> Job<b>&lt;</b>LoggedMap<b>&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.LoggedMap.close" href="#def:val Recalled.Internal.LoggedMap.close">close</a><b>:</b> loggedMap<b>:</b> <a href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a> <b>-&gt;</b> Job<b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.LoggedMap.tryFind" href="#def:val Recalled.Internal.LoggedMap.tryFind">tryFind</a><b>:</b> loggedMap<b>:</b> <a href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a>
+            <b>-&gt;</b> keyDigest<b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+            <b>-&gt;</b> Alt<b>&lt;</b>option<b>&lt;</b><a href="#def:type Recalled.Internal.LoggedMap.Info">Info</a><b>&gt;&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.LoggedMap.add" href="#def:val Recalled.Internal.LoggedMap.add">add</a><b>:</b> loggedMap<b>:</b> <a href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a>
+        <b>-&gt;</b> keyDigest<b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+        <b>-&gt;</b> depKeyDigests<b>:</b> array<b>&lt;</b><a href="#def:type Recalled.Internal.Digest">Digest</a><b>&gt;</b>
+        <b>-&gt;</b> depDigest<b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+        <b>-&gt;</b> bobSize<b>:</b> int
+        <b>-&gt;</b> bobWrite<b>:</b> (nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> unit)
+        <b>-&gt;</b> Job<b>&lt;</b><a href="#def:type Recalled.Internal.LoggedMap.Info">Info</a><b>&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.LoggedMap.readFun" href="#def:val Recalled.Internal.LoggedMap.readFun">readFun</a><b>:</b> loggedMap<b>:</b> <a href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a>
+            <b>-&gt;</b> <a href="#def:val Recalled.Internal.LoggedMap.readFun">readFun</a><b>:</b> (nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <i>'x</i>)
+            <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+</pre>
+<pre><b>module</b> <a id="dec:module Recalled.Internal.MemMapBuf" href="#def:module Recalled.Internal.MemMapBuf">MemMapBuf</a>  <b>=</b>
+  <b>type</b> <a id="dec:type Recalled.Internal.MemMapBuf.MemMapBuf" href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a>
+  <b>val</b> <a id="dec:val Recalled.Internal.MemMapBuf.create" href="#def:val Recalled.Internal.MemMapBuf.create">create</a><b>:</b> path<b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a> <b>-&gt;</b> Job<b>&lt;</b><a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a><b>&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.MemMapBuf.size" href="#def:val Recalled.Internal.MemMapBuf.size">size</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a> <b>-&gt;</b> PtrInt
+  <b>module</b> <a id="dec:module Recalled.Internal.MemMapBuf.Unsafe" href="#def:module Recalled.Internal.MemMapBuf.Unsafe">Unsafe</a>  <b>=</b>
+    <b>val</b> <a id="dec:val Recalled.Internal.MemMapBuf.Unsafe.truncate" href="#def:val Recalled.Internal.MemMapBuf.Unsafe.truncate">truncate</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a> <b>-&gt;</b> PtrInt <b>-&gt;</b> unit
+  <b>val</b> <a id="dec:val Recalled.Internal.MemMapBuf.close" href="#def:val Recalled.Internal.MemMapBuf.close">close</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a> <b>-&gt;</b> Job<b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.MemMapBuf.flush" href="#def:val Recalled.Internal.MemMapBuf.flush">flush</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a> <b>-&gt;</b> Job<b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.MemMapBuf.accessFun" href="#def:val Recalled.Internal.MemMapBuf.accessFun">accessFun</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a>
+              <b>-&gt;</b> <a href="#def:val Recalled.Internal.LoggedMap.readFun">readFun</a><b>:</b> (nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <i>'x</i>)
+              <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.MemMapBuf.accessJob" href="#def:val Recalled.Internal.MemMapBuf.accessJob">accessJob</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a>
+              <b>-&gt;</b> readJob<b>:</b> (nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>)
+              <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.MemMapBuf.append" href="#def:val Recalled.Internal.MemMapBuf.append">append</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a>
+           <b>-&gt;</b> align<b>:</b> int
+           <b>-&gt;</b> <a href="#def:val Recalled.Internal.MemMapBuf.size">size</a><b>:</b> int
+           <b>-&gt;</b> Job<b>&lt;</b>PtrInt<b>&gt;</b>
+</pre>
+<pre><b>module</b> <a id="dec:module Recalled.Internal.MurmurHash3" href="#def:module Recalled.Internal.MurmurHash3">MurmurHash3</a>  <b>=</b>
+  <b>val</b> <a id="dec:val Recalled.Internal.MurmurHash3.bytes" href="#def:val Recalled.Internal.MurmurHash3.bytes">bytes</a><b>:</b> data<b>:</b> nativeptr<b>&lt;</b>byte<b>&gt;</b>
+          <b>-&gt;</b> length<b>:</b> int
+          <b>-&gt;</b> seed<b>:</b> uint32
+          <b>-&gt;</b> lo<b>:</b> byref<b>&lt;</b>uint64<b>&gt;</b>
+          <b>-&gt;</b> hi<b>:</b> byref<b>&lt;</b>uint64<b>&gt;</b>
+          <b>-&gt;</b> unit
+  <b>val</b> <a id="dec:val Recalled.Internal.MurmurHash3.string" href="#def:val Recalled.Internal.MurmurHash3.string">string</a><b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a><b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a>
+           <b>-&gt;</b> seed<b>:</b> uint32
+           <b>-&gt;</b> lo<b>:</b> byref<b>&lt;</b>uint64<b>&gt;</b>
+           <b>-&gt;</b> hi<b>:</b> byref<b>&lt;</b>uint64<b>&gt;</b>
+           <b>-&gt;</b> unit
+</pre>
+<h2>Description</h2>
+<pre><b>namespace</b> Recalled<b>.</b><a id="def:namespace Recalled.Internal" href="#dec:namespace Recalled.Internal">Internal</a>
+</pre>
+<div class="nested"><p> The Recalled.Internal library implements the internal mechanisms used by the Recalled library and associated tools.  The Recalled.Internal library is not meant to be directly used by programs written with the Recalled library.<pre><b>[&lt;</b>NoComparison; CustomEquality<b>&gt;]</b> 
+<b>type</b> <a id="def:type Recalled.Internal.Digest" href="#dec:type Recalled.Internal.Digest">Digest</a>  <b>=</b> <b>struct</b>
+</pre>
+<div class="nested"><p> Represents a digest or hash of some data or value.</p><p> User code should never need to modify digest values.  Recalled computes digests of anything and everything and having the ability to mutate digests values internally makes a difference.</p><p> Note that the digest algorithms used with Recalled do not need to be cryptographically secure, but should ideally make collisions highly unlikely.  Currently Recalled uses the <code><a href="#def:module Recalled.Internal.MurmurHash3">MurmurHash3</a></code> algorithm to compute digests, but the digest algorithm may be changed in the future.<pre><b>val</b> <b>mutable</b> <a id="def:val Recalled.Internal.Digest.Lo" href="#dec:val Recalled.Internal.Digest.Lo">Lo</a><b>:</b> uint64
+</pre>
+<div class="nested"><p> Bits 0 to 63 of the digest.</div>
+<pre><b>val</b> <b>mutable</b> <a id="def:val Recalled.Internal.Digest.Hi" href="#dec:val Recalled.Internal.Digest.Hi">Hi</a><b>:</b> uint64
+</pre>
+<div class="nested"><p> Bits 64 to 127 of the digest.</div>
+<pre><b>new</b><b>:</b> lo<b>:</b> uint64 <b>*</b> hi<b>:</b> uint64 <b>-&gt;</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+</pre>
+<div class="nested"><p> Creates a new digest value.</div>
+<pre><b>static</b> <b>member</b> <a id="def:static member Recalled.Internal.Digest.Zero" href="#dec:static member Recalled.Internal.Digest.Zero">Zero</a><b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+</pre>
+<div class="nested"><p> The zero digest value.</div>
+<pre><b>static</b> <b>member</b> (<a id="def:static member Recalled.Internal.Digest.^^^" href="#dec:static member Recalled.Internal.Digest.^^^">^^^</a>)<b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a> <b>*</b> <a href="#def:type Recalled.Internal.Digest">Digest</a> <b>-&gt;</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+</pre>
+<div class="nested"><p> Combine two digests.</div>
+<pre><b>static</b> <b>member</b> <a id="def:static member Recalled.Internal.Digest.Bytes" href="#dec:static member Recalled.Internal.Digest.Bytes">Bytes</a><b>:</b> ptr<b>:</b> nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>*</b> count<b>:</b> int <b>-&gt;</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+</pre>
+<div class="nested"><p> Computes a digest of the specified region of memory.</div>
+<pre><b>static</b> <b>member</b> <a id="def:static member Recalled.Internal.Digest.String" href="#dec:static member Recalled.Internal.Digest.String">String</a><b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a> <b>-&gt;</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+</pre>
+<div class="nested"><p> Computes a digest of the given string.</div>
+</div>
+<pre><b>[&lt;</b>Class<b>&gt;]</b> 
+<b>type</b> <a id="def:type Recalled.Internal.DigestEqualityComparer" href="#dec:type Recalled.Internal.DigestEqualityComparer">DigestEqualityComparer</a>  <b>=</b>
+</pre>
+<div class="nested"><p> Equality comparer for digests.<pre><b>new</b><b>:</b> unit <b>-&gt;</b> <a href="#def:type Recalled.Internal.DigestEqualityComparer">DigestEqualityComparer</a>
+</pre>
+<div class="nested"><p> An empty default constructor.</div>
+</div>
+<pre><b>module</b> <a id="def:module Recalled.Internal.LoggedMap" href="#dec:module Recalled.Internal.LoggedMap">LoggedMap</a>  <b>=</b>
+</pre>
+<div class="nested"><p> Operations on logged maps.<pre><b>type</b> <a id="def:type Recalled.Internal.LoggedMap.LoggedMap" href="#dec:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a>
+</pre>
+<div class="nested"><p> Represents a logged map.</p><p> Recalled uses a logged map to log information on computations, including information on dependencies of computations and and the results of computations, stored as separate binary objects or bob.  The term bob is used, because efficient storage of both large and small objects is supported.</p><p> Operations on logged maps work incrementally.  Operations that change the contents of the map generally append new data to the end of the log files, although, in some cases, existing storage may be reused directly.  When an existing logged map is opened, the logged operations are effectively replayed to reconstruct the contents of the logged map.</div>
+<pre><b>type</b> <a id="def:type Recalled.Internal.LoggedMap.Info" href="#dec:type Recalled.Internal.LoggedMap.Info">Info</a>  <b>=</b> {
+</pre>
+<div class="nested"><p> Represents information on an entry stored in a logged map.<pre><a id="def:field Recalled.Internal.LoggedMap.Info.DepKeyDigests" href="#dec:field Recalled.Internal.LoggedMap.Info.DepKeyDigests">DepKeyDigests</a><b>:</b> array<b>&lt;</b><a href="#def:type Recalled.Internal.Digest">Digest</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Digests of the identities of the dependencies of the computation.</div>
+<pre><a id="def:field Recalled.Internal.LoggedMap.Info.DepDigest" href="#dec:field Recalled.Internal.LoggedMap.Info.DepDigest">DepDigest</a><b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+</pre>
+<div class="nested"><p> A combined digest of the results of all the dependencies.</div>
+<pre><a id="def:field Recalled.Internal.LoggedMap.Info.BobDigest" href="#dec:field Recalled.Internal.LoggedMap.Info.BobDigest">BobDigest</a><b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+</pre>
+<div class="nested"><p> Digest of the result of the computation.</div>
+<pre><a id="def:field Recalled.Internal.LoggedMap.Info.BobOffset" href="#dec:field Recalled.Internal.LoggedMap.Info.BobOffset">BobOffset</a><b>:</b> PtrInt
+</pre>
+<div class="nested"><p> Offset to the serialized result of the computation in the bob buffer of the log.</div>
+<pre><a id="def:field Recalled.Internal.LoggedMap.Info.BobSize" href="#dec:field Recalled.Internal.LoggedMap.Info.BobSize">BobSize</a><b>:</b> int
+</pre>
+<div class="nested"><p> Size of the serialized result in bytes.</div>
+<pre><a id="def:field Recalled.Internal.LoggedMap.Info.AddOffset" href="#dec:field Recalled.Internal.LoggedMap.Info.AddOffset">AddOffset</a><b>:</b> PtrInt
+</pre>
+<div class="nested"><p> Offset to the entry in the add buffer of the log.</div>
+</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.LoggedMap.create" href="#dec:val Recalled.Internal.LoggedMap.create">create</a><b>:</b> logDir<b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a>
+         <b>-&gt;</b> Job<b>&lt;</b>LoggedMap<b>&gt;</b>
+</pre>
+<div class="nested"><p> Creates a new or opens an existing logged map.  In case an existing logged map is opened, control is returned immediately to the caller, but a process runs to reconstruct the logged map in the background.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.LoggedMap.close" href="#dec:val Recalled.Internal.LoggedMap.close">close</a><b>:</b> loggedMap<b>:</b> <a href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a> <b>-&gt;</b> Job<b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Closes the logged map.  This must be called explicitly and the caller must wait for the alternative to make sure everything written to the logged map really will be persisted.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.LoggedMap.tryFind" href="#dec:val Recalled.Internal.LoggedMap.tryFind">tryFind</a><b>:</b> loggedMap<b>:</b> <a href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a>
+          <b>-&gt;</b> keyDigest<b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+          <b>-&gt;</b> Alt<b>&lt;</b>option<b>&lt;</b><a href="#def:type Recalled.Internal.LoggedMap.Info">Info</a><b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Tries to find an entry from the logged map.  The alternative becomes available as soon as it is known whether the logged map contains the desired entry.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.LoggedMap.add" href="#dec:val Recalled.Internal.LoggedMap.add">add</a><b>:</b> loggedMap<b>:</b> <a href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a>
+      <b>-&gt;</b> keyDigest<b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+      <b>-&gt;</b> depKeyDigests<b>:</b> array<b>&lt;</b><a href="#def:type Recalled.Internal.Digest">Digest</a><b>&gt;</b>
+      <b>-&gt;</b> depDigest<b>:</b> <a href="#def:type Recalled.Internal.Digest">Digest</a>
+      <b>-&gt;</b> bobSize<b>:</b> int
+      <b>-&gt;</b> bobWrite<b>:</b> (nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> unit)
+      <b>-&gt;</b> Job<b>&lt;</b><a href="#def:type Recalled.Internal.LoggedMap.Info">Info</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Adds an entry to the logged map.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.LoggedMap.readFun" href="#dec:val Recalled.Internal.LoggedMap.readFun">readFun</a><b>:</b> loggedMap<b>:</b> <a href="#def:type Recalled.Internal.LoggedMap.LoggedMap">LoggedMap</a>
+          <b>-&gt;</b> <a href="#def:val Recalled.Internal.LoggedMap.readFun">readFun</a><b>:</b> (nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <i>'x</i>)
+          <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Grants direct access to the bob storage of the logged map.</div>
+</div>
+<pre><b>module</b> <a id="def:module Recalled.Internal.MemMapBuf" href="#dec:module Recalled.Internal.MemMapBuf">MemMapBuf</a>  <b>=</b>
+</pre>
+<div class="nested"><p> Operations on memory mapped buffers.<pre><b>type</b> <a id="def:type Recalled.Internal.MemMapBuf.MemMapBuf" href="#dec:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a>
+</pre>
+<div class="nested"><p> Represents a memory mapped buffer that is persisted to a file.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.MemMapBuf.create" href="#dec:val Recalled.Internal.MemMapBuf.create">create</a><b>:</b> path<b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a> <b>-&gt;</b> Job<b>&lt;</b><a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a><b>&gt;</b>
+</pre>
+<div class="nested"><p> Creates a memory mapped buffer from and persisted to the specified file.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.MemMapBuf.size" href="#dec:val Recalled.Internal.MemMapBuf.size">size</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a> <b>-&gt;</b> PtrInt
+</pre>
+<div class="nested"><p> Returns the current size of the buffer.</div>
+<pre><b>module</b> <a id="def:module Recalled.Internal.MemMapBuf.Unsafe" href="#dec:module Recalled.Internal.MemMapBuf.Unsafe">Unsafe</a>  <b>=</b>
+</pre>
+<div class="nested"><p> Unsafe operations on memory mapped buffers.<pre><b>val</b> <a id="def:val Recalled.Internal.MemMapBuf.Unsafe.truncate" href="#dec:val Recalled.Internal.MemMapBuf.Unsafe.truncate">truncate</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a> <b>-&gt;</b> PtrInt <b>-&gt;</b> unit
+</pre>
+<div class="nested"><p> Reduce the size of buffer.  This operation is safe only when the memory mapped buffer is not concurrenly accessed by other threads.</div>
+</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.MemMapBuf.close" href="#dec:val Recalled.Internal.MemMapBuf.close">close</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a> <b>-&gt;</b> Job<b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Closes the memory mapped buffer.  This must be called explicitly and the caller must wait for the alternative to make sure anything written to the buffer really will be persisted to the underlying file.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.MemMapBuf.flush" href="#dec:val Recalled.Internal.MemMapBuf.flush">flush</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a> <b>-&gt;</b> Job<b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
+</pre>
+<div class="nested"><p> Waits until the buffer is not being accessed and flushes the buffer.  Note that if you call this from inside an <code><a href="#def:val Recalled.Internal.MemMapBuf.accessJob">accessJob</a></code> and wait for the reply then you have a deadlock.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.MemMapBuf.accessFun" href="#dec:val Recalled.Internal.MemMapBuf.accessFun">accessFun</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a>
+            <b>-&gt;</b> <a href="#def:val Recalled.Internal.LoggedMap.readFun">readFun</a><b>:</b> (nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> <i>'x</i>)
+            <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Grants access to read/write arbitrarily from/to the buffer for the duration of the given function.  The function is passed the buffer start address.  After the function returns, the address will no longer be valid.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.MemMapBuf.accessJob" href="#dec:val Recalled.Internal.MemMapBuf.accessJob">accessJob</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a>
+            <b>-&gt;</b> readJob<b>:</b> (nativeptr<b>&lt;</b>byte<b>&gt;</b> <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>)
+            <b>-&gt;</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b>
+</pre>
+<div class="nested"><p> Grants access to read/write arbitrarily from/to the buffer for the duration of the given job.  The job is passed the buffer start address. After the job returns, the address will no longer be valid.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.MemMapBuf.append" href="#dec:val Recalled.Internal.MemMapBuf.append">append</a><b>:</b> buf<b>:</b> <a href="#def:type Recalled.Internal.MemMapBuf.MemMapBuf">MemMapBuf</a>
+         <b>-&gt;</b> align<b>:</b> int
+         <b>-&gt;</b> <a href="#def:val Recalled.Internal.MemMapBuf.size">size</a><b>:</b> int
+         <b>-&gt;</b> Job<b>&lt;</b>PtrInt<b>&gt;</b>
+</pre>
+<div class="nested"><p> Allocates space from the end of the buffer and return offset to the start of the allocated space.</div>
+</div>
+<pre><b>module</b> <a id="def:module Recalled.Internal.MurmurHash3" href="#dec:module Recalled.Internal.MurmurHash3">MurmurHash3</a>  <b>=</b>
+</pre>
+<div class="nested"><p> Implementation of the MurmurHash3 algorithm for Recalled.<pre><b>val</b> <a id="def:val Recalled.Internal.MurmurHash3.bytes" href="#dec:val Recalled.Internal.MurmurHash3.bytes">bytes</a><b>:</b> data<b>:</b> nativeptr<b>&lt;</b>byte<b>&gt;</b>
+        <b>-&gt;</b> length<b>:</b> int
+        <b>-&gt;</b> seed<b>:</b> uint32
+        <b>-&gt;</b> lo<b>:</b> byref<b>&lt;</b>uint64<b>&gt;</b>
+        <b>-&gt;</b> hi<b>:</b> byref<b>&lt;</b>uint64<b>&gt;</b>
+        <b>-&gt;</b> unit
+</pre>
+<div class="nested"><p> Computes a 128-bit hash of the specified block of memory and stores the lower and higher 64-bits of the result to the specified variables.</div>
+<pre><b>val</b> <a id="def:val Recalled.Internal.MurmurHash3.string" href="#dec:val Recalled.Internal.MurmurHash3.string">string</a><b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a><b>:</b> <a href="#def:val Recalled.Internal.MurmurHash3.string">string</a>
+         <b>-&gt;</b> seed<b>:</b> uint32
+         <b>-&gt;</b> lo<b>:</b> byref<b>&lt;</b>uint64<b>&gt;</b>
+         <b>-&gt;</b> hi<b>:</b> byref<b>&lt;</b>uint64<b>&gt;</b>
+         <b>-&gt;</b> unit
+</pre>
+<div class="nested"><p> Computes a 128-bit hash of the specified string and stores the lower and higher 64-bits of the result to the specified variables.</div>
+</div>
+</div>
+</td></tr></table></body>
+</html>
