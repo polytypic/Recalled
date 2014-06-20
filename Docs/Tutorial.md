@@ -1,10 +1,5 @@
 # Defining Computations that can be Recalled
 
-**Note: this document is just slightly out of date due to some interface tweaks
-in the latest experimental releases, but if you look at the reference documents,
-you should have no problems to work out the minimal differences.  I will be
-revising and extending this document in the next few days.**
-
 Recalled is a library, an
 [EDSL](http://en.wikipedia.org/wiki/Domain-specific_language) of a sort, that
 can be used to define *persistent*, *incremental*, *parallel* computations such
@@ -74,9 +69,10 @@ let's begin by creating an auxiliary definition for the purposes of the current
 problem&mdash;a computation that simply gets the last write time of a file:
 
 ```fsharp
-let lastWriteTimeUtc path = logAs ("lastWriteTimeUtc: " + path) {
-  return File.GetLastWriteTimeUtc path
-}
+let lastWriteTimeUtc (path: string) : LogAs<Logged<DateTime>> =
+  logAs ("lastWriteTimeUtc: " + path) {
+    return File.GetLastWriteTimeUtc path
+  }
 ```
 
 The above definition uses the `logAs` combinator to define a persisted
@@ -102,12 +98,13 @@ Let's then work to define a computation to calculate the sum of integers in a
 file.  Here is a first attempt:
 
 ```fsharp
-let sumLinesOfFile path = logAs ("sumLinesOfFile: " + path) {
-  let sum =
-    File.ReadAllLines path
-    |> Array.sumBy (fun intLine -> int intLine)
-  return sum
-}
+let sumLinesOfFile (path: string) : LogAs<Logged<int>> =
+  logAs ("sumLinesOfFile: " + path) {
+    let sum =
+      File.ReadAllLines path
+      |> Array.sumBy (fun intLine -> int intLine)
+    return sum
+  }
 ```
 
 The above `sumLinesOfFile` computation works, but it doesn't buy us anything.
@@ -122,13 +119,14 @@ computes the sum&mdash;whether or not the file has changed.  Fortunately this is
 easy to fix.  Here is a modified version:
 
 ```fsharp
-let sumLinesOfFile path = logAs ("sumLinesOfFile: " + path) {
-  let! _ = lastWriteTimeUtc path
-  let sum =
-    File.ReadAllLines path
-    |> Array.sumBy (fun intLine -> int intLine)
-  return sum
-}
+let sumLinesOfFile (path: string) : LogAs<Logged<int>> =
+  logAs ("sumLinesOfFile: " + path) {
+    let! _ = lastWriteTimeUtc path
+    let sum =
+      File.ReadAllLines path
+      |> Array.sumBy (fun intLine -> int intLine)
+    return sum
+  }
 ```
 
 What we changed is that now the `sumLinesOfFile` computation *depends on* the
@@ -179,14 +177,15 @@ Speaking of the ability to work with ordinary functions that return ordinary
 values, here is an example of a computation that is surely familiar:
 
 ```fsharp
-let rec fib n = logAs (sprintf "fib: %d" n) {
-  if n < 2L then
-    return n
-  else
-    let! x = fib (n-2L) |> wait
-    let! y = fib (n-1L) |> wait
-    return x + y
-}
+let rec fib (n: BigInteger) : LogAs<Logged<BigInteger>> =
+  logAs ("fib: " + n.ToString ()) {
+    if n < 2I then
+      return n
+    else
+      let! x = fib (n-1I) |> wait
+      let! y = fib (n-2I) |> wait
+      return x + y
+  }
 ```
 
 What would be the time and space complexity of the above computation?
@@ -196,7 +195,7 @@ What would be the time and space complexity of the above computation?
 Let's then continue with a computation for reading all lines of a file:
 
 ```fsharp
-let readAllLines path = update {
+let readAllLines (path: string) : Update<array<string>> = update {
   let! _ = lastWriteTimeUtc path
   return File.ReadAllLines path
 }
@@ -219,13 +218,14 @@ Recalled's log system.
 Using `readAllLines`, we can simplify the `sumLinesOfFile` computation:
 
 ```fsharp
-let sumLinesOfFile path = logAs ("sumLinesOfFile: " + path) {
-  let! intLines = readAllLines path
-  let sum =
-    intLines
-    |> Array.sumBy (fun intLine -> int intLine)
-  return sum
-}
+let sumLinesOfFile (path: string) : LogAs<Logged<int>> =
+  logAs ("sumLinesOfFile: " + path) {
+    let! intLines = readAllLines path
+    let sum =
+      intLines
+      |> Array.sumBy (fun intLine -> int intLine)
+    return sum
+  }
 ```
 
 Written this way, `sumLinesOfFile` looks very much like just another ordinary
@@ -246,19 +246,20 @@ Continuing with our toy, we now have the building blocks to define a
 `sumLinesOfFiles` computation:
 
 ```fsharp
-let sumLinesOfFiles (fileListPath: string) = logAs ("sumLinesOfFiles: " + fileListPath) {
-  let! fileList = readAllLines fileListPath
+let sumLinesOfFiles (fileListPath: string) : LogAs<Logged<int>> =
+  logAs ("sumLinesOfFiles: " + fileListPath) {
+    let! fileList = readAllLines fileListPath
 
-  let! sums =
-    fileList
-    |> Seq.mapWithLog (sumLinesOfFile >> wait)
+    let! sums =
+      fileList
+      |> Seq.mapLogAs (sumLinesOfFile >> wait)
 
-  let total =
-    sums
-    |> Array.sum
+    let total =
+      sums
+      |> Seq.sum
 
-  return total
-}
+    return total
+  }
 ```
 
 The two new operations used in the above definition are the `Seq.mapWithLog` and
@@ -297,23 +298,24 @@ immediately.  We could just as well first start all the computations and then
 read their results.
 
 ```fsharp
-let sumLinesOfFiles (fileListPath: string) = logAs ("sumLinesOfFiles: " + fileListPath) {
-  let! fileList = readAllLines fileListPath
+let sumLinesOfFiles (fileListPath: string) : LogAs<Logged<int>> =
+  logAs ("sumLinesOfFiles: " + fileListPath) {
+    let! fileList = readAllLines fileListPath
 
-  let! loggedSums =
-    fileList
-    |> Seq.mapWithLog sumLinesOfFile
+    let! loggedSums =
+      fileList
+      |> Seq.mapLogAs sumLinesOfFile
 
-  let! sums =
-    loggedSums
-    |> Seq.mapJob readAsJob
+    let! sums =
+      loggedSums
+      |> Seq.mapUpdate read
 
-  let total =
-    sums
-    |> Array.sum
+    let total =
+      sums
+      |> Seq.sum
 
-  return total
-}
+    return total
+  }
 ```
 
 This concludes the toy example, almost.  We haven't yet looked at how these
