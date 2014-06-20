@@ -1,21 +1,26 @@
 # Defining Computations that can be Recalled
 
-Recall is a library, an
+**Note: this document is just slightly out of date due to some interface tweaks
+in the latest experimental releases, but if you look at the reference documents,
+you should have no problems to work out the minimal differences.  I will be
+revising and extending this document in the next few days.**
+
+Recalled is a library, an
 [EDSL](http://en.wikipedia.org/wiki/Domain-specific_language) of a sort, that
 can be used to define *persistent*, *incremental*, *parallel* computations such
-as [build systems](http://en.wikipedia.org/wiki/Build_automation).  Recall isn't
-really a ready made
+as [build systems](http://en.wikipedia.org/wiki/Build_automation).  Recalled
+isn't really a ready made
 [traditional build system](http://en.wikipedia.org/wiki/List_of_build_automation_software)
-as such.  The core of Recall is very minimal and doesn't even contain built-in
+as such.  The core of Recalled is very minimal and doesn't even contain built-in
 functionality, like operations for checking file modification dates,
 characteristics to build systems.  However, such operations can be implemented
 in a straightforward manner and, in particular, *forward build systems*, that go
 from inputs to outputs or sources to targets, can be more or less directly
-programmed using Recall.
+programmed using Recalled.
 
 ## A toy example
 
-Let's examine how Recall can be used via a concrete toy example, meant to be
+Let's examine how Recalled can be used via a concrete toy example, meant to be
 simple enough to be easily worked through without having to spend any time with
 problem domain specific details
 
@@ -63,8 +68,8 @@ the total would be computed from previously known sums and so on.
 
 ### Working incrementally
 
-As hinted in the beginning, Recall isn't really a ready made build tool, but it
-allows one to straightforwardly program build tool like functionality.  So,
+As hinted in the beginning, Recalled isn't really a ready made build tool, but
+it allows one to straightforwardly program build tool like functionality.  So,
 let's begin by creating an auxiliary definition for the purposes of the current
 problem&mdash;a computation that simply gets the last write time of a file:
 
@@ -78,17 +83,17 @@ The above definition uses the `logAs` combinator to define a persisted
 computation.  The idea of the `logAs` combinator is that it defines a named
 computation, that can be later identified, and whose execution is *logged*, so
 that that its result, and other details, can be later recovered&mdash;possibly
-in another run of the same or modified program.  That is right.  Recall is
+in another run of the same or modified program.  That is right.  Recalled is
 designed in such a way that a programmer can easily incrementally modify a
-working program so that on subsequent runs Recall reuses whatever it can and
+working program so that on subsequent runs Recalled reuses whatever it can and
 modified computations get rerun as necessary.
 
 The `lastWriteTimeUtc` computation does not depend on any other logged
-computation.  Recall treats such computations as primitive and always reruns
-such computations.  However, Recall does log the results of such primitive
+computation.  Recalled treats such computations as primitive and always reruns
+such computations.  However, Recalled does log the results of such primitive
 computations, in this case the `DateTime` value returned by
 `File.GetLastWriteTimeUtc`, and after recomputing the value, can compare the new
-value with the old one, allowing Recall to avoid rerunning other computations
+value with the old one, allowing Recalled to avoid rerunning other computations
 that depend on such primitive computations.
 
 ### Dependencies
@@ -127,19 +132,19 @@ let sumLinesOfFile path = logAs ("sumLinesOfFile: " + path) {
 ```
 
 What we changed is that now the `sumLinesOfFile` computation *depends on* the
-`lastWriteTimeUtc` computation.  Recall sees and essentially logs the result of
-the `lastWriteTimeUtc` computation even though the result of `lastWriteTimeUtc`
-isn't explicitly used by `sumLinesOfFile`.
+`lastWriteTimeUtc` computation.  Recalled sees and essentially logs the result
+of the `lastWriteTimeUtc` computation even though the result of
+`lastWriteTimeUtc` isn't explicitly used by `sumLinesOfFile`.
 
-### The essence of Recall
+### The essence of being Recalled
 
-Recall operates under the fundamental assumption that the programmer makes sure
-that all input that may have an effect on the output of a computation is logged
-for Recall to see.  This may sound like a difficult requirement to fulfill, but
-it is, in fact, fairly trivial, because any data that may have an effect on the
-output can just be logged as part of a computation using operations like
-`logAs`, which we have been using already, but also other operations like `log`
-and `watch`
+Recalled operates under the fundamental assumption that the programmer makes
+sure that all input that may have an effect on the output of a computation is
+logged for Recalled to see.  This may sound like a difficult requirement to
+fulfill, but it is, in fact, fairly trivial, because any data that may have an
+effect on the output can just be logged as part of a computation using
+operations like `logAs`, which we have been using already, but also other
+operations like `log` and `watch`
 
 ```fsharp
 let! _ = log { ... ; return ... }
@@ -149,21 +154,21 @@ do! watch (input1, input2, ..., inputN)
 that conveniently use an automatically derived identity, based on the
 surrounding computation, for the logged data.
 
-When Recall reruns the modified version of `sumLinesOfFile`, it first reruns the
-`lastWriteTimeUtc` computation, which is the only dependency of
-`sumLinesOfFile`.  Assuming the result of that hasn't changed, Recall decides,
+When Recalled reruns the modified version of `sumLinesOfFile`, it first reruns
+the `lastWriteTimeUtc` computation, which is the only dependency of
+`sumLinesOfFile`.  Assuming the result of that hasn't changed, Recalled decides,
 based on the fundamental assumption, that nothing has changed so it simply
 recovers the previously logged result of `sumLinesOfFile`.
 
-This is also where Recall differs from most traditional build systems and is
+This is also where Recalled differs from most traditional build systems and is
 more like an adaptation of
 [Self-Adjusting Computation](http://www.umut-acar.org/self-adjusting-computation).
 Traditional build systems often have some specific built-in primitive kinds of
 dependencies such as dependencies to files.  Upon rebuilds those systems use
 their built-in primitives to check dependencies such as checking file
-modification dates or, say, MD5 hashes of file contents.  In Recall,
+modification dates or, say, MD5 hashes of file contents.  In Recalled,
 recomputations are triggered by changes in the result *values* produced by the
-computations.  This makes Recall particularly convenient for working with
+computations.  This makes Recalled particularly convenient for working with
 ordinary host-language functions, while many existing build systems try to
 primarily make it easy to work with external programs that read and write
 *files*.
@@ -207,7 +212,7 @@ Getting back to `readAllLines`, we could, of course, easily log the result if we
 wanted to, but it makes little sense to log a potentially large amount of data
 that can be trivially recomputed by reading the file.  Doing so would bring
 little benefit as it would simply move the burden of reading the file list to
-Recall's log system.
+Recalled's log system.
 
 ### Readability
 
@@ -224,8 +229,8 @@ let sumLinesOfFile path = logAs ("sumLinesOfFile: " + path) {
 ```
 
 Written this way, `sumLinesOfFile` looks very much like just another ordinary
-function.  This is also very much a design goal for Recall.  The goal is to make
-these kinds of *persistent* and *incremental* computations as readable as
+function.  This is also very much a design goal for Recalled.  The goal is to
+make these kinds of *persistent* and *incremental* computations as readable as
 possible in the sense that you can read the overall algorithm almost as easily
 as you'd read ordinary code.
 
@@ -285,7 +290,7 @@ answering:
 
 There is one simple improvement we can make to the `sumLinesOfFiles`
 computation.  The sums of individual files do not depend on each other, so those
-sums can be computed in parallel.  Recall basically starts every logged
+sums can be computed in parallel.  Recalled basically starts every logged
 computation as a separate lightweight thread and you explicitly have to wait if
 you need to access the result.  In this case we don't need the results
 immediately.  We could just as well first start all the computations and then
@@ -318,8 +323,8 @@ computation can be run.
 
 Logged computation are built upon the lightweight jobs of
 [Hopac](https://github.com/VesaKarvonen/Hopac) and the `recall` operation of
-Recall, when given path to a directory for the log data, returns a job than can
-be `run` using Hopac:
+Recalled, when given path to a directory for the log data, returns a job than
+can be `run` using Hopac:
 
 ```fsharp
 let sum : int = run <| recall ".recall" {
@@ -327,5 +332,5 @@ let sum : int = run <| recall ".recall" {
 }
 ```
 
-By the way, can you see now how the name *"Recall"* is descriptive of Recall in
-at least two essential ways?
+By the way, can you see now how the name *"Recalled"* is descriptive of Recalled
+in at least two essential ways?
