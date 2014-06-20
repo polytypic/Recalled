@@ -3,7 +3,7 @@
 open System.IO
 open System.Diagnostics
 open Hopac
-open Recall
+open Recalled
 
 // This test shows what is and what isn't being computed.  The idea is to test a
 // sequence of changes to a computation as if the computations were evolved as

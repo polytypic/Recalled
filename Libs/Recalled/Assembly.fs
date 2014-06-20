@@ -1,4 +1,4 @@
-﻿namespace Recall
+﻿namespace Recalled
 
 open System.Reflection
 open System.Runtime.InteropServices
@@ -6,13 +6,13 @@ open System.Runtime.InteropServices
 [<AutoOpen>]
 module AssemblyInfo =
   [<Literal>]
-  let Version = Recall.Internal.AssemblyInfo.Version
+  let Version = Recalled.Internal.AssemblyInfo.Version
 
-[<assembly: AssemblyTitle("Recall")>]
-[<assembly: AssemblyDescription("A simple EDSL in F# for defining persistent, incremental, parallel computations such as build systems.")>]
+[<assembly: AssemblyTitle("Recalled")>]
+[<assembly: AssemblyDescription("A library for defining persistent, incremental, parallel computations such as build systems.")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
-[<assembly: AssemblyProduct("Recall")>]
+[<assembly: AssemblyProduct("Recalled")>]
 [<assembly: AssemblyCopyright("© Vesa Karvonen")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]

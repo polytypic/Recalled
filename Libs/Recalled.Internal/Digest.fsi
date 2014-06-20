@@ -1,7 +1,7 @@
-﻿/// The Recall.Internal library implements the internal mechanisms used by the
-/// Recall library and associated tools.  The Recall.Internal library is not
-/// meant to be directly used by programs written with the Recall library.
-namespace Recall.Internal
+﻿/// The Recalled.Internal library implements the internal mechanisms used by the
+/// Recalled library and associated tools.  The Recalled.Internal library is not
+/// meant to be directly used by programs written with the Recalled library.
+namespace Recalled.Internal
 
 open Microsoft.FSharp.NativeInterop
 open System.IO
@@ -10,13 +10,13 @@ open System.Collections.Generic
 /// Represents a digest or hash of some data or value.
 ///
 #if DOC
-/// User code should never need to modify digest values.  Recall computes
+/// User code should never need to modify digest values.  Recalled computes
 /// digests of anything and everything and having the ability to mutate digests
 /// values internally makes a difference.
 ///
-/// Note that the digest algorithms used with Recall do not need to be
+/// Note that the digest algorithms used with Recalled do not need to be
 /// cryptographically secure, but should ideally make collisions highly
-/// unlikely.  Currently Recall uses the `MurmurHash3` algorithm to compute
+/// unlikely.  Currently Recalled uses the `MurmurHash3` algorithm to compute
 /// digests, but the digest algorithm may be changed in the future.
 #endif
 type [<NoComparison; CustomEquality>] Digest = struct

@@ -1,6 +1,6 @@
-﻿namespace Recall
+﻿namespace Recalled
 
-open Recall.Internal
+open Recalled.Internal
 open Microsoft.FSharp.NativeInterop
 open System
 open System.Collections.Generic
@@ -291,7 +291,7 @@ type RunWithLogBuilder (logDir: string) =
   }
 
 [<AutoOpen>]
-module Recall =
+module Recalled =
   let recall (logDir: string) : RunWithLogBuilder =
     RunWithLogBuilder (logDir)
 

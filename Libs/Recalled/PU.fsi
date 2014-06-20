@@ -1,4 +1,4 @@
-﻿namespace Recall
+﻿namespace Recalled
 
 open System.Numerics
 open System
@@ -11,7 +11,7 @@ open Infers.Rep
 ///
 /// This class has a very low level interface and is designed to make it
 /// possible to implement nearly optimal serialization to and deserialization
-/// from memory mapped files.  This is important, because Recall serializes
+/// from memory mapped files.  This is important, because Recalled serializes
 /// all the results of logged computations and potentially deserializes large
 /// numbers of those results.
 ///

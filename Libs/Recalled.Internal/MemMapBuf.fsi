@@ -1,4 +1,4 @@
-﻿namespace Recall.Internal
+﻿namespace Recalled.Internal
 
 open Hopac
 

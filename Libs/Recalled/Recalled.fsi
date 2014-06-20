@@ -1,25 +1,25 @@
-﻿/// Recall is a library for defining persistent, incremental, parallel
-/// computations such as build systems.  The main goals for Recall are to make
-/// it convenient to define such computations and to be able to scale such
+﻿/// Recalled is a library for defining persistent, incremental, parallel
+/// computations such as build systems.  The main goals for Recalled are to make
+/// it straightforward to define such computations and to scale such
 /// computations.
 ///
-/// The central concept of Recall is that of a logged computation, represented
+/// The central concept of Recalled is that of a logged computation, represented
 /// by the `Logged<'x>` type constructor.  A logged computation is defined and
 /// executed in such a manner that after it has been run to completion, the
 /// computation can be recreated, possibly in a separate run of the program, and
 /// its result can be recovered without actually running the recreated
-/// computation to completion, assuming Recall finds nothing that has changed
+/// computation to completion, assuming Recalled finds nothing that has changed
 /// that could change the result of the computation.
 ///
-/// A correctly defined logged computation is recomputed by Recall if it needs
-/// to be recomputed, because its result may have changed.  Recall makes it easy
-/// for the programmer to write correct logged computations, but does not
+/// A correctly defined logged computation is recomputed by Recalled if it needs
+/// to be recomputed, because its result may have changed.  Recalled makes it
+/// easy for the programmer to write correct logged computations, but does not
 /// strictly enforce correctness.  Strictly enforcing correctness is essentially
 /// impossible to do in a impure language in a convenient manner, because it
-/// precludes the use of built-in lambda expressions.  Therefore Recall chooses
-/// convenience over cumbersomeness.  To define a correct logged computation,
-/// the programmer simply needs to make sure that any input that may change the
-/// output of a computation is essentially seen by Recall.
+/// precludes the use of built-in lambda expressions.  Therefore Recalled
+/// chooses convenience over cumbersomeness.  To define a correct logged
+/// computation, the programmer simply needs to make sure that any input that
+/// may change the output of a computation is essentially seen by Recalled.
 ///
 /// Logged computations are defined and executed using lightweight threads,
 /// called jobs, provided by the Hopac library.  This directly allows logged
@@ -28,7 +28,7 @@
 /// operations, e.g. to perform distributed operations over a network of
 /// machines or to perform other forms of asynchronous IO, while allowing full
 /// use of the cores of the local machine to process other computations.
-namespace Recall
+namespace Recalled
 
 open System
 open Hopac
@@ -45,8 +45,8 @@ type Update<'x>
 ///
 /// During a logged computation, binding the value of another logged computation
 /// makes the current logged computation dependent on the result of the bound
-/// logged computation.  This way Recall learns about the input that may change
-/// the output of a computation.
+/// logged computation.  This way Recalled learns about the input that may
+/// change the output of a computation.
 #endif
 type Logged<'x>
 
@@ -149,9 +149,9 @@ module Seq =
   /// returns a new sequence with the results.
   val mapLogAs: ('x -> LogAs<'y>) -> seq<'x> -> Update<ResizeArray<'y>>
 
-/// Operations for defining computations with Recall.
+/// Operations for defining computations that can be Recalled.
 [<AutoOpen>]
-module Recall =
+module Recalled =
   /// Creates a job that creates a new or reads an existing computation log
   /// stored in the specified directory, creates and runs the given update
   /// computation and then waits until all the logged computations have either
@@ -229,7 +229,7 @@ module Recall =
   /// until the completion of the step.
 #if DOC
   ///
-  /// Note that Recall automatically cancels computations in case of failure.
+  /// Note that Recalled automatically cancels computations in case of failure.
   /// Explicit cancellation is unlikely to provide any benefits except in case
   /// of computations that perform long running embedded asynchronous
   /// operations.

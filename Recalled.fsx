@@ -1,20 +1,17 @@
-// Tip: Add --lib:<recall-root-directory> to your F# interactive options
+// Tip: Add --lib:<recalled-root-directory> to your F# interactive options
 
-#r "Libs\\Recall\\bin\\Release\\Hopac.Core.dll" ;;
-#r "Libs\\Recall\\bin\\Release\\Hopac.dll" ;;
-#r "Libs\\Recall\\bin\\Release\\Infers.dll" ;;
-#r "Libs\\Recall\\bin\\Release\\Infers.Rep.dll" ;;
-#r "Libs\\Recall\\bin\\Release\\Recall.dll" ;;
+#r "Libs\\Recalled\\bin\\Release\\Hopac.Core.dll" ;;
+#r "Libs\\Recalled\\bin\\Release\\Hopac.dll" ;;
+#r "Libs\\Recalled\\bin\\Release\\Infers.dll" ;;
+#r "Libs\\Recalled\\bin\\Release\\Infers.Rep.dll" ;;
+#r "Libs\\Recalled\\bin\\Release\\Recalled.Internal.dll" ;;
+#r "Libs\\Recalled\\bin\\Release\\Recalled.dll" ;;
 
 open System.Security.Cryptography ;;
 open System.IO ;;
 open System ;;
 open Hopac ;;
-open Hopac.Infixes ;;
-open Hopac.Job.Infixes ;;
-open Hopac.Alt.Infixes ;;
-open Hopac.Extensions ;;
-open Recall ;;
+open Recalled ;;
 
 ////////////////////////////////////////////////////////////////////////////////
 

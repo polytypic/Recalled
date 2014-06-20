@@ -1,8 +1,8 @@
-﻿namespace Recall.Internal
+﻿namespace Recalled.Internal
 
 open Microsoft.FSharp.NativeInterop
 
-/// Implementation of the MurmurHash3 algorithm for Recall.
+/// Implementation of the MurmurHash3 algorithm for Recalled.
 module MurmurHash3 =
   /// Computes a 128-bit hash of the specified block of memory and stores the
   /// lower and higher 64-bits of the result to the specified variables.

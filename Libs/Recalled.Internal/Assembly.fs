@@ -1,4 +1,4 @@
-﻿namespace Recall.Internal
+﻿namespace Recalled.Internal
 
 open System.Reflection
 open System.Runtime.InteropServices
@@ -6,13 +6,13 @@ open System.Runtime.InteropServices
 [<AutoOpen>]
 module AssemblyInfo =
   [<Literal>]
-  let Version = "0.0.0.5"
+  let Version = "0.0.0.6"
 
-[<assembly: AssemblyTitle("Recall.Internal")>]
-[<assembly: AssemblyDescription("Internal modules used by the Recall library.")>]
+[<assembly: AssemblyTitle("Recalled.Internal")>]
+[<assembly: AssemblyDescription("Internal modules used by the Recalled library.")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
-[<assembly: AssemblyProduct("Recall.Internal")>]
+[<assembly: AssemblyProduct("Recalled.Internal")>]
 [<assembly: AssemblyCopyright("© Vesa Karvonen")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]

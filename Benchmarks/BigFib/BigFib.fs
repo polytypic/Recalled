@@ -6,7 +6,7 @@
 
 open System.Diagnostics
 open Hopac
-open Recall
+open Recalled
 
 let rec fib n = logAs ("fib: " + n.ToString ()) {
   if n < 2I then

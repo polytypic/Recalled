@@ -2,13 +2,13 @@
 <package>
   <metadata>
     <id>Recalled</id>
-    <version>0.0.0.5</version>
+    <version>0.0.0.6</version>
     <title>Recalled</title>
     <summary>A library for defining persistent, incremental, parallel computations such as build systems.</summary>
     <authors>Vesa Karvonen</authors>
     <owners>Vesa Karvonen</owners>
-    <licenseUrl>https://github.com/VesaKarvonen/Recall/blob/master/LICENSE.md</licenseUrl>
-    <projectUrl>https://github.com/VesaKarvonen/Recall</projectUrl>
+    <licenseUrl>https://github.com/VesaKarvonen/Recalled/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/VesaKarvonen/Recalled</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Recalled is a library for defining persistent, incremental, parallel computations such as build systems.  The two goals for Recalled are to make it straightforward to define such computations and to effectively scale such computations by utililizing all CPU cores and by sharing results among a network of workstations.</description>
     <releaseNotes>This is an experimental release.  You must manually delete files created by previous experimental releases.</releaseNotes>
@@ -20,9 +20,9 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Libs\Recall\bin\Release\Recall.dll" target="lib\net451" />
-    <file src="..\Libs\Recall\bin\Release\Recall.xml" target="lib\net451" />
-    <file src="..\Libs\Recall\bin\Release\Recall.Internal.dll" target="lib\net451" />
-    <file src="..\Libs\Recall\bin\Release\Recall.Internal.xml" target="lib\net451" />
+    <file src="..\Libs\Recalled\bin\Release\Recalled.dll" target="lib\net451" />
+    <file src="..\Libs\Recalled\bin\Release\Recalled.xml" target="lib\net451" />
+    <file src="..\Libs\Recalled\bin\Release\Recalled.Internal.dll" target="lib\net451" />
+    <file src="..\Libs\Recalled\bin\Release\Recalled.Internal.xml" target="lib\net451" />
   </files>
 </package>

@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module Recall.Internal.Util
+module Recalled.Internal.Util
 
 open Microsoft.FSharp.NativeInterop
 

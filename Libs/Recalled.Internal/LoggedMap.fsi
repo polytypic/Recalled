@@ -1,4 +1,4 @@
-﻿namespace Recall.Internal
+﻿namespace Recalled.Internal
 
 open Hopac
 
@@ -7,7 +7,7 @@ module LoggedMap =
   /// Represents a logged map.
 #if DOC
   ///
-  /// Recall uses a logged map to log information on computations, including
+  /// Recalled uses a logged map to log information on computations, including
   /// information on dependencies of computations and and the results of
   /// computations, stored as separate binary objects or bob.  The term bob is
   /// used, because efficient storage of both large and small objects is

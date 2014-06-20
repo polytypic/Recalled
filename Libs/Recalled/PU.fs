@@ -1,6 +1,6 @@
-﻿namespace Recall
+﻿namespace Recalled
 
-open Recall.Internal
+open Recalled.Internal
 open Microsoft.FSharp.NativeInterop
 open System.Numerics
 open System
