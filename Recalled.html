@@ -115,13 +115,13 @@ font-weight: bold;
   <b>member</b> Delay<b>:</b> (unit <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Return<b>:</b> <i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> ReturnFrom<b>:</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b> ReturnFrom<b>:</b>  <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b> ReturnFrom<b>:</b>    Log<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b> ReturnFrom<b>:</b>    Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b> <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b> Log<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Bind<b>:</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
-  <b>member</b> Bind<b>:</b>  <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
-  <b>member</b> Bind<b>:</b>    Log<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
-  <b>member</b> Bind<b>:</b>    Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b> <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b> Log<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>
   <b>member</b> Combine<b>:</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b>unit<b>&gt;</b> <b>*</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Zero<b>:</b> unit <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b>unit<b>&gt;</b>
 </pre>
@@ -140,11 +140,11 @@ font-weight: bold;
   <b>member</b> Delay<b>:</b> (unit <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Return<b>:</b> <i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> ReturnFrom<b>:</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b>        ReturnFrom<b>:</b>   <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
-  <b>member</b> ReturnFrom<b>:</b>     Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b> <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
+  <b>member</b> ReturnFrom<b>:</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> Bind<b>:</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>
-  <b>member</b>        Bind<b>:</b>   <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>
-  <b>member</b> Bind<b>:</b>     Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b> <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>
+  <b>member</b> Bind<b>:</b> Job<b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'y</i><b>&gt;</b>
   <b>member</b> Combine<b>:</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b>unit<b>&gt;</b> <b>*</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> TryFinally<b>:</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (unit <b>-&gt;</b> unit) <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
   <b>member</b> TryWith<b>:</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>*</b> (exn <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>) <b>-&gt;</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b><i>'x</i><b>&gt;</b>
@@ -334,10 +334,18 @@ font-weight: bold;
 <div class="nested"><p> Represents a computation whose result is logged with a user defined identity.</div>
 <pre><b>type</b> <a id="def:type Recalled.Log" href="#dec:type Recalled.Log">Log</a><b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
-<div class="nested"><p> Represents a computation whose result is logged and is given an implicitly created identity based on identity of the surrounding computation.</div>
+<div class="nested"><p> Represents a computation whose result is logged and is given an implicitly defined identity based on the identity of the surrounding computation.</div>
 <pre><b>type</b> <a id="def:type Recalled.UpdateBuilder" href="#dec:type Recalled.UpdateBuilder">UpdateBuilder</a>  <b>=</b>
 </pre>
-<div class="nested"><p> Builder for steppable computations.</p><p> Note that steppable computations allow only a limited set of computational patterns, because a steppable computation is not guaranteed to be run to completion.  Specifically, while a single step of a computation is guaranteed to be run to completion after it has been started, a sequence of steps is not guaranteed to be run to completion.  Because of this, constructs such as <code><b>use</b></code> cannot be given meaningful semantics.  However, within a single step, even one defined as a job, such constructs can be used.</div>
+<div class="nested"><p> Builder for updates or steppable computations.</p><p> Note that steppable computations allow only a limited set of computational patterns, because a steppable computation is not guaranteed to be run to completion.  Specifically, while a single step of a computation is guaranteed to be run to completion after it has been started, a sequence of steps is not guaranteed to be run to completion.  Because of this, constructs such as <code><b>use</b></code> cannot be given simple intuitive semantics and are therefore not supported.  However, within a single step, even one defined as a job, such constructs can be used.</p><p> The following computational patterns are supported:</p><pre><b>...</b> ; <b>...</b>
+<b>do</b> <b>...</b>
+<b>do</b><b>!</b> <b>...</b>
+<b>if</b> <b>...</b> <b>then</b> <b>...</b>
+<b>if</b> <b>...</b> <b>then</b> <b>...</b> <b>else</b> <b>...</b>
+<b>let</b><b>!</b> <b>...</b> <b>=</b> <b>...</b> <b>|</b> job <b>|</b> <a href="#def:val Recalled.Recalled.log">log</a> <b>|</b> <a href="#def:val Recalled.Recalled.logAs">logAs</a>
+<b>return</b> <b>...</b>
+<b>return</b><b>!</b> <b>...</b> <b>|</b> job <b>|</b> <a href="#def:val Recalled.Recalled.log">log</a> <b>|</b> <a href="#def:val Recalled.Recalled.logAs">logAs</a>
+</pre><p> In the above, an ellipsis denotes either an update or an ordinary expression.  An update can directly bind jobs as well as computations logged with either a user defined or an implicitly defined identity.</div>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
 <b>type</b> <a id="def:type Recalled.LogAsBuilder" href="#dec:type Recalled.LogAsBuilder">LogAsBuilder</a>  <b>=</b>
 </pre>
@@ -348,11 +356,28 @@ font-weight: bold;
 <div class="nested"><p> Builder for a computation logged with an implicitly assigned identity.</div>
 <pre><b>type</b> <a id="def:type Recalled.WithLogBuilder" href="#dec:type Recalled.WithLogBuilder">WithLogBuilder</a>  <b>=</b>
 </pre>
-<div class="nested"><p> Builder for parallel computations with a log.  A computation with a log is executed in a context with a log for logging individual logged computations.</div>
+<div class="nested"><p> Builder for parallel computations with a log.  A computation with a log is executed in a context with a log for logging individual logged computations.</p><p> The following computational patterns are supported:</p><pre><b>...</b> ; <b>...</b>
+<b>do</b> <b>...</b>
+<b>do</b><b>!</b> <b>...</b>
+<b>for</b> <b>...</b> <b>=</b> <b>...</b> <b>to</b> <b>...</b> <b>do</b> <b>...</b>
+<b>for</b> <b>...</b> <b>in</b> <b>...</b> <b>do</b> <b>...</b>
+<b>if</b> <b>...</b> <b>then</b> <b>...</b>
+<b>if</b> <b>...</b> <b>then</b> <b>...</b> <b>else</b> <b>...</b>
+<b>let</b> <b>...</b> <b>=</b> <b>...</b> <b>in</b> <b>...</b>
+<b>let</b><b>!</b> <b>...</b> <b>=</b> <b>...</b> <b>|</b> job <b>|</b> <a href="#def:val Recalled.Recalled.logAs">logAs</a>
+<b>match</b> <b>...</b> <b>with</b> <b>...</b>
+<b>return</b> <b>...</b>
+<b>return</b><b>!</b> <b>...</b> <b>|</b> job <b>|</b> <a href="#def:val Recalled.Recalled.logAs">logAs</a>
+<b>try</b> <b>...</b> <b>finally</b> <b>...</b>
+<b>try</b> <b>...</b> <b>with</b> <b>...</b>
+<b>use</b> <b>...</b> <b>in</b> <b>...</b>
+<b>use</b><b>!</b> <b>...</b> <b>in</b> <b>...</b>
+<b>while</b> <b>...</b> <b>do</b> <b>...</b>
+</pre><p> In the above, an ellipsis denotes a computation with a log or an ordinary expression.  A computation with a log can directly bind jobs as well as computations logged with a user defined identity.  However, updates and computations with an implicitly defined identity cannot be bound directly.</div>
 <pre><b>[&lt;</b>Class<b>&gt;]</b> 
 <b>type</b> <a id="def:type Recalled.RunWithLogBuilder" href="#dec:type Recalled.RunWithLogBuilder">RunWithLogBuilder</a>  <b>=</b>
 </pre>
-<div class="nested"><p> Builder for running a parallel computations with a log.</div>
+<div class="nested"><p> Builder for running a parallel computation with a log.</div>
 <pre><b>module</b> <a id="def:module Recalled.Seq" href="#dec:module Recalled.Seq">Seq</a>  <b>=</b>
 </pre>
 <div class="nested"><p> Additional operations for sequences.<pre><b>val</b> <a id="def:val Recalled.Seq.mapUpdate" href="#dec:val Recalled.Seq.mapUpdate">mapUpdate</a><b>:</b> (<i>'x</i> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'y</i><b>&gt;</b>) <b>-&gt;</b> seq<b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b>ResizeArray<b>&lt;</b><i>'y</i><b>&gt;&gt;</b>
@@ -367,7 +392,7 @@ font-weight: bold;
 </pre>
 <div class="nested"><p> Operations for defining computations that can be Recalled.<pre><b>val</b> <a id="def:val Recalled.Recalled.recall" href="#dec:val Recalled.Recalled.recall">recall</a><b>:</b> logDir<b>:</b> <a href="#def:member Recalled.PU.string">string</a> <b>-&gt;</b> <a href="#def:type Recalled.RunWithLogBuilder">RunWithLogBuilder</a>
 </pre>
-<div class="nested"><p> Creates a job that creates a new or reads an existing computation log stored in the specified directory, creates and runs the given update computation and then waits until all the logged computations have either finished successfully or some computations have failed and the rest have been canceled.  In case all computations finished successfully, the result value is produced.  Otherwise an exception is raised with details on the failed computations.</div>
+<div class="nested"><p> Returns a builder that creates a job that creates a new or reads an existing computation log stored in the specified directory, creates and runs the computation with the log and then waits until all the logged computations have either finished successfully or some computations have failed and the rest have been canceled.  In case all computations finished successfully, the result value is produced.  Otherwise an exception is raised with details on the failed computations.</div>
 <pre><b>val</b> <a id="def:val Recalled.Recalled.logged" href="#dec:val Recalled.Recalled.logged">logged</a><b>:</b> <a href="#def:type Recalled.WithLogBuilder">WithLogBuilder</a>
 </pre>
 <div class="nested"><p> A builder for parallel computations with a log.</div>
@@ -376,7 +401,7 @@ font-weight: bold;
 <div class="nested"><p> Returns a builder for creating a new logged computation with the given identity.  Computations with the same identity are assumed to be the same computations.  The result of the computation is persisted to a computation log along with dependencies to other logged computations.</p><p> The first time a logged computations is created, it is always run to completion.  When a logged computation with the same identity is recreated it may or may not be run to completion.</p><p> In case the log indicates that the recreated computation has no dependencies to other logged computations then the computation is run to completion every time it is recreated.  This makes it convenient to essentially create new primitive operations and is also quite logical as a computation that has no inputs must either be a constant or it must use some hidden effects to compute its output.</p><p> If, however, the log has a non empty sequence of dependencies to other logged computations, then the recreated computation is run to completion only if the sequence of dependencies changes or the result of any one of those logged computations has changed.  This works correctly as long as any input that may change the result of the computation are bound as other logged computations within the defined logged computation.</div>
 <pre><b>val</b> <a id="def:val Recalled.Recalled.log" href="#dec:val Recalled.Recalled.log">log</a><b>:</b> <a href="#def:type Recalled.LogBuilder">LogBuilder</a>
 </pre>
-<div class="nested"><p> Returns a builder for creating a new logged computation.  The computation is given an automatically determined identity.</div>
+<div class="nested"><p> Returns a builder for creating a new logged computation.  The computation is given an automatically determined identity based on the identity of the surrounding computation.  Otherwise the computation behaves just like a computation defined with <code><a href="#def:val Recalled.Recalled.logAs">logAs</a></code>.</div>
 <pre><b>val</b> <a id="def:val Recalled.Recalled.watch" href="#dec:val Recalled.Recalled.watch">watch</a><b>:</b> <i>'x</i> <b>-&gt;</b> Log<b>&lt;</b>unit<b>&gt;</b>
 </pre>
 <div class="nested"><p> Returns a computation that logs the given value as a dependency.</div>
@@ -388,13 +413,13 @@ font-weight: bold;
 <div class="nested"><p> Provides an intermediate digest of the current point in a logged computation.</p><p> The intermediate digest includes the identity of the current computation as well as digests of the results of all the dependencies of the current computation.  If you ask the intermediate digest after logging all dependencies and just before computing the result of the current logged computation, then the intermediate digest effectively identifies the result.  You could, for example, then use the digest to request a previously computed result from a server.</div>
 <pre><b>val</b> <a id="def:val Recalled.Recalled.read" href="#dec:val Recalled.Recalled.read">read</a><b>:</b> <a href="#def:type Recalled.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.Update">Update</a><b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
-<div class="nested"><p> Returns an operation with a log that waits for the result of the logged operation.</div>
+<div class="nested"><p> Returns an update that waits for the result of the logged operation.</div>
 <pre><b>val</b> <a id="def:val Recalled.Recalled.wait" href="#dec:val Recalled.Recalled.wait">wait</a><b>:</b> <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><a href="#def:type Recalled.Logged">Logged</a><b>&lt;</b><i>'x</i><b>&gt;&gt;</b> <b>-&gt;</b> <a href="#def:type Recalled.LogAs">LogAs</a><b>&lt;</b><i>'x</i><b>&gt;</b>
 </pre>
-<div class="nested"><p> Returns an operation with a log that directly waits for the result of the logged operation.</div>
+<div class="nested"><p> Returns a computation logged with a user defined identity that directly waits for and return the result value of the given computation.</div>
 <pre><b>val</b> <a id="def:val Recalled.Recalled.getCancelAlt" href="#dec:val Recalled.Recalled.getCancelAlt">getCancelAlt</a><b>:</b> <a href="#def:type Recalled.WithLog">WithLog</a><b>&lt;</b>Alt<b>&lt;</b>unit<b>&gt;&gt;</b>
 </pre>
-<div class="nested"><p> Provides an alternative that becomes enabled if some computation within the whole logged computation has failed.  This allows long running computation steps to cancel themselves cleanly without having to wait until the completion of the step.</p><p> Note that Recalled automatically cancels computations in case of failure. Explicit cancellation is unlikely to provide any benefits except in case of computations that perform long running embedded asynchronous operations.</div>
+<div class="nested"><p> Provides an alternative that becomes enabled if some computation within the whole computation with a log has failed.  This allows long running computation steps to cancel themselves cleanly without having to wait until the completion of the step.</p><p> Note that Recalled automatically cancels computations in case of failure. Explicit cancellation is unlikely to provide any benefits except in case of computations that perform long running embedded operations.</div>
 </div>
 </div>
 </td></tr></table></body>
