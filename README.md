@@ -33,7 +33,8 @@ available via [NuGet](http://www.nuget.org/).
 
 I do not expect radical changes to the basic programming interface of the
 library, but there are still a few important robustness improvements that I have
-in mind for the implementation.
+in mind for the implementation.  See the end of this page for a description of
+planned improvements.
 
 ## Documentation
 
@@ -70,3 +71,45 @@ Recalled is inspired by, but is significantly different from
 
 Understanding those works is not at all necessary to use Recalled or to
 understand its implementation, but might be of general interest.
+
+## Planned improvements
+
+Robustness improvements:
+
+* Currently Recalled does not implicitly guard against changes in the log
+  format.  Recalled should be improved to check a log format revision number and
+  if the format has changed, Recalled should simply clear the log and recompute
+  everything.
+
+* Currently Recalled does not clean up the computation log.  There is a simple
+  and efficient way to compact the log using a linear pass over the log and
+  Recalled should be improved to perform such a clean up pass whenever the log
+  is holding a large percentage of deleted items.
+
+Interface or flexibility improvements:
+
+* Currently Recalled implicitly uses the `PU` inference rules (see the reference
+  docs) to generate serialization capabilities for arbitrary types.  For clarity
+  and flexibility, the interface of Recalled should also provide ways for user
+  code to explicitly provide specialized serialization capabilities for Recalled
+  to use.
+
+After the above improvements, Recalled should basically "just work" for carefree
+persisted, incremental, parallel computations and would be ready to be tagged as
+version "1.0.0".
+
+Scalability improvements:
+
+* Recalled has been designed with the idea in mind that the results of
+  computations can be shared over a network of workstations.  This is currently
+  enabled in the form of the `digest` combinator and user code should be able to
+  implement the necessary network stuff on top of Recalled.  Sharing of results
+  over a network of workstations could and should also be just directly
+  supported by Recalled.
+
+* Recalled can currently be used to write programs that perform incremental
+  computations when (re)run.  It would also be possible to extend the internals
+  of Recalled to support *change propagation* like in Self-Adjusting
+  Computation.  This way Recalled could also be used to implement build "agents"
+  that monitor sources for changes and then perform incremental builds after
+  changes.
