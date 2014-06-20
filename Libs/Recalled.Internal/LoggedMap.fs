@@ -369,11 +369,11 @@ module LoggedMap =
          for kvI in unsatisfied do
            loggedMap.Dict.Remove kvI.Key |> ignore
 
-      /// ...until can declare read phase ready.
+      // ...until can declare read phase ready.
       do! loggedMap.Ready <-= None
       do Monitor.Exit loggedMap.Dict
 
-      /// Answer the unsatisfied finds.
+      // Answer the unsatisfied finds.
       do! unsatisfied
           |> Seq.iterJob (fun kvI ->
              kvI.Value.Info <-= None)

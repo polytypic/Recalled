@@ -137,7 +137,7 @@ module internal Do =
             Job.result sum
           else
             newDeps.[i].Info >>= fun info ->
-            depDigest (sum ^^^ info.BobDigest) (i+1)  /// XXX Combine more robustly?
+            depDigest (sum ^^^ info.BobDigest) (i+1)  // XXX Combine more robustly?
 
         let complete x =
           logged.value <- Some x
