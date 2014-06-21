@@ -61,20 +61,22 @@ Consider the data stored by a typical build system.  Most of the data remains
 untouched from one run of the build system to the next.  It obviously makes
 sense to avoid having to rewrite or move data that has not changed.  On the
 other hand, some tiny part of the data is likely to be under active development
-and changes from one build to the next.  Once the development is finished, the
-data becomes part of the majority that only changes infrequently.  It therefore
-seems reasonable to store changes simply by appending them to the storage,
-because that is unlikely to immediately waste large amounts of storage space,
-because most of the live data remains untouched.
+and changes from one build to the next.  Once the initial development is
+finished, the data becomes part of the majority that only changes infrequently.
+It therefore seems reasonable to store changes simply by appending them to the
+storage, because that is unlikely to immediately waste large amounts of storage
+space, because most of the live data remains untouched.
 
 This is exactly the main approach employed by the persistent storage system of
 Recalled to store computations.  Specifically, records of new computations are
 simply appended to the end of a file.  When a previously known computation
-changes, it is also appended to the end of a file, but it is also recorded that
-the previous version of the computation has been removed.  When Recalled later
-reads an existing *log* of computations, it effectively redoes all the
-operations, both *add* and *remove* operations, to reconstruct the last
-persisted state of the storage.
+changes, the new data is also appended to the end of a file, but it is also
+recorded that the previous version of the computation has been removed.  (As a
+special case, Recalled reuses old storage space when the size of the new entry
+exactly matches the size of the old entry.)  When Recalled later reads an
+existing *log* of computations, it effectively redoes all the operations, both
+*add* and *remove* operations, to reconstruct the last persisted state of the
+storage.
 
 Some of the main benefits of a
 [log structured storage](http://blog.notdot.net/2009/12/Damn-Cool-Algorithms-Log-structured-storage)
@@ -97,9 +99,9 @@ The first technique used is to store add and remove entries in separate log
 files.  The add entries are stored sequentially in the add log file.  Every add
 entry can therefore be implicitly given a sequence number.  The remove log then
 simply contains integer sequence numbers referring to removed add entries.  When
-Recalled reconstructs the log, the log file containing remove entries is sorted,
-and when the add entries are processed sequentially, the sorted list of removed
-indices can be consulted very efficiently.
+Recalled reads an existing log, the log file containing remove entries is first
+sorted, and when the add entries are then processed sequentially, the sorted
+list of removed indices can be consulted very efficiently.
 
 Even with this organization it may still take a lot of time to process all the
 entries.  Therefore Recalled performs reconstruction in a separate thread and
@@ -114,7 +116,7 @@ the log has been read completely.
 
 When a Recalled program runs, an attempt is made to match all created
 computations to previously logged computations and generally the digests of all
-results are needed.  However only a subset of the results values need to be
+results are needed.  However only a subset of the result values need to be
 reconstructed or deserialized from the log.  At the limit, only the last final
 result of a Recalled computation may need to be deserialized from the log.  To
 avoid slowing down the process of reading the add entries containing the
@@ -127,13 +129,16 @@ To make operations on the various log files as efficient as possible, Recalled
 uses memory mapped files to implement the dynamically grown log buffers.
 Serialization and deserialization operations directly read and write the memory
 mapped files without need for intermediate abstractions such as streams.  This
-approach admits nearly optimal serialization and deserialization.  To
-deserialize a 64-bit integer, for example, a single aligned 64-bit read
-operation is sufficient.  Memory mapped buffers also make it convenient to
-perform serialization and deserialization operations in parallel.  The operating
-system takes care of managing the necessary IO operations and can make effective
-use of RAM to cache the most frequently needed regions of the memory mapped
-files.
+approach admits *nearly optimal serialization and
+deserialization*&mdash;theoretically even approaching memory bandwidth limits.
+To deserialize a 64-bit integer, for example, a single aligned 64-bit read
+operation is sufficient and to deserialize an array of 64-bit integers, one can
+simply make a sequence of aligned reads from the memory mapped buffer.  The sort
+of the remove entries is performed in-place and the sorted result becomes
+persisted.  Memory mapped buffers also make it convenient to perform
+serialization and deserialization operations in parallel.  The operating system
+takes care of managing the necessary IO operations and can make effective use of
+RAM to cache the most frequently needed regions of the memory mapped files.
 
 ## Compacting the log structured storage
 
@@ -153,9 +158,9 @@ Here is a picture of a possible log state:
 
 <img src="http://vesakarvonen.github.io/Recalled/LogDiagram.svg"/>
 
-At the top are the remove entries.  In the middle are the add entries.  In the
-bottom are the bob entries.  For every add there is a corresponding bob.  Two
-entries have been removed and are shown in darker color.
+At the top are the *remove* entries.  In the middle are the *add* entries.  In
+the bottom are the *bob* entries.  For every add there is a corresponding bob.
+Two entries have been removed and are shown in darker color.
 
 ## Summary
 
