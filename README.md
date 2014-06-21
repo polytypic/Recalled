@@ -45,6 +45,10 @@ computation builders and a handful of combinators.  See the
 [Recalled Library Reference](http://vesakarvonen.github.io/Recalled/Recalled.html)
 for details.
 
+The document [The design of the persistent storage of Recalled](Docs/LogArch.md)
+discusses the design of the persistent storage mechanism of Recalled.  You do
+not need to read that document to use the Recalled library.
+
 The implementation of Recalled is based on two infrastructure libraries:
 
 * The [Hopac](https://github.com/VesaKarvonen/Hopac) library makes it easy to
