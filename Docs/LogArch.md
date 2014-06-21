@@ -1,13 +1,14 @@
 # The design of the persistent storage of Recalled
 
-Recalled is based on idea of persistently storing the results and dependencies
-of computations so that when the computations are being rerun, dependencies can
-be checked for changes and recomputation can be avoided when dependencies have
-not changed.  The raw speed at which the persistent storage can be read from
-largely determines the *overhead time* when running programs written with
-Recalled and the speed at which the persistent storage can be written to is also
-crucial when new computations are being persisted.  This document describes the
-design of the persistent storage architecture used by Recalled.
+Recalled is based on the idea of persistently storing the results and
+dependencies of computations so that when the computations are being rerun,
+dependencies can be checked for changes and recomputation can be avoided when
+dependencies have not changed.  The raw speed at which the persistent storage
+can be read from largely determines the *overhead time* when running programs
+written with Recalled and the speed at which the persistent storage can be
+written to is also crucial when new computations are being persisted.  This
+document describes the design of the persistent storage architecture used by
+Recalled.
 
 ## What needs to be stored and retrieved?
 
