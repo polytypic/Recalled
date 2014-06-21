@@ -146,6 +146,16 @@ being first read and then written once from beginning to end.  It should not be
 difficult for the OS to perform this sort of linear IO access pattern at nearly
 maximum IO bandwidth.
 
+## A picture is worth a thousand words
+
+Here is a picture of a possible log state:
+
+<img src="http://vesakarvonen.github.io/Recalled/LogDiagram.svg"/>
+
+At the top are the remove entries.  In the middle are the add entries.  In the
+bottom are the bob entries.  For every add there is a corresponding bob.  Two
+entries have been removed and are shown in darker color.
+
 ## Summary
 
 The efficiency of the Recalled library depends crucially on the efficiency of
