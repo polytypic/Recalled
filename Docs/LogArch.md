@@ -137,7 +137,7 @@ RAM to cache the most frequently needed regions of the memory mapped files.
 
 As the set of data being computed with Recalled evolves, the log storage will
 not only store the live entries, but will also contain entries that have been
-removed and replaced by new entries.  Once the percentage of dead date becomes
+removed and replaced by new entries.  Once the percentage of dead data becomes
 high enough, the log storage can be compacted in linear time by going through
 the entries and copying or shifting live data towards the beginning of the log
 files.  This results in the log files being first read and then written once
