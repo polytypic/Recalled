@@ -9,7 +9,7 @@ Recalled and the speed at which the persistent storage can be written to is also
 crucial when new computations are being persisted.  This document describes the
 design of the persistent storage architecture used by Recalled.
 
-## What needs to be stored?
+## What needs to be stored and retrieved?
 
 Before diving into the design of the persistent storage, it is important to
 understand what actually needs to be stored by Recalled and what needs to be
@@ -36,7 +36,8 @@ a specific computation may need to be referenced as a dependency many times.  To
 reduce the amount of data to be stored and retrieved, Recalled only stores
 *digests*, specifically 128-bit hashes, computed from the arbitrary identity
 strings and matches those digests to the arbitrary strings computed when the
-program is run.
+program is run.  Furthermore, operations on digests can be performed in
+*constant time*.
 
 The result of a computation can be an arbitrary F# type.  For example, a
 computation that compresses a texture image might return a large array of bytes
@@ -52,3 +53,67 @@ data, so that Recalled only needs to retrieve the digests and compare them to
 determine whether some result has changed.  For checking dependencies it is
 sufficient to store just a single combined digest of the results of all the
 dependencies.
+
+## The basic idea: Log structured storage
+
+Consider the data stored by a typical build system.  Most of the data remains
+untouched from one run of the build system to the next.  It obviously makes
+sense to avoid having to rewrite or move data that has not changed.  On the
+other hand, some tiny part of the data is likely to be under active development
+and changes from one build to the next.  Once the development is finished, the
+data becomes part of the majority that only changes infrequently.  It therefore
+seems reasonable to store changes simply by appending them to the storage,
+because that is unlikely to immediately waste large amounts of storage space,
+because most of the live data remains untouched.
+
+This is exactly the main approach employed by the persistent storage system of
+Recalled to store computations.  Specifically, records of new computations are
+simply appended to the end a file.  When a previously known computation changes,
+it is also appended to the end of a file, but it is also recorded that the
+previous version of the computation has been removed.  When Recalled later reads
+an existing storage of computations, it effectively redoes all the operations,
+both *add* and *remove* operations, to reconstruct the last persisted state of
+the storage.
+
+One of the main benefits of a
+[log structured storage](http://blog.notdot.net/2009/12/Damn-Cool-Algorithms-Log-structured-storage)
+mechanism is it avoids the need to move data around and can be very easy to
+implement.  Another benefit is that a single log file can store multiple
+entries.  Traditional file systems are not particularly efficient when there is
+a need to store potentially hundreds of thousands of individual files.
+
+## Avoiding the need to wait for the whole log to be read
+
+When a Recalled program starts, the persistent log is read and computations
+created at runtime are matched to the entries in the log.  As the number of
+entries stored in the log increases, the time it takes to reconstruct the last
+persisted state of the storage also increases.  Should a Recalled program need
+to wait until the whole log has been read, the overhead time might become a
+major limiting factor.  The storage system used by Recalled uses two techniques
+to minimize the log reconstruction overhead time.
+
+The first technique used is to store add and remove entries in separate log
+files.  The add entries are stored sequentially in the add log file.  Every add
+entry can therefore be implicitly given a sequence number.  The remove log then
+simply contains integer sequence numbers referring to removed add entries.  When
+Recalled reconstructs the log, the log file containing remove entries is sorted,
+and when the add entries are processed sequentially, the sorted list of removed
+indices can be consulted very efficiently.
+
+Even with this organization it may still take a lot of time to process all the
+entries.  Therefore Recalled performs reconstruction in a separate thread and
+allows other threads to make queries for log entries during reconstruction.  As
+soon as a particular entry has been read from the storage, queries for that
+entry can be satisfied.  Queries for entries that do not exist in the log are
+answered negatively as soon as the entire log has been read.  This approach
+allows a Recalled program to effectively start processing computations before
+the log has been read completely.
+
+## Separate storage for binary objects or BOBs
+
+## Memory mapped buffers
+
+## Compacting the log structured storage
+
+## Summary
+
