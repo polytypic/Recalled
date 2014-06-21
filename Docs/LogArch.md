@@ -71,7 +71,7 @@ Recalled to store computations.  Specifically, records of new computations are
 simply appended to the end a file.  When a previously known computation changes,
 it is also appended to the end of a file, but it is also recorded that the
 previous version of the computation has been removed.  When Recalled later reads
-an existing storage of computations, it effectively redoes all the operations,
+an existing *log* of computations, it effectively redoes all the operations,
 both *add* and *remove* operations, to reconstruct the last persisted state of
 the storage.
 
@@ -111,9 +111,42 @@ the log has been read completely.
 
 ## Separate storage for binary objects or BOBs
 
+When a Recalled program runs, an attempt is made to match all created
+computations to previously logged computations and generally the digests of all
+results are needed.  However only a subset of the results values need to be
+reconstructed or deserialized from the log.  At the limit, only the last final
+result of a Recalled computation may need to be deserialized from the log.  To
+avoid slowing down the process of reading the add entries containing the
+digests, the less frequently needed result data of computations is stored in yet
+another log and accessed separately only when needed.
+
 ## Memory mapped buffers
+
+To make operations on the various log files as efficient as possible, Recalled
+uses memory mapped files to implement the log buffers.  Serialization and
+deserialization operations directly read and write the memory mapped files
+without need for intermediate abstractions such as streams.  This approach
+admits nearly optimal serialization and deserialization.  To deserialize a
+64-bit integer, for example, a single aligned 64-bit read operation is
+sufficient.  Memory mapped buffers also make it convenient to perform
+serialization and deserialization operations in parallel.  The operating system
+takes care of managing the necessary IO operations and can make effective use of
+RAM to cache the most frequently needed regions of the memory mapped files.
 
 ## Compacting the log structured storage
 
+As the set of data being computed with Recalled evolves, the log storage will
+not only store the live entries, but will also contain entries that has been
+removed and replaced by new entries.  Once the percentage of dead date becomes
+high enough, the log storage can be compacted in linear time by going through
+the entries and copying or shifting live data towards the beginning of the log
+files.  This results in the log files being first read and then written once
+from beginning to end.  It should not be difficult for the OS to perform this
+sort of linear IO access pattern at nearly maximal IO bandwidth.
+
 ## Summary
 
+The efficiency of the Recalled library depends crucially on the efficiency of
+the persistent storage method.  For this reason Recalled implements a relative
+simple, yet highly IO efficient, log structured storage mechanism designed for
+the needs of the Recalled library.
