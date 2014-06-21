@@ -85,15 +85,15 @@ module LoggedMap =
 
       let inline writeDigest (dig: Digest) p =
         p
-        |> writeIfChanged dig.Lo
-        |> writeIfChanged dig.Hi
+        |> writeIfNot dig.Lo
+        |> writeIfNot dig.Hi
 
       let mutable p =
         p
         |> writeDigest keyDigest
         |> writeDigest bobDigest
-        |> writeIfChanged bobSize
-        |> writeIfChanged depKeyDigests.Length
+        |> writeIfNot bobSize
+        |> writeIfNot depKeyDigests.Length
 
       if 0 <> depKeyDigests.Length then
         for i=0 to depKeyDigests.Length-1 do
@@ -120,19 +120,19 @@ module LoggedMap =
     let addEntrySize =
       0L
       // keyDigest
-      |> incBy sizeof<Digest>
+      |> skipBy sizeof<Digest>
       // bobDigest
-      |> incBy sizeof<Digest>
+      |> skipBy sizeof<Digest>
       // bobSize
-      |> incBy sizeof<int32>
+      |> skipBy sizeof<int32>
       // depKeyDigests
-      |> incBy sizeof<int32>
+      |> skipBy sizeof<int32>
     let addEntrySize =
       if 0 <> depKeyDigests.Length then
         addEntrySize
-        |> incBy (depKeyDigests.Length * sizeof<Digest>)
+        |> skipBy (depKeyDigests.Length * sizeof<Digest>)
         // depDigest
-        |> incBy sizeof<Digest>
+        |> skipBy sizeof<Digest>
       else
         addEntrySize
     let addEntrySize = int addEntrySize
@@ -185,7 +185,7 @@ module LoggedMap =
              loggedMap.RemBuf
              (fun ptr ->
                 int64 (NativePtr.toNativeInt ptr) + remOffs
-                |> writeIfChanged remIdx
+                |> writeIfNot remIdx
                 |> ignore) >>.
             justAdd loggedMap entry keyDigest depKeyDigests depDigest bobSize bobWrite
 
@@ -332,7 +332,8 @@ module LoggedMap =
                         AddOffset = addOffset
                       }
 
-                    do ri.bobOffset <- alignTo sizeof<int64> (incBy ri.bobSize ri.bobOffset)
+                    do ri.bobOffset <-
+                         skipTo sizeof<int64> (skipBy ri.bobSize ri.bobOffset)
 
                     let entry = {Idx = ri.addIdx; Info = IVar.Now.createFull info}
 

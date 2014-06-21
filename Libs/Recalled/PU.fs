@@ -45,29 +45,35 @@ module internal UtilPU =
 
   let inline mkNative () : OpenPU<'x> =
     O {new InternalPU<'x> () with
-         override this.Size (_, p) = incBy sizeof<'x> (alignTo sizeof<'x> p)
+         override this.Size (_, p) =
+           p
+           |> skipTo sizeof<'x>
+           |> skipBy sizeof<'x>
          override this.Dopickle (x, p) =
            p
-           |> alignTo sizeof<'x>
-           |> writeIfChanged x
+           |> clearIfNotTo sizeof<'x>
+           |> writeIfNot x
          override this.Unpickle (p, x) =
            p
-           |> alignTo sizeof<'x>
-           |> readTo (&x)}
+           |> skipTo sizeof<'x>
+           |> readTo &x}
 
   let inline mkNativeBy (toNative: 'x -> 'n) (ofNative: 'n -> 'x) : OpenPU<'x> =
     O {new InternalPU<'x> () with
-         override this.Size (_, p) = incBy sizeof<'n> (alignTo sizeof<'n> p)
+         override this.Size (_, p) =
+           p
+           |> skipTo sizeof<'n>
+           |> skipBy sizeof<'n>
          override this.Dopickle (x, p) =
            p
-           |> alignTo sizeof<'n>
-           |> writeIfChanged (toNative x)
+           |> clearIfNotTo sizeof<'n>
+           |> writeIfNot (toNative x)
          override this.Unpickle (p, x) =
            let mutable (n: 'n) = Unchecked.defaultof<_>
            let p =
              p
-             |> alignTo sizeof<'n>
-             |> readTo (&n)
+             |> skipTo sizeof<'n>
+             |> readTo &n
            x <- ofNative n
            p}
 
@@ -76,25 +82,24 @@ module internal UtilPU =
          override this.Size (x, p) =
            let x = toBytes x
            p
-           |> alignTo sizeof<int>
-           |> incBy (sizeof<int> + x.Length)
+           |> skipTo sizeof<int>
+           |> skipBy (sizeof<int> + x.Length)
          override this.Dopickle (x, p) =
            let x = toBytes x
            let mutable p =
              p
-             |> alignTo sizeof<int>
-             |> writeIfChanged x.Length
+             |> clearIfNotTo sizeof<int>
+             |> writeIfNot x.Length
            for i=0 to x.Length-1 do
-             p <- writeIfChanged x.[i] p
+             p <- writeIfNot x.[i] p
            p
          override this.Unpickle (p, x) =
-           let mutable p = alignTo sizeof<int> p
+           let mutable p = skipTo sizeof<int> p
            let n = read p
-           p <- incBy sizeof<int> p
+           p <- skipBy sizeof<int> p
            let bs = Array.zeroCreate n
            for i=0 to n-1 do
-             bs.[i] <- read p
-             p <- incBy sizeof<byte> p
+             p <- readTo &bs.[i] p
            x <- ofBytes bs
            p}
 
@@ -110,8 +115,8 @@ module internal UtilPU =
            let x = toArray x
            let mutable p =
              p
-             |> alignTo sizeof<int>
-             |> incBy sizeof<int>
+             |> skipTo sizeof<int>
+             |> skipBy sizeof<int>
            for i=0 to x.Length-1 do
              p <- e.Size (&x.[i], p)
            p
@@ -119,8 +124,8 @@ module internal UtilPU =
            let x = toArray x
            let mutable p =
              p
-             |> alignTo sizeof<int>
-             |> writeIfChanged x.Length
+             |> clearIfNotTo sizeof<int>
+             |> writeIfNot x.Length
            for i=0 to x.Length-1 do
              p <- e.Dopickle (&x.[i], p)
            p
@@ -128,8 +133,8 @@ module internal UtilPU =
            let mutable n = 0
            let mutable p =
              p
-             |> alignTo sizeof<int>
-             |> readTo (&n)
+             |> skipTo sizeof<int>
+             |> readTo &n
            let a = Array.zeroCreate n
            for i=0 to n-1 do
              p <- e.Unpickle (p, &a.[i])
@@ -174,16 +179,16 @@ module internal UtilPU =
       failwith "Unions with more than 256 cases are not yet supported"
     O {new InternalPU<'u> () with
          override this.Size (x, p) =
-           let p = incBy sizeof<uint8> p
+           let p = skipBy sizeof<uint8> p
            let i = m.Tag x
            cs.[i].Size (&x, p)
          override this.Dopickle (x, p) =
            let i = m.Tag x
-           let p = writeIfChanged (uint8 i) p
+           let p = writeIfNot (uint8 i) p
            cs.[i].Dopickle (&x, p)
          override this.Unpickle (p, x) =
            let i = int32 (read p : uint8)
-           let p = incBy sizeof<uint8> p
+           let p = skipBy sizeof<uint8> p
            cs.[i].Unpickle (p, &x)}
 
 type [<InferenceRules>] PU () =
@@ -239,24 +244,24 @@ type [<InferenceRules>] PU () =
   member this.string: OpenPU<string> = memoize <| fun () ->
     O {new InternalPU<string> () with
          override this.Size (x, p) =
-           alignTo sizeof<int> p
-           |> incBy (sizeof<int> + sizeof<char> * x.Length)
+           p
+           |> skipTo sizeof<int>
+           |> skipBy (sizeof<int> + sizeof<char> * x.Length)
          override this.Dopickle (x, p) =
            let mutable p =
              p
-             |> alignTo sizeof<int>
-             |> writeIfChanged x.Length
+             |> clearIfNotTo sizeof<int>
+             |> writeIfNot x.Length
            for i=0 to x.Length-1 do
-             p <- writeIfChanged x.[i] p
+             p <- writeIfNot x.[i] p
            p
          override this.Unpickle (p, x) =
-           let mutable p = alignTo sizeof<int> p
+           let mutable p = skipTo sizeof<int> p
            let n = read p
-           p <- incBy sizeof<int> p
+           p <- skipBy sizeof<int> p
            let cs = Array.zeroCreate n
            for i=0 to n-1 do
-             cs.[i] <- read p
-             p <- incBy sizeof<char> p
+             p <- readTo &cs.[i] p
            x <- String (cs)
            p}
 
@@ -267,19 +272,18 @@ type [<InferenceRules>] PU () =
     O {new InternalPU<Digest> () with
          override this.Size (x, p) =
            p
-           |> alignTo sizeof<uint64>
-           |> incBy (2 * sizeof<uint64>)
+           |> skipTo sizeof<uint64>
+           |> skipBy (2 * sizeof<uint64>)
          override this.Dopickle (x, p) =
            p
-           |> alignTo sizeof<uint64>
-           |> writeIfChanged x.Lo
-           |> writeIfChanged x.Hi
+           |> clearIfNotTo sizeof<uint64>
+           |> writeIfNot x.Lo
+           |> writeIfNot x.Hi
          override this.Unpickle (p, x) =
-           let mutable p = alignTo sizeof<uint64> p
-           x.Lo <- read p
-           p <- incBy sizeof<uint64> p
-           x.Hi <- read p
-           incBy sizeof<uint64> p}
+           p
+           |> skipTo sizeof<uint64>
+           |> readTo &x.Lo
+           |> readTo &x.Hi}
            
   member this.BigInteger: OpenPU<BigInteger> = memoize <| fun () ->
     mkBytesBy (fun x -> x.ToByteArray ()) (fun x -> BigInteger (x))

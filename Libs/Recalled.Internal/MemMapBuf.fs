@@ -88,7 +88,7 @@ module MemMapBuf =
        Job.queue (access buf.ptr >>= fun () ->
          Cond.signal buf.isFree (0 = Interlocked.Decrement &buf.numAccessors))
      | Append (align, size, reply) ->
-       let offs = buf.size |> alignTo align
+       let offs = buf.size |> skipTo align
        let size = int64 size
        Job.whenDo (buf.capacity - offs < size)
          (Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) |>> fun () ->
