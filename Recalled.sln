@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{04A3834D-1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5E3BB5D0-A29D-45B0-9A4B-60FE9DD93ED8}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\LogArch.md = Docs\LogArch.md
+		Docs\LogDiagram.odg = Docs\LogDiagram.odg
 		Docs\Tutorial.md = Docs\Tutorial.md
 	EndProjectSection
 EndProject
