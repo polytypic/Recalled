@@ -136,7 +136,7 @@ RAM to cache the most frequently needed regions of the memory mapped files.
 ## Compacting the log structured storage
 
 As the set of data being computed with Recalled evolves, the log storage will
-not only store the live entries, but will also contain entries that has been
+not only store the live entries, but will also contain entries that have been
 removed and replaced by new entries.  Once the percentage of dead date becomes
 high enough, the log storage can be compacted in linear time by going through
 the entries and copying or shifting live data towards the beginning of the log
