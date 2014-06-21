@@ -68,19 +68,19 @@ because most of the live data remains untouched.
 
 This is exactly the main approach employed by the persistent storage system of
 Recalled to store computations.  Specifically, records of new computations are
-simply appended to the end a file.  When a previously known computation changes,
-it is also appended to the end of a file, but it is also recorded that the
-previous version of the computation has been removed.  When Recalled later reads
-an existing *log* of computations, it effectively redoes all the operations,
-both *add* and *remove* operations, to reconstruct the last persisted state of
-the storage.
+simply appended to the end of a file.  When a previously known computation
+changes, it is also appended to the end of a file, but it is also recorded that
+the previous version of the computation has been removed.  When Recalled later
+reads an existing *log* of computations, it effectively redoes all the
+operations, both *add* and *remove* operations, to reconstruct the last
+persisted state of the storage.
 
-One of the main benefits of a
+Perhaps the main benefits of
 [log structured storage](http://blog.notdot.net/2009/12/Damn-Cool-Algorithms-Log-structured-storage)
-mechanism is it avoids the need to move data around and can be very easy to
-implement.  Another benefit is that a single log file can store multiple
-entries.  Traditional file systems are not particularly efficient when there is
-a need to store potentially hundreds of thousands of individual files.
+mechanisms are that they avoid the need to move data around and can be very easy
+to implement.  Another benefit is that a single log file can store a large
+number of entries.  Traditional file systems are not particularly efficient when
+there is a need to store potentially hundreds of thousands of individual files.
 
 ## Avoiding the need to wait for the whole log to be read
 
@@ -123,30 +123,32 @@ another log and accessed separately only when needed.
 ## Memory mapped buffers
 
 To make operations on the various log files as efficient as possible, Recalled
-uses memory mapped files to implement the log buffers.  Serialization and
-deserialization operations directly read and write the memory mapped files
-without need for intermediate abstractions such as streams.  This approach
-admits nearly optimal serialization and deserialization.  To deserialize a
-64-bit integer, for example, a single aligned 64-bit read operation is
-sufficient.  Memory mapped buffers also make it convenient to perform
-serialization and deserialization operations in parallel.  The operating system
-takes care of managing the necessary IO operations and can make effective use of
-RAM to cache the most frequently needed regions of the memory mapped files.
+uses memory mapped files to implement the dynamically grown log buffers.
+Serialization and deserialization operations directly read and write the memory
+mapped files without need for intermediate abstractions such as streams.  This
+approach admits nearly optimal serialization and deserialization.  To
+deserialize a 64-bit integer, for example, a single aligned 64-bit read
+operation is sufficient.  Memory mapped buffers also make it convenient to
+perform serialization and deserialization operations in parallel.  The operating
+system takes care of managing the necessary IO operations and can make effective
+use of RAM to cache the most frequently needed regions of the memory mapped
+files.
 
 ## Compacting the log structured storage
 
 As the set of data being computed with Recalled evolves, the log storage will
 not only store the live entries, but will also contain entries that have been
-removed and replaced by new entries.  Once the percentage of dead data becomes
-high enough, the log storage can be compacted in linear time by going through
-the entries and copying or shifting live data towards the beginning of the log
-files.  This results in the log files being first read and then written once
-from beginning to end.  It should not be difficult for the OS to perform this
-sort of linear IO access pattern at nearly maximal IO bandwidth.
+removed and replaced by new entries and entries that are simply no longer used.
+Once the percentage of dead data becomes high enough, the log storage can be
+compacted in linear time by going through the entries and copying or shifting
+live data towards the beginning of the log files.  This results in the log files
+being first read and then written once from beginning to end.  It should not be
+difficult for the OS to perform this sort of linear IO access pattern at nearly
+maximum IO bandwidth.
 
 ## Summary
 
 The efficiency of the Recalled library depends crucially on the efficiency of
-the persistent storage method.  For this reason Recalled implements a relative
-simple, yet highly IO efficient, log structured storage mechanism designed for
-the needs of the Recalled library.
+the persistent storage mechanism.  For this reason Recalled implements a
+relative simple, yet highly IO efficient, log structured storage mechanism
+designed for the needs of the Recalled library.
