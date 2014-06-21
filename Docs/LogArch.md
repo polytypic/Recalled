@@ -30,14 +30,15 @@ let computation : LogAs<Logged<ResultType>> =
 The first thing to note is that the identity of a computation is an arbitrary
 string, namely `"identity of computation"` in the above sketch.  That also goes
 for the dependencies, namely `computationA` and `computationB` in the above
-sketch.  Storing and comparing arbitrary strings would be fairly
-expensive&mdash;particularly for storing the identities of dependencies, because
-a specific computation may need to be referenced as a dependency many times.  To
-reduce the amount of data to be stored and retrieved, Recalled only stores
-*digests*, specifically 128-bit hashes, computed from the arbitrary identity
-strings and matches those digests to the arbitrary strings computed when the
-program is run.  Furthermore, operations on digests can be performed in
-*constant time*.
+sketch.  Storing, retrieving and comparing arbitrary length strings would be
+fairly expensive&mdash;particularly for storing the identities of dependencies,
+because a specific computation may need to be referenced as a dependency many
+times.  To reduce the complexity of the data to be stored and retrieved,
+Recalled only stores *digests*, specifically 128-bit hashes, computed from the
+arbitrary identity strings and matches those digests to the arbitrary strings
+computed when the program is run.  Unlike with arbitrary strings, and aside from
+computing a digest from arbitrary data, operations on digests can be performed
+in *constant time* and typically using only a few machine instructions.
 
 The result of a computation can be an arbitrary F# type.  For example, a
 computation that compresses a texture image might return a large array of bytes
@@ -75,9 +76,9 @@ reads an existing *log* of computations, it effectively redoes all the
 operations, both *add* and *remove* operations, to reconstruct the last
 persisted state of the storage.
 
-Perhaps the main benefits of
+Some of the main benefits of a
 [log structured storage](http://blog.notdot.net/2009/12/Damn-Cool-Algorithms-Log-structured-storage)
-mechanisms are that they avoid the need to move data around and can be very easy
+mechanism are that it avoids the need to move data around and can be very easy
 to implement.  Another benefit is that a single log file can store a large
 number of entries.  Traditional file systems are not particularly efficient when
 there is a need to store potentially hundreds of thousands of individual files.
@@ -150,7 +151,7 @@ maximum IO bandwidth.
 
 Here is a picture of a possible log state:
 
-<img src="http://vesakarvonen.github.io/Recalled/LogDiagram.svg" style="width: 50%; height: 50%"/>
+<img src="http://vesakarvonen.github.io/Recalled/LogDiagram.svg"/>
 
 At the top are the remove entries.  In the middle are the add entries.  In the
 bottom are the bob entries.  For every add there is a corresponding bob.  Two
