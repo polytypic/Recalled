@@ -167,5 +167,5 @@ Two entries have been removed and are shown in darker color.
 
 The efficiency of the Recalled library depends crucially on the efficiency of
 the persistent storage mechanism.  For this reason Recalled implements a
-relative simple, yet highly IO efficient, log structured storage mechanism
+relatively simple, yet highly IO efficient, log structured storage mechanism
 designed for the needs of the Recalled library.
