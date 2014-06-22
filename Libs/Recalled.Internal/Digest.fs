@@ -9,29 +9,22 @@ type [<NoComparison; CustomEquality>] Digest = struct
     val mutable Lo: uint64
     val mutable Hi: uint64
 
-    new (lo, hi) = {Lo = lo; Hi = hi}
+    static member inline ZeroIfEq (lhs: byref<Digest>, rhs: byref<Digest>) =
+      (lhs.Lo ^^^ rhs.Lo ||| lhs.Hi ^^^ rhs.Hi)
 
-    new (bytes: array<byte>) =
-      assert (16 = bytes.Length)
-      {Lo = BitConverter.ToUInt64 (bytes, 0)
-       Hi = BitConverter.ToUInt64 (bytes, 8)}
+    static member inline Combine (l': byref<Digest>, r: byref<Digest>) =
+      let llo = l'.Lo
+      let lhi = l'.Hi
+      let llo = (llo + llo) ^^^ (lhi >>> 63)
+      let lhi = (lhi + lhi) ^^^ (llo >>> 63)
+      l'.Lo <- llo ^^^ r.Lo
+      l'.Hi <- lhi ^^^ r.Hi
 
-    static member Zero = Digest (0UL, 0UL)
+    static member inline Bytes (ptr: nativeptr<byte>, len: int, res: byref<Digest>) =
+      MurmurHash3.bytes ptr len 0u &res.Lo &res.Hi
 
-    static member (^^^) (l: Digest, r: Digest) =
-      Digest (l.Lo ^^^ r.Lo, l.Hi ^^^ r.Hi)
-
-    static member Bytes (ptr: nativeptr<byte>, len: int) : Digest =
-      let mutable lo = 0UL
-      let mutable hi = 0UL
-      MurmurHash3.bytes ptr len 0u (&lo) (&hi)
-      Digest (lo, hi)
-
-    static member String (string: string) : Digest =
-      let mutable lo = 0UL
-      let mutable hi = 0UL
-      MurmurHash3.string string 0u (&lo) (&hi)
-      Digest (lo, hi)
+    static member inline String (string: string, res: byref<Digest>) =
+      MurmurHash3.string string 0u &res.Lo &res.Hi
 
     override this.ToString () =
       sprintf "%016x%016x" this.Hi this.Lo

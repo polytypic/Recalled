@@ -15,12 +15,12 @@ open System.Threading
 
 module LoggedMap =
   type Info = {
-      DepKeyDigests: array<Digest>
-      DepDigest: Digest
-      BobDigest: Digest
-      BobOffset: PtrInt
-      BobSize: int
-      AddOffset: PtrInt
+      mutable DepKeyDigests: array<Digest>
+      mutable DepDigest: Digest
+      mutable BobDigest: Digest
+      mutable BobOffset: PtrInt
+      mutable BobSize: int
+      mutable AddOffset: PtrInt
     }
 
   type Entry = {
@@ -75,10 +75,19 @@ module LoggedMap =
                 (bobWrite: nativeptr<byte> -> unit)
                 (addOffs: PtrInt)
                 (bobOffs: PtrInt) =
+    let info = {
+        DepKeyDigests = depKeyDigests
+        DepDigest = depDigest
+        BobDigest = Unchecked.defaultof<_>
+        BobOffset = bobOffs
+        BobSize = bobSize
+        AddOffset = addOffs
+      }
+
     MemMapBuf.accessFun loggedMap.BobBuf (fun ptr ->
       let ptr = NativePtr.ofNativeInt (NativePtr.toNativeInt ptr + nativeint bobOffs)
       bobWrite ptr
-      Digest.Bytes (ptr, bobSize)) >>= fun (bobDigest: Digest) ->
+      Digest.Bytes (ptr, bobSize, &info.BobDigest)) >>= fun () ->
 
     MemMapBuf.accessFun loggedMap.AddBuf (fun ptr ->
       let p = int64 (NativePtr.toNativeInt ptr) + addOffs
@@ -91,22 +100,14 @@ module LoggedMap =
       let mutable p =
         p
         |> writeDigest keyDigest
-        |> writeDigest bobDigest
+        |> writeDigest info.BobDigest
         |> writeIfNot bobSize
         |> writeIfNot depKeyDigests.Length
 
       if 0 <> depKeyDigests.Length then
         for i=0 to depKeyDigests.Length-1 do
           p <- writeDigest depKeyDigests.[i] p
-        p <- writeDigest depDigest p) >>= fun () ->
-    let info = {
-        DepKeyDigests = depKeyDigests
-        DepDigest = depDigest
-        BobDigest = bobDigest
-        BobOffset = bobOffs
-        BobSize = bobSize
-        AddOffset = addOffs
-      }
+        p <- writeDigest info.DepDigest p) >>= fun () ->
     entry.Info <-= Some info >>%
     info
 
@@ -242,11 +243,25 @@ module LoggedMap =
       i <- i+1 ; while get i < mid do i <- i+1
     j+1
 
-  let rec quickSortMed3 (ptr: nativeptr<int32>) start stop =
+  let rec quickSortMed3Fun (ptr: nativeptr<int32>) start stop =
     if 2 <= stop - start then
       let middle = partitionMed3 ptr start stop
-      quickSortMed3 ptr start middle
-      quickSortMed3 ptr middle stop
+      if middle - start < stop - middle then
+        quickSortMed3Fun ptr start middle
+        quickSortMed3Fun ptr middle stop
+      else
+        quickSortMed3Fun ptr middle stop
+        quickSortMed3Fun ptr start middle
+
+  let rec quickSortMed3Job (ptr: nativeptr<int32>) start stop = job {
+    if stop - start < 30 then
+      return quickSortMed3Fun ptr start stop
+    else
+      let middle = partitionMed3 ptr start stop
+      let! wait = Promise.queue (quickSortMed3Job ptr start middle)
+      do! quickSortMed3Job ptr middle stop
+      return! wait
+  }
 
   let server (loggedMap: LoggedMap) = job {
     try
@@ -261,7 +276,7 @@ module LoggedMap =
           do MemMapBuf.Unsafe.truncate loggedMap.RemBuf
               (int64 sizeof<int32> * int64 remBufCnt)
 
-          do quickSortMed3 remBufPtr 0 remBufCnt
+          do! quickSortMed3Job remBufPtr 0 remBufCnt
 
           let! _ = MemMapBuf.flush loggedMap.RemBuf
 

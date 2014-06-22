@@ -15,7 +15,8 @@ exception CanceledOnFailure
 
 type Logged =
   abstract Id: string
-  abstract Key: Digest
+  abstract ZeroIfEq: byref<Digest> -> uint64
+  abstract CopyKey: byref<Digest> -> unit
   abstract Info: IVar<LoggedMap.Info>
 
 type Log = {
@@ -29,13 +30,14 @@ type Log = {
 type [<Sealed>] Logged<'x> =
   interface Logged with
     override this.Id = this.id
-    override this.Key = this.key
+    override this.ZeroIfEq (other) = Digest.ZeroIfEq (&this.key, &other)
+    override this.CopyKey (other) = other <- this.key
     override this.Info = this.info
   val id: string
-  val key: Digest
+  [<DefaultValue>] val mutable key: Digest
   val info: IVar<LoggedMap.Info>
   val mutable value: option<'x>
-  new (id, key) = {id = id; key = key; info = ivar (); value = None}
+  new (id) = {id = id; info = ivar (); value = None}
 
 type Update<'x> =
   | Value of 'x
@@ -94,10 +96,10 @@ module internal Do =
     Job.delay <| fun () ->
       Latch.Now.increment log.Latch
 
-      let key = Digest.String id
+      let logged = Logged<'x> (id)
+      Digest.String (id, &logged.key)
 
-      let logged = Logged<'x> (id, key)
-      let was = log.New.GetOrAdd (key, logged :> Logged)
+      let was = log.New.GetOrAdd (logged.key, logged :> Logged)
 
       if not (LanguagePrimitives.PhysicalEquality was (logged :> Logged)) then
         match was with
@@ -137,13 +139,16 @@ module internal Do =
             Job.result sum
           else
             newDeps.[i].Info >>= fun info ->
-            depDigest (sum ^^^ info.BobDigest) (i+1)  // XXX Combine more robustly?
+            Digest.Combine (sum, &info.BobDigest)
+            depDigest sum (i+1)
 
         let complete x =
           logged.value <- Some x
-          depDigest Digest.Zero 0 >>= fun depDigest ->
-          let depKeys = Array.init newDeps.Count (fun i -> newDeps.[i].Key)
-          LoggedMap.add log.Old key depKeys depDigest
+          depDigest (ref logged.key) 0 >>= fun depDigest ->
+          let depKeys = Array.zeroCreate newDeps.Count
+          for i=0 to depKeys.Length-1 do
+            newDeps.[i].CopyKey (&depKeys.[i])
+          LoggedMap.add log.Old logged.key depKeys (!depDigest)
            (xPU.Size x)
            (fun ptr ->
               xPU.Dopickle (x, ptr) |> ignore) >>=
@@ -164,8 +169,8 @@ module internal Do =
              | GetLog log2xUJ ->
                log2xUJ log >>= build
              | GetDigest digest2xU ->
-               depDigest key 0 >>= fun digest ->
-               build (digest2xU digest)
+               depDigest (ref logged.key) 0 >>= fun digest ->
+               build (digest2xU (!digest))
              | GetThis lli2xUJ ->
                lli2xUJ log logged newDeps.Count >>= build
 
@@ -174,7 +179,7 @@ module internal Do =
 
         Job.queue
          (Job.tryWith
-           (LoggedMap.tryFind log.Old key >>= function
+           (LoggedMap.tryFind log.Old logged.key >>= function
              | None ->
                build xU
              | Some old when old.DepKeyDigests.Length = 0 ->
@@ -192,14 +197,13 @@ module internal Do =
                     | Job xUJ ->
                       xUJ >>= checkDeps
                     | Required (newDep, xU) ->
-                      let oldDepKey = oldInfo.DepKeyDigests.[newDeps.Count]
                       newDeps.Add newDep
-                      if newDep.Key <> oldDepKey then
+                      if 0UL <> newDep.ZeroIfEq (&oldInfo.DepKeyDigests.[newDeps.Count-1]) then
                         build (xU ())
                       else
                         if oldInfo.DepKeyDigests.Length <= newDeps.Count then
-                          depDigest Digest.Zero 0 >>= fun newDepDigest ->
-                          if newDepDigest = oldInfo.DepDigest then
+                          depDigest (ref logged.key) 0 >>= fun newDepDigest ->
+                          if 0UL = Digest.ZeroIfEq (newDepDigest, &oldInfo.DepDigest) then
                             reuse oldInfo
                           else
                             build (xU ())
@@ -208,8 +212,8 @@ module internal Do =
                     | GetLog log2xUJ ->
                       log2xUJ log >>= checkDeps
                     | GetDigest digest2xU ->
-                      depDigest key 0 >>= fun digest ->
-                      build (digest2xU digest)
+                      depDigest (ref logged.key) 0 >>= fun digest ->
+                      build (digest2xU (!digest))
                     | GetThis lli2xUJ ->
                       lli2xUJ log logged newDeps.Count >>= checkDeps
                checkDeps xU)

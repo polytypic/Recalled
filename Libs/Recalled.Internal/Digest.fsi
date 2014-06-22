@@ -25,20 +25,16 @@ type [<NoComparison; CustomEquality>] Digest = struct
     /// Bits 64 to 127 of the digest.
     val mutable Hi: uint64
 
-    /// Creates a new digest value.
-    new: lo: uint64 * hi: uint64 -> Digest
-
-    /// The zero digest value.
-    static member Zero: Digest
+    static member inline ZeroIfEq: byref<Digest> * byref<Digest> -> uint64
 
     /// Combine two digests.
-    static member (^^^): Digest * Digest -> Digest
+    static member inline Combine: byref<Digest> * byref<Digest> -> unit
 
     /// Computes a digest of the specified region of memory.
-    static member Bytes: ptr: nativeptr<byte> * count: int -> Digest
+    static member inline Bytes: ptr: nativeptr<byte> * count: int * byref<Digest> -> unit
 
     /// Computes a digest of the given string.
-    static member String: string -> Digest
+    static member inline String: string * byref<Digest> -> unit
   end
 
 /// Equality comparer for digests.

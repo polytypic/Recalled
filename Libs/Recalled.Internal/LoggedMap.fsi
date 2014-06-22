@@ -24,18 +24,18 @@ module LoggedMap =
   /// Represents information on an entry stored in a logged map.
   type Info = {
       /// Digests of the identities of the dependencies of the computation.
-      DepKeyDigests: array<Digest>
+      mutable DepKeyDigests: array<Digest>
       /// A combined digest of the results of all the dependencies.
-      DepDigest: Digest
+      mutable DepDigest: Digest
       /// Digest of the result of the computation.
-      BobDigest: Digest
+      mutable BobDigest: Digest
       /// Offset to the serialized result of the computation in the bob buffer
       /// of the log.
-      BobOffset: PtrInt
+      mutable BobOffset: PtrInt
       /// Size of the serialized result in bytes.
-      BobSize: int
+      mutable BobSize: int
       /// Offset to the entry in the add buffer of the log.
-      AddOffset: PtrInt
+      mutable AddOffset: PtrInt
     }
 
   /// Creates a new or opens an existing logged map.  In case an existing logged
