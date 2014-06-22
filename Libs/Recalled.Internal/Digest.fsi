@@ -10,9 +10,11 @@ open System.Collections.Generic
 /// Represents a digest or hash of some data or value.
 ///
 #if DOC
-/// User code should never need to modify digest values.  Recalled computes
-/// digests of anything and everything and having the ability to mutate digests
-/// values internally makes a difference.
+/// Note that user code should never need to directly modify digest values.  The
+/// interface for manipulating digest values is very low level and imperative,
+/// because Recalled computes digests of anything and everything and any
+/// performance difference on digest operations has a noticeable effect on
+/// the overall performance of Recalled.
 ///
 /// Note that the digest algorithms used with Recalled do not need to be
 /// cryptographically secure, but should ideally make collisions highly
@@ -25,15 +27,20 @@ type [<NoComparison; CustomEquality>] Digest = struct
     /// Bits 64 to 127 of the digest.
     val mutable Hi: uint64
 
+    /// Returns zero if the digests are equal.  Neither of the digests are
+    /// modified.
     static member inline ZeroIfEq: byref<Digest> * byref<Digest> -> uint64
 
-    /// Combine two digests.
+    /// Combine two digests.  The result is written to the first digest and the
+    /// second digest is not modified.
     static member inline Combine: byref<Digest> * byref<Digest> -> unit
 
-    /// Computes a digest of the specified region of memory.
+    /// Computes a digest of the specified region of memory.  The result is
+    /// written to the specified digest variable.
     static member inline Bytes: ptr: nativeptr<byte> * count: int * byref<Digest> -> unit
 
-    /// Computes a digest of the given string.
+    /// Computes a digest of the given string.  The result is written to the
+    /// specified digest variable.
     static member inline String: string * byref<Digest> -> unit
   end
 

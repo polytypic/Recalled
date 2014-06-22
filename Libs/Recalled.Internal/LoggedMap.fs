@@ -25,6 +25,7 @@ module LoggedMap =
 
   type Entry = {
       mutable Idx: int
+      mutable Live: bool
       mutable Info: IVar<option<Info>>
     }
 
@@ -55,11 +56,12 @@ module LoggedMap =
          upcast loggedMap.Ready
        else
          let info = ivar ()
-         loggedMap.Dict.Add (keyDigest, {Idx = -1; Info = info})
+         loggedMap.Dict.Add (keyDigest, {Idx = -1; Live = true; Info = info})
          Monitor.Exit loggedMap.Dict
          upcast info
      | Just entry ->
        Monitor.Exit loggedMap.Dict
+       entry.Live <- true
        upcast entry.Info
 
   let readFun (loggedMap: LoggedMap)
@@ -159,7 +161,7 @@ module LoggedMap =
     if 0UL = (keyDigest.Lo ||| keyDigest.Hi) then
       failwith "Sorry, key digest of Zero not allowed!"
     loggedMap.Ready >>= fun _ ->
-    let entry = {Idx = 0; Info = ivar ()}
+    let entry = {Idx = 0; Live = true; Info = ivar ()}
     Monitor.Enter loggedMap.Dict
     match loggedMap.Dict.TryGetValue keyDigest with
      | Nothing ->
@@ -350,7 +352,11 @@ module LoggedMap =
                     do ri.bobOffset <-
                          skipTo sizeof<int64> (skipBy ri.bobSize ri.bobOffset)
 
-                    let entry = {Idx = ri.addIdx; Info = IVar.Now.createFull info}
+                    let entry = {
+                        Idx = ri.addIdx
+                        Live = false
+                        Info = IVar.Now.createFull info
+                      }
 
                     do Monitor.Enter loggedMap.Dict
                     match loggedMap.Dict.TryGetValue ri.keyDigest with
