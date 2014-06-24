@@ -58,8 +58,8 @@ The idea is that you are using the `sumLinesOfFiles` function to compute the sum
 whenever you need it&mdash;without necessarily even knowing whether any file has
 actually changed.  Wouldn't it be nice if your program could be modified to
 avoid needless recomputation?  For example, if just one file changes or a new
-file is added, it would nice if only the sum for that would be (re)computed and
-the total would be computed from previously known sums and so on.
+file is added, it would be nice if only the sum for that would be (re)computed
+and the total would be computed from previously known sums and so on.
 
 ### Working incrementally
 
@@ -78,8 +78,8 @@ let lastWriteTimeUtc (path: string) : LogAs<Logged<DateTime>> =
 The above definition uses the `logAs` combinator to define a persisted
 computation.  The idea of the `logAs` combinator is that it defines a named
 computation, that can be later identified, and whose execution is *logged*, so
-that that its result, and other details, can be later recovered&mdash;possibly
-in another run of the same or modified program.  That is right.  Recalled is
+that its result, and other details, can be later recovered&mdash;possibly in
+another run of the same or modified program.  That is right.  Recalled is
 designed in such a way that a programmer can easily incrementally modify a
 working program so that on subsequent runs Recalled reuses whatever it can and
 modified computations get rerun as necessary.
@@ -107,8 +107,8 @@ let sumLinesOfFile (path: string) : LogAs<Logged<int>> =
   }
 ```
 
-The above `sumLinesOfFile` computation works, but it doesn't buy us anything.
-Can you see why?
+The above `sumLinesOfFile` computation works, but it doesn't buy us much.  Can
+you see why?
 
 Of course, it should be mentioned that in the context of this toy example we are
 not interested in robustness details such as checking whether a file actually
@@ -162,13 +162,13 @@ This is also where Recalled differs from most traditional build systems and is
 more like an adaptation of
 [Self-Adjusting Computation](http://www.umut-acar.org/self-adjusting-computation).
 Traditional build systems often have some specific built-in primitive kinds of
-dependencies such as dependencies to files.  Upon rebuilds those systems use
-their built-in primitives to check dependencies such as checking file
-modification dates or, say, MD5 hashes of file contents.  In Recalled,
-recomputations are triggered by changes in the result *values* produced by the
-computations.  This makes Recalled particularly convenient for working with
-ordinary host-language functions, while many existing build systems try to
-primarily make it easy to work with external programs that read and write
+dependencies such as dependencies to files or they might be based on timestamps.
+Upon rebuilds those systems use their built-in primitives to check dependencies
+such as checking file modification dates or, say, MD5 hashes of file contents.
+In Recalled, recomputations are triggered by changes in the result *values*
+produced by the computations.  This makes Recalled particularly convenient for
+working with ordinary host-language functions, while many existing build systems
+try to primarily make it easy to work with external programs that read and write
 *files*.
 
 #### Getting sidetracked on values
@@ -262,10 +262,9 @@ let sumLinesOfFiles (fileListPath: string) : LogAs<Logged<int>> =
   }
 ```
 
-The two new operations used in the above definition are the `Seq.mapWithLog` and
-`wait`.  `Seq.mapWithLog` just runs a number of computations with a log.
-`wait`, on the other hand, makes a logged computation wait until its result is
-ready.
+The two new operations used in the above definition are the `Seq.mapLogAs` and
+`wait`.  `Seq.mapLogAs` just runs a number of computations with a log.  `wait`,
+on the other hand, makes a logged computation wait until its result is ready.
 
 At this point you might want to compare this new persistent and incremental
 version of `sumLinesOfFiles` to the original
@@ -325,7 +324,7 @@ computation can be run.
 
 Logged computation are built upon the lightweight jobs of
 [Hopac](https://github.com/VesaKarvonen/Hopac) and the `recall` operation of
-Recalled, when given path to a directory for the log data, returns a job than
+Recalled, when given path to a directory for the log data, returns a job that
 can be `run` using Hopac:
 
 ```fsharp
