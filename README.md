@@ -49,6 +49,15 @@ The document [The design of the persistent storage of Recalled](Docs/LogArch.md)
 discusses the design of the persistent storage mechanism of Recalled.  You do
 not need to read that document to use the Recalled library.
 
+## Presentations
+
+Here are slides I've prepared for talks on Recalled:
+
+* [25.6.2014](http://vesakarvonen.github.io/Recalled/Recalled-250614.pdf) in New
+  York.
+
+## Background material
+
 The implementation of Recalled is based on two infrastructure libraries:
 
 * The [Hopac](https://github.com/VesaKarvonen/Hopac) library makes it easy to
