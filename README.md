@@ -53,6 +53,10 @@ not need to read that document to use the Recalled library.
 
 Here are slides I've prepared for talks on Recalled:
 
+* [6.8.2014](http://vesakarvonen.github.io/Recalled/Recalled-060814.pdf) in
+  Helsinki. *Note: The missing diagram from the "Picture" slide will be added
+  later.*
+
 * [25.6.2014](http://vesakarvonen.github.io/Recalled/Recalled-250614.pdf) in New
   York.
 

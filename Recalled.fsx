@@ -1,11 +1,11 @@
-// Tip: Add --lib:<recalled-root-directory> to your F# interactive options
+#I __SOURCE_DIRECTORY__ ;;
 
-#r "Libs\\Recalled\\bin\\Release\\Hopac.Core.dll" ;;
-#r "Libs\\Recalled\\bin\\Release\\Hopac.dll" ;;
-#r "Libs\\Recalled\\bin\\Release\\Infers.dll" ;;
-#r "Libs\\Recalled\\bin\\Release\\Infers.Rep.dll" ;;
-#r "Libs\\Recalled\\bin\\Release\\Recalled.Internal.dll" ;;
-#r "Libs\\Recalled\\bin\\Release\\Recalled.dll" ;;
+#r "Libs/Recalled/bin/Release/Hopac.Core.dll" ;;
+#r "Libs/Recalled/bin/Release/Hopac.dll" ;;
+#r "Libs/Recalled/bin/Release/Infers.dll" ;;
+#r "Libs/Recalled/bin/Release/Infers.Rep.dll" ;;
+#r "Libs/Recalled/bin/Release/Recalled.Internal.dll" ;;
+#r "Libs/Recalled/bin/Release/Recalled.dll" ;;
 
 open System.Security.Cryptography ;;
 open System.IO ;;
