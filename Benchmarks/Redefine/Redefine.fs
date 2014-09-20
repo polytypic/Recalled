@@ -16,13 +16,13 @@ let showDigest = update {
 
 /// Helper for creating simple primitive constants.  Another alternative
 /// would be to use the `watch` primitive.
-let constant x = logAs (sprintf "constant: %A" x) {
+let constant x = log (sprintf "constant: %A" x) {
   do printfn " constant: %A" x
   return x
 }
 
 /// The first version of the logged computation.
-let stage1 = logAs "test" {
+let stage1 = log "test" {
   let! x = constant 0 |> wait
   do printfn " test(1): %A" x
   do! showDigest
@@ -30,7 +30,7 @@ let stage1 = logAs "test" {
 }
 
 /// The second modified version of the logged computation.
-let stage2 = logAs "test" {
+let stage2 = log "test" {
   let! x = constant 1 |> wait
   do printfn " test(2): %A" x
   do! showDigest
@@ -38,7 +38,7 @@ let stage2 = logAs "test" {
 }
 
 /// The third modified version of the logged computation.
-let stage3 = logAs "test" {
+let stage3 = log "test" {
   let! y = constant 2 |> wait
   let! x = constant 0 |> wait
   do printfn " test(3): %A + %A" x y
@@ -49,7 +49,7 @@ let stage3 = logAs "test" {
 /// This runs the given stage twice.  On initial run we expect the computation
 /// to be run to completion as it is either new or modified.  On the rerun we
 /// expect that computations are skipped after checking dependencies.
-let test (stage: LogAs<Logged<int>>) =
+let test (stage: Logged<Result<int>>) =
   printfn "\nInitial:"
   let res1 : int = run <| recall ".recall" {
     return! stage |> wait

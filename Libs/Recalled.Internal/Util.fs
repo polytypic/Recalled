@@ -9,6 +9,28 @@ let inline (|Just|Nothing|) (got, x) = if got then Just x else Nothing
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type [<AbstractClass>] ByRefToValue<'d, 'r> () =
+  abstract Invoke: byref<'d> -> 'r
+
+////////////////////////////////////////////////////////////////////////////////
+
+type Default<'t when 't: (new: unit -> 't)> () =
+  static let instance = new 't ()
+  static member Get () = instance
+
+////////////////////////////////////////////////////////////////////////////////
+
+type [<Struct>] Struct<'t1, 't2> (t1: 't1, t2: 't2) =
+  member this.T1 = t1
+  member this.T2 = t2
+
+type [<Struct>] Struct<'t1, 't2, 't3> (t1: 't1, t2: 't2, t3: 't3) =
+  member this.T1 = t1
+  member this.T2 = t2
+  member this.T3 = t3
+
+////////////////////////////////////////////////////////////////////////////////
+
 type PtrInt = int64
 // Operations on plain int64 values tend to compile to better code (on 64-bit
 // platforms) than operations on the nativeint struct type.

@@ -32,16 +32,20 @@ type UnionPU<'c, 'cs, 'u> = U of list<InternalPU<'u>>
 
 [<AutoOpen>]
 module internal UtilPU =
-  type Unique =
-   | Unique
+  module Unsafe =
+    let inline bitcast (x: 'x) : 'y =
+      let p = NativePtr.stackalloc sizeof<'x>
+      NativePtr.write p x
+      let p = p |> NativePtr.toNativeInt |> NativePtr.ofNativeInt
+      NativePtr.read p
 
-  let inline memoize (mk: unit -> 'x) =
-    match StaticMap<Unique, option<'x>>.Get () with
-     | None ->
-       let x = mk ()
-       StaticMap<Unique, option<'x>>.Set (Some x)
-       x
-     | Some x -> x
+  module Float32 =
+    let inline toUInt32 (x: float32) : uint32 = Unsafe.bitcast x
+    let inline ofUInt32 (x: uint32) : float32 = Unsafe.bitcast x
+
+  module Float =
+    let inline toUInt64 (x: float) : uint64 = Unsafe.bitcast x
+    let inline ofUInt64 (x: uint64) : float = Unsafe.bitcast x
 
   let inline mkNative () : OpenPU<'x> =
     O {new InternalPU<'x> () with
@@ -191,16 +195,15 @@ module internal UtilPU =
            let p = skipBy sizeof<uint8> p
            cs.[i].Unpickle (p, &x)}
 
-type [<InferenceRules>] PU () =
+type [<InferenceRules (StaticMap = StaticMap.Results)>] PU () =
   static member makePU () : PU<'x> =
-    lock typeof<PU> <| fun () ->
-      match Engine.TryGenerate (PU ()) with
-        | None -> failwithf "PU: Unsupported type %A" typeof<'x>
-        | Some pu -> pu
+    match Engine.TryGenerate (PU ()) with
+     | None -> failwithf "PU: Unsupported type %A" typeof<'x>
+     | Some pu -> pu
 
-  static member Get () = memoize PU.makePU
+  static member Get () = StaticMap<PU>.Memoize PU.makePU
 
-  member this.toPU (O pu: OpenPU<'x>) : PU<'x> = memoize <| fun () ->
+  member this.toPU (O pu: OpenPU<'x>) : PU<'x> =
     {new PU<'x> () with
        override this.Size (x) =
          let mutable x = x
@@ -223,25 +226,27 @@ type [<InferenceRules>] PU () =
        override p.Get () = o
        override p.Set (O x) = r.impl <- x}
 
-  member this.unit: OpenPU<unit> = memoize (mkConst >> O)
+  member this.unit: OpenPU<unit> = mkConst () |> O
 
-  member this.bool: OpenPU<bool> = memoize mkNative
+  member this.bool: OpenPU<bool> = mkNative ()
 
-  member this.int8: OpenPU<int8> = memoize mkNative
-  member this.int16: OpenPU<int16> = memoize mkNative
-  member this.int32: OpenPU<int32> = memoize mkNative
-  member this.int64: OpenPU<int64> = memoize mkNative
+  member this.int8: OpenPU<int8> = mkNative ()
+  member this.int16: OpenPU<int16> = mkNative ()
+  member this.int32: OpenPU<int32> = mkNative ()
+  member this.int64: OpenPU<int64> = mkNative ()
 
-  member this.uint8: OpenPU<uint8> = memoize mkNative
-  member this.uint16: OpenPU<uint16> = memoize mkNative
-  member this.uint32: OpenPU<uint32> = memoize mkNative
-  member this.uint64: OpenPU<uint64> = memoize mkNative
+  member this.uint8: OpenPU<uint8> = mkNative ()
+  member this.uint16: OpenPU<uint16> = mkNative ()
+  member this.uint32: OpenPU<uint32> = mkNative ()
+  member this.uint64: OpenPU<uint64> = mkNative ()
 
-  member this.float32: OpenPU<float32> = memoize mkNative // XXX NaN
-  member this.float64: OpenPU<float  > = memoize mkNative // XXX NaN
+  member this.float32: OpenPU<float32> =
+    mkNativeBy Float32.toUInt32 Float32.ofUInt32
+  member this.float64: OpenPU<float> =
+    mkNativeBy Float.toUInt64 Float.ofUInt64
 
-  member this.char: OpenPU<char> = memoize mkNative
-  member this.string: OpenPU<string> = memoize <| fun () ->
+  member this.char: OpenPU<char> = mkNative ()
+  member this.string: OpenPU<string> =
     O {new InternalPU<string> () with
          override this.Size (x, p) =
            p
@@ -265,10 +270,10 @@ type [<InferenceRules>] PU () =
            x <- String (cs)
            p}
 
-  member this.DateTime: OpenPU<DateTime> = memoize <| fun () ->
+  member this.DateTime: OpenPU<DateTime> =
     mkNativeBy (fun d -> d.Ticks) (fun t -> DateTime t)
 
-  member this.Digest: OpenPU<Digest> = memoize <| fun () -> 
+  member this.Digest: OpenPU<Digest> =
     O {new InternalPU<Digest> () with
          override this.Size (x, p) =
            p
@@ -285,49 +290,49 @@ type [<InferenceRules>] PU () =
            |> readTo &x.Lo
            |> readTo &x.Hi}
            
-  member this.BigInteger: OpenPU<BigInteger> = memoize <| fun () ->
+  member this.BigInteger: OpenPU<BigInteger> =
     mkBytesBy (fun x -> x.ToByteArray ()) (fun x -> BigInteger (x))
 
-  member this.bytes: OpenPU<array<byte>> = memoize <| fun () ->
+  member this.bytes: OpenPU<array<byte>> =
     mkBytesBy id id
 
-  member this.list (t: OpenPU<'x>) : OpenPU<list<'x>> = memoize <| fun () ->
+  member this.list (t: OpenPU<'x>) : OpenPU<list<'x>> =
     mkSeq List.toArray List.ofArray t
 
-  member this.array (t: OpenPU<'a>) : OpenPU<array<'a>> = memoize <| fun () ->
+  member this.array (t: OpenPU<'a>) : OpenPU<array<'a>> =
     mkSeq id id t
 
   member this.case (m: Case<Empty, 'cs, 'u>)
-                  : UnionPU<Empty, 'cs, 'u> = memoize <| fun () ->
+                  : UnionPU<Empty, 'cs, 'u> =
     U [mkConst (let mutable n = Unchecked.defaultof<_> in m.Create (&n))]
   member this.case (m: Case<'ls, 'cs, 'u>,
                     p: ProductPU<'ls, 'ls, 'u>)
-                  : UnionPU<'ls, 'cs, 'u> = memoize <| fun () -> 
+                  : UnionPU<'ls, 'cs, 'u> = 
     U [mkTupleOrNonRecursiveRecord m p]
 
   member this.plus (U c:  UnionPU<       'c,       Choice<'c, 'cs>, 'u>,
                     U cs: UnionPU<           'cs ,            'cs , 'u>)
-                        : UnionPU<Choice<'c, 'cs>, Choice<'c, 'cs>, 'u> = memoize <| fun () -> 
+                        : UnionPU<Choice<'c, 'cs>, Choice<'c, 'cs>, 'u> =
     U (c @ cs)
 
   member this.union (_: Rep,
                      m: Union<'u>,
                      _: AsChoice<'c, 'u>,
-                     u: UnionPU<'c, 'c, 'u>) : OpenPU<'u> = memoize <| fun () -> 
+                     u: UnionPU<'c, 'c, 'u>) : OpenPU<'u> =
     mkUnion m u
 
   member this.times (f:  ProductPU< 'f,       And<'f, 'fs>, 'r>,
                      fs: ProductPU<     'fs ,         'fs , 'r>)
-                    : ProductPU<And<'f, 'fs>, And<'f, 'fs>, 'r> = memoize <| fun () -> 
+                    : ProductPU<And<'f, 'fs>, And<'f, 'fs>, 'r> =
     mkProduct f fs
     
   member this.elem (_: Elem<'e, 'p, 't>,
                     t: OpenPU<'e>)
-                  : ProductPU<'e, 'p, 't> = memoize <| fun () -> 
+                  : ProductPU<'e, 'p, 't> =
     mkElemOrField t
 
   member this.product (_: Rep,
                        _: Product<'t>,
                        m: AsProduct<'p, 't>,
-                       p: ProductPU<'p, 'p, 't>) : OpenPU<'t> = memoize <| fun () -> 
+                       p: ProductPU<'p, 'p, 't>) : OpenPU<'t> =
     O (mkTupleOrNonRecursiveRecord m p)

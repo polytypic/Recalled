@@ -66,7 +66,7 @@ type UnionPU<'c, 'cs, 't>
 /// Please note that the method signatures can be seen as a specification of
 /// which types are supported by the inference rules.
 #endif
-type [<InferenceRules>] PU =
+type [<InferenceRules (StaticMap = StaticMap.Results)>] PU =
   /// Returns a previously generated serialization capability or attempts to
   /// generate one for the specified type `'t`.
   static member Get: unit -> PU<'t>

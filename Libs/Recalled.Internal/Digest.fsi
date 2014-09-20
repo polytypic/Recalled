@@ -50,3 +50,19 @@ type [<Class>] DigestEqualityComparer =
 
  /// An empty default constructor.
  new: unit -> DigestEqualityComparer
+
+/// A mutable dictionary of digests.
+type DigestDict<'v>
+
+/// Operations on digest dictionaries.
+module DigestDict =
+  /// The empty digest dictionary.
+  val empty: DigestDict<'v>
+
+  /// Atomically gets the value associated with the digest or 
+  val getOrAdd: dict: byref<DigestDict<'v>>
+             -> digest: byref<Digest>
+             -> seed: byref<'r>
+             -> create: ByRefToValue<'r, 'v>
+             -> added: byref<bool>
+             -> 'v

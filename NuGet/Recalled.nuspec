@@ -15,14 +15,14 @@
     <copyright>© Vesa Karvonen</copyright>
     <tags>f# fsharp parallel build</tags>
     <dependencies>
-      <dependency id="Hopac" version="0.0.0.21" />
-      <dependency id="Infers" version="0.0.0.2" />
+      <dependency id="Hopac" version="0.0.0.24" />
+      <dependency id="Infers" version="0.0.0.6" />
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Libs\Recalled\bin\Release\Recalled.dll" target="lib\net451" />
-    <file src="..\Libs\Recalled\bin\Release\Recalled.xml" target="lib\net451" />
-    <file src="..\Libs\Recalled\bin\Release\Recalled.Internal.dll" target="lib\net451" />
-    <file src="..\Libs\Recalled\bin\Release\Recalled.Internal.xml" target="lib\net451" />
+    <file src="..\Libs\Recalled\bin\Release\Recalled.dll" target="lib\net45" />
+    <file src="..\Libs\Recalled\bin\Release\Recalled.xml" target="lib\net45" />
+    <file src="..\Libs\Recalled\bin\Release\Recalled.Internal.dll" target="lib\net45" />
+    <file src="..\Libs\Recalled\bin\Release\Recalled.Internal.xml" target="lib\net45" />
   </files>
 </package>

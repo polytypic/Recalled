@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Recalled.Internal</RootNamespace>
     <AssemblyName>Recalled.Internal</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>Recalled.Internal</Name>
     <TargetFrameworkProfile />
@@ -61,6 +61,7 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
+    <Content Include="packages.config" />
     <Compile Include="Assembly.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="MurmurHash3.fsi" />
@@ -71,16 +72,14 @@
     <Compile Include="MemMapBuf.fs" />
     <Compile Include="LoggedMap.fsi" />
     <Compile Include="LoggedMap.fs" />
-    <None Include="packages.config" />
-    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Hopac">
-      <HintPath>..\..\packages\Hopac.0.0.0.21\lib\net451\Hopac.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.24\lib\net45\Hopac.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Hopac.Core">
-      <HintPath>..\..\packages\Hopac.0.0.0.21\lib\net451\Hopac.Core.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.24\lib\net45\Hopac.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

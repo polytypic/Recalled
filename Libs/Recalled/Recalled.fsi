@@ -33,36 +33,29 @@ namespace Recalled
 open System
 open Hopac
 
-/// Represents a persistent storage.
-type Log
-
 /// Represents a single primitive step or a sequence of steps of a possibly
 /// logged computation.
 type Update<'x>
 
-/// Represents a logged computation.
-#if DOC
-///
-/// During a logged computation, binding the value of another logged computation
-/// makes the current logged computation dependent on the result of the bound
-/// logged computation.  This way Recalled learns about the input that may
-/// change the output of a computation.
-#endif
+/// Represents the result of a logged computation.
+type Result<'x>
+
+/// Represents a computation whose result is logged.
 type Logged<'x>
+
+/// Represents a persistent storage.
+type Log
 
 /// Represents a parallel computation with a log.
 type WithLog<'x> = Log -> Job<'x>
 
-/// Represents a computation whose result is logged with a user defined
-/// identity.
-type LogAs<'x>
-
-/// Represents a computation whose result is logged and is given an implicitly
-/// defined identity based on the identity of the surrounding computation.
-type Log<'x>
-
 /// Builder for updates or steppable computations.
 #if DOC
+///
+/// During a steppable computation, binding the value of a logged computation
+/// makes the current computation dependent on the result of the bound logged
+/// computation.  This way Recalled learns about the input that may change the
+/// output of a computation.
 ///
 /// Note that steppable computations allow only a limited set of computational
 /// patterns, because a steppable computation is not guaranteed to be run to
@@ -80,13 +73,13 @@ type Log<'x>
 ///> do! ...
 ///> if ... then ...
 ///> if ... then ... else ...
-///> let! ... = ... | job | log | logAs
+///> let! ... = ... | job | log
 ///> return ...
-///> return! ... | job | log | logAs
+///> return! ... | job | log
 ///
 /// In the above, an ellipsis denotes either an update or an ordinary
-/// expression.  An update can directly bind jobs as well as computations logged
-/// with either a user defined or an implicitly defined identity.
+/// expression.  An update can directly bind jobs as well as logged
+/// computations.
 #endif
 type UpdateBuilder =
   new: unit -> UpdateBuilder
@@ -96,28 +89,22 @@ type UpdateBuilder =
   member Return: 'x -> Update<'x>
 
   member ReturnFrom: Update<'x> -> Update<'x>
-  member ReturnFrom: LogAs<'x> -> Update<'x>
-  member ReturnFrom: Log<'x> -> Update<'x>
-  member ReturnFrom: Job<'x> -> Update<'x>
+  member ReturnFrom: Logged<'x> -> Update<'x>
+  member ReturnFrom:    Job<'x> -> Update<'x>
 
   member Bind: Update<'x> * ('x -> Update<'y>) -> Update<'y>
-  member Bind: LogAs<'x> * ('x -> Update<'y>) -> Update<'y>
-  member Bind: Log<'x> * ('x -> Update<'y>) -> Update<'y>
-  member Bind: Job<'x> * ('x -> Update<'y>) -> Update<'y>
+  member Bind: Logged<'x> * ('x -> Update<'y>) -> Update<'y>
+  member Bind:    Job<'x> * ('x -> Update<'y>) -> Update<'y>
 
   member Combine: Update<unit> * Update<'x> -> Update<'x>
 
   member Zero: unit -> Update<unit>
 
-/// Builder for a computation logged with a user defined identity.
-type [<Class>] LogAsBuilder =
+/// Builder for a logged computation.
+type [<Class>] LoggedBuilder =
   inherit UpdateBuilder
-  member Run: Update<'x> -> LogAs<Logged<'x>>
-
-/// Builder for a computation logged with an implicitly assigned identity.
-type [<Class>] LogBuilder =
-  inherit UpdateBuilder
-  member Run: Update<'x> -> Log<Logged<'x>>
+  new: string -> LoggedBuilder
+  member Run: Update<'x> -> Logged<Result<'x>>
 
 /// Builder for parallel computations with a log.  A computation with a log is
 /// executed in a context with a log for logging individual logged computations.
@@ -132,10 +119,10 @@ type [<Class>] LogBuilder =
 ///> if ... then ...
 ///> if ... then ... else ...
 ///> let ... = ... in ...
-///> let! ... = ... | job | logAs
+///> let! ... = ... | job | log
 ///> match ... with ...
 ///> return ...
-///> return! ... | job | logAs
+///> return! ... | job | log
 ///> try ... finally ...
 ///> try ... with ...
 ///> use ... in ...
@@ -144,8 +131,7 @@ type [<Class>] LogBuilder =
 ///
 /// In the above, an ellipsis denotes a computation with a log or an ordinary
 /// expression.  A computation with a log can directly bind jobs as well as
-/// computations logged with a user defined identity.  However, updates and
-/// computations with an implicitly defined identity cannot be bound directly.
+/// logged computations.  However, updates cannot be bound directly.
 type WithLogBuilder =
   new: unit -> WithLogBuilder
 
@@ -154,11 +140,11 @@ type WithLogBuilder =
   member inline Return: 'x -> WithLog<'x>
 
   member inline ReturnFrom: WithLog<'x> -> WithLog<'x>
-  member ReturnFrom: LogAs<'x> -> WithLog<'x>
+  member ReturnFrom: Logged<'x> -> WithLog<'x>
   member inline ReturnFrom: Job<'x> -> WithLog<'x>
 
   member inline Bind: WithLog<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
-  member Bind: LogAs<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
+  member Bind: Logged<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
   member inline Bind: Job<'x> * ('x -> WithLog<'y>) -> WithLog<'y>
 
   member inline Combine: WithLog<unit> * WithLog<'x> -> WithLog<'x>
@@ -187,7 +173,7 @@ module Seq =
 
   /// Creates an update that maps a given logged operation over a sequence and
   /// returns a new sequence with the results.
-  val mapLogAs: ('x -> LogAs<'y>) -> seq<'x> -> Update<ResizeArray<'y>>
+  val mapLogged: ('x -> Logged<'y>) -> seq<'x> -> Update<ResizeArray<'y>>
 
 /// Operations for defining computations that can be Recalled.
 [<AutoOpen>]
@@ -202,12 +188,15 @@ module Recalled =
   val recall: logDir: string -> RunWithLogBuilder
 
   /// A builder for parallel computations with a log.
-  val logged: WithLogBuilder
+  val withLog: WithLogBuilder
 
-  /// Returns a builder for creating a new logged computation with the given
-  /// identity.  Computations with the same identity are assumed to be the same
-  /// computations.  The result of the computation is persisted to a computation
-  /// log along with dependencies to other logged computations.
+  /// A builder for defining updates or partial logged computations whose
+  /// results are not logged.
+  val update: UpdateBuilder
+
+  /// Returns a computation that logs the dependencies and the result of the
+  /// given update with the specified identity.  Computations with the same
+  /// identity are assumed to be the same computations.
 #if DOC
   ///
   /// The first time a logged computations is created, it is always run to
@@ -219,7 +208,7 @@ module Recalled =
   /// completion every time it is recreated.  This makes it convenient to
   /// essentially create new primitive operations and is also quite logical as a
   /// computation that has no inputs must either be a constant or it must use
-  /// some hidden effects to compute its output.
+  /// some encapsulated effects to compute its output.
   ///
   /// If, however, the log has a non empty sequence of dependencies to other
   /// logged computations, then the recreated computation is run to completion
@@ -228,20 +217,16 @@ module Recalled =
   /// any input that may change the result of the computation are bound as other
   /// logged computations within the defined logged computation.
 #endif
-  val logAs: id: string -> LogAsBuilder
+  val logPU: id: string -> PU<'x> -> Update<'x> -> Logged<Result<'x>>
 
-  /// Returns a builder for creating a new logged computation.  The computation
-  /// is given an automatically determined identity based on the identity of the
-  /// surrounding computation.  Otherwise the computation behaves just like a
-  /// computation defined with `logAs`.
-  val log: LogBuilder
+  /// `log id { ... }` is equivalent to `logPU id (PU.Get ()) (update { ... })`.
+  val inline log: id: string -> LoggedBuilder
 
   /// Returns a computation that logs the given value as a dependency.
-  val watch: 'x -> Log<unit>
+  val watchPU: PU<'x> -> 'x -> Update<unit>
 
-  /// A builder for defining updates or partial logged computations whose
-  /// results are not logged.
-  val update: UpdateBuilder
+  /// `watch x` is equivalent to `watch (PU.Get ()) x`.
+  val watch: 'x -> Update<unit>
 
   /// Provides an intermediate digest of the current point in a logged
   /// computation.
@@ -257,12 +242,48 @@ module Recalled =
 #endif
   val digest: Update<Internal.Digest>
 
-  /// Returns an update that waits for the result of the logged operation.
-  val read: Logged<'x> -> Update<'x>
+  /// Returns a computation that adds the logged result as a dependency.
+  val req: Result<_> -> Update<unit>
 
-  /// Returns a computation logged with a user defined identity that directly
-  /// waits for and return the result value of the given computation.
-  val wait: LogAs<Logged<'x>> -> LogAs<'x>
+  /// Returns an update that waits for the result of the logged operation, but
+  /// does not add the computation as a dependency.  It is an error to `read` a
+  /// result without depending upon the computation that produced the result.
+  val read: Result<'x> -> Update<'x>
+
+  /// Returns the identity with which the computation has been logged.
+  val idOf: Result<_> -> string
+
+  /// Returns a computation that adds the given computation as a dependency,
+  /// but ignores the result of the computation.
+#if DOC
+  /// In other words,
+  ///
+  ///> do! dep computation
+  ///
+  /// is equivalent to
+  ///
+  ///> let! _ = computation
+#endif
+  val dep: Logged<_> -> Logged<unit>
+
+  /// Returns a computation that adds the given computation as a dependency,
+  /// waits for and returns the result of the computation.
+#if DOC
+  ///
+  /// In other words,
+  ///
+  ///> let! x = wait computation
+  ///
+  /// is roughly equivalent to
+  ///
+  ///> let! xL = computation
+  ///> let! x = read xL
+  ///
+  /// Note when using `wait` rather than `read` the current computation cannot
+  /// proceed in parallel with the waited computation.  Of course, if the result
+  /// is needed immediately, it makes no difference.
+#endif
+  val wait: Logged<Result<'x>> -> Logged<'x>
 
   /// Provides an alternative that becomes enabled if some computation within
   /// the whole computation with a log has failed.  This allows long running
