@@ -3,6 +3,8 @@
 set -x
 set -e
 
+wget -O .nuget/nuget.exe http://nuget.org/nuget.exe
+
 nuget restore Recalled.sln
 
 function build () {
