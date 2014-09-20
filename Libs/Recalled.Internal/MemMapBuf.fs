@@ -52,6 +52,18 @@ module MemMapBuf =
       else
         buf.size <- size
 
+  let getFileLengthOr0 path =
+    if File.Exists path then
+      let info = FileInfo (path)
+      info.Length
+    else
+      0L
+
+  let setFileLength path newLength =
+    let newLength = int64 newLength
+    use s = new FileStream (path, FileMode.OpenOrCreate)
+    s.SetLength newLength
+
   let doClose buf =
     buf.view.SafeMemoryMappedViewHandle.ReleasePointer ()
     buf.ptr <- Unchecked.defaultof<_>
@@ -63,11 +75,16 @@ module MemMapBuf =
     buf.file.Dispose ()
     buf.file <- null
 
-    use f = new FileStream (buf.path, FileMode.Open)
-    f.SetLength (int64 buf.size)
+    setFileLength buf.path buf.size
 
   let doOpenWithCapacity buf newCapacity =
-    buf.file <- MemoryMappedFile.CreateFromFile (buf.path, FileMode.OpenOrCreate, null, int64 newCapacity)
+    setFileLength buf.path newCapacity
+    buf.file <-
+      MemoryMappedFile.CreateFromFile (
+        buf.path,
+        FileMode.OpenOrCreate,
+        null,
+        int64 newCapacity)
     buf.capacity <- newCapacity
     buf.view <- buf.file.CreateViewAccessor ()
     buf.ptr <- Unchecked.defaultof<_>
@@ -98,12 +115,7 @@ module MemMapBuf =
        reply <-= offs
 
   let create (path: string) = Job.delay <| fun () ->
-    let size =
-      if File.Exists path then
-        let info = FileInfo (path)
-        info.Length
-      else
-        0L
+    let size = getFileLengthOr0 path
     let buf = {
       path = path
       size = size
