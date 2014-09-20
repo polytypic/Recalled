@@ -16,5 +16,5 @@ function build () {
     rm -rf .recall
 }
 
-#build Debug
+build Debug
 build Release

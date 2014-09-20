@@ -34,10 +34,9 @@ let inline isMono () =
 [<EntryPoint>]
 let main argv =
   try
-    // XXX Tail call issues on Mono
-    if isMono () then
-      Scheduler.Global.setCreate
-       {Scheduler.Create.Def with MaxStackSize = Some <| 4 * 1024 * 1024}
+    // XXX Tail call issues on Mono and in Debug mode
+    Scheduler.Global.setCreate
+     {Scheduler.Create.Def with MaxStackSize = Some <| 4 * 1024 * 1024}
     let mutable n = 1I
     for i=1 to 16 do
       printf "fib %s" (n.ToString ())

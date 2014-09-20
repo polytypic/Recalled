@@ -13,7 +13,7 @@ install:
 platform: Any CPU
 
 configuration:
-#  - Debug
+  - Debug
   - Release
 
 test_script:
