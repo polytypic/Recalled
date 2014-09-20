@@ -1,0 +1,21 @@
+version: "{build}"
+
+branches:
+  only:
+    - master
+
+matrix:
+  fast_finish: true
+
+install:
+  - NuGet restore Recalled.sln
+
+platform: Any CPU
+
+configuration:
+  - Debug
+  - Release
+
+test_script:
+  - Benchmarks\Redefine\bin\%CONFIGURATION%\Redefine.exe
+  - Benchmarks\BigFib\bin\%CONFIGURATION%\BigFib.exe
