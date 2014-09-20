@@ -70,11 +70,11 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Hopac">
-      <HintPath>..\..\packages\Hopac.0.0.0.24\lib\net45\Hopac.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.25\lib\net45\Hopac.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Hopac.Core">
-      <HintPath>..\..\packages\Hopac.0.0.0.24\lib\net45\Hopac.Core.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.25\lib\net45\Hopac.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Infers">
@@ -100,8 +100,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Recalled.Internal\Recalled.Internal.fsproj">
       <Name>Recalled.Internal</Name>
       <Project>{4f566e03-d02b-491e-93d4-e7acea2a4936}</Project>

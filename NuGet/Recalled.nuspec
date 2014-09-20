@@ -15,7 +15,7 @@
     <copyright>© Vesa Karvonen</copyright>
     <tags>f# fsharp parallel build</tags>
     <dependencies>
-      <dependency id="Hopac" version="0.0.0.24" />
+      <dependency id="Hopac" version="0.0.0.25" />
       <dependency id="Infers" version="0.0.0.6" />
     </dependencies>
   </metadata>
