@@ -1,3 +1,5 @@
+> [![Build status](https://ci.appveyor.com/api/projects/status/aav8lotwvhvo43gr)](https://ci.appveyor.com/project/VesaKarvonen/recalled) &#xb7; [![Build Status](https://travis-ci.org/VesaKarvonen/Recalled.svg?branch=master)](https://travis-ci.org/VesaKarvonen/Recalled)
+
 # Recalled
 
 Recalled is a library that implements a simple
