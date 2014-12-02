@@ -68,6 +68,9 @@ module LoggedMap =
               (readFun: nativeptr<byte> -> 'x) : Job<'x> =
     MemMapBuf.accessFun loggedMap.BobBuf readFun
 
+  let remDead (loggedMap: LoggedMap) : Job<Alt<unit>> =
+    failwith "XXX"
+
   let justWrite (loggedMap: LoggedMap)
                 (entry: Entry)
                 (keyDigest: Digest)

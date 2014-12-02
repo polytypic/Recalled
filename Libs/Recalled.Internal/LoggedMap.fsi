@@ -65,6 +65,11 @@ module LoggedMap =
         -> bobWrite: (nativeptr<byte> -> unit)
         -> Job<Info>
 
+  /// Marks all entries that have not been explicitly searched for in the logged
+  /// map as removed.
+  val remDead: loggedMap: LoggedMap
+            -> Job<Alt<unit>>
+
   /// Grants direct access to the bob storage of the logged map.
   val readFun: loggedMap: LoggedMap
             -> readFun: (nativeptr<byte> -> 'x)

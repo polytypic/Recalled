@@ -5,14 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>9fe70616-af42-4504-b816-6ffe9ac1238a</ProjectGuid>
+    <ProjectGuid>9cc538ad-2a71-4bb2-86ec-2c3083acb66c</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>BigFib</RootNamespace>
-    <AssemblyName>BigFib</AssemblyName>
+    <RootNamespace>Tutorial</RootNamespace>
+    <AssemblyName>Tutorial</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>BigFib</Name>
+    <Name>Tutorial</Name>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -26,7 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\BigFib.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Tutorial.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -37,7 +37,7 @@
     <DefineConstants />
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\BigFib.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Tutorial.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
@@ -76,7 +76,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <Compile Include="BigFib.fs" />
+    <Compile Include="Tutorial.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libs\Recalled.Internal\Recalled.Internal.fsproj">

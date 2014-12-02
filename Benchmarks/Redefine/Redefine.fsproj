@@ -42,11 +42,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Hopac">
-      <HintPath>..\..\packages\Hopac.0.0.0.25\lib\net45\Hopac.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.31\lib\net45\Hopac.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Hopac.Core">
-      <HintPath>..\..\packages\Hopac.0.0.0.25\lib\net45\Hopac.Core.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.31\lib\net45\Hopac.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Infers">
