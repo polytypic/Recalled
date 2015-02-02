@@ -40,7 +40,7 @@ module MemMapBuf =
   /// duration of the given job.  The job is passed the buffer start address.
   /// After the job returns, the address will no longer be valid.
   val accessJob: buf: MemMapBuf
-              -> readJob: (nativeptr<byte> -> Job<'x>)
+              -> readJob: (nativeptr<byte> -> #Job<'x>)
               -> Job<'x>
 
   /// Allocates space from the end of the buffer and return offset to the start

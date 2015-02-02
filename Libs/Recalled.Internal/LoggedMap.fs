@@ -40,7 +40,7 @@ module LoggedMap =
 
   let close loggedMap =
     loggedMap.AddIdx >>= fun _ ->
-    Promise.startAsAlt
+    Promise.start
      (MemMapBuf.close loggedMap.AddBuf >>= fun addClosed ->
       MemMapBuf.close loggedMap.RemBuf >>= fun remClosed ->
       MemMapBuf.close loggedMap.BobBuf >>= fun bobClosed ->
@@ -53,16 +53,16 @@ module LoggedMap =
      | Nothing ->
        if IVar.Now.isFull loggedMap.Ready then
          Monitor.Exit loggedMap.Dict
-         upcast loggedMap.Ready
+         loggedMap.Ready
        else
          let info = ivar ()
          loggedMap.Dict.Add (keyDigest, {Idx = -1; Live = true; Info = info})
          Monitor.Exit loggedMap.Dict
-         upcast info
+         info
      | Just entry ->
        Monitor.Exit loggedMap.Dict
        entry.Live <- true
-       upcast entry.Info
+       entry.Info
 
   let readFun (loggedMap: LoggedMap)
               (readFun: nativeptr<byte> -> 'x) : Job<'x> =

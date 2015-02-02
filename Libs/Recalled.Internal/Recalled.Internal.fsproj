@@ -61,7 +61,6 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <ItemGroup>
-    <Content Include="packages.config" />
     <Compile Include="Assembly.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="MurmurHash3.fsi" />
@@ -72,14 +71,19 @@
     <Compile Include="MemMapBuf.fs" />
     <Compile Include="LoggedMap.fsi" />
     <Compile Include="LoggedMap.fs" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Hopac">
-      <HintPath>..\..\packages\Hopac.0.0.0.31\lib\net45\Hopac.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.39\lib\net45\Hopac.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Hopac.Core">
-      <HintPath>..\..\packages\Hopac.0.0.0.31\lib\net45\Hopac.Core.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.0.0.39\lib\net45\Hopac.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Hopac.Platform">
+      <HintPath>..\..\packages\Hopac.0.0.0.39\lib\net45\Hopac.Platform.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
