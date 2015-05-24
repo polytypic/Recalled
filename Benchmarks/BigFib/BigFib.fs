@@ -12,7 +12,7 @@ open Recalled
 
 let rec fib n : Logged<Result<BigInteger>> = log ("fib: " + n.ToString ()) {
   if n < 2I then
-    // For small `n` this code is always run, because there are not dependencies
+    // For small `n` this code is always run, because there are no dependencies
     // to other computations.
     return n
   else
