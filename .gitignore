@@ -1,6 +1,7 @@
 *.exe
 *.nupkg
 *.suo
+*.userprefs
 *~
 .\#*
 .recall
