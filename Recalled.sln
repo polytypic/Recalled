@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
+# Visual Studio 2012
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Recalled", "Libs\Recalled\Recalled.fsproj", "{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{04A3834D-1C74-498E-972F-E62C426938FC}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Recalled", "Libs\Recalled\Recalled.fsproj", "{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Recalled.Internal", "Libs\Recalled.Internal\Recalled.Internal.fsproj", "{4F566E03-D02B-491E-93D4-E7ACEA2A4936}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5E3BB5D0-A29D-45B0-9A4B-60FE9DD93ED8}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,6 +25,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{97D87F19-C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Benchmarks", "Benchmarks", "{3C33842D-FBF9-4D06-B98C-F9E6BF2E9BE3}"
 EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "BigFib", "Benchmarks\BigFib\BigFib.fsproj", "{9FE70616-AF42-4504-B816-6FFE9AC1238A}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Redefine", "Benchmarks\Redefine\Redefine.fsproj", "{0C56A3F1-1A46-4B27-86EC-50834A620225}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Tutorial", "Benchmarks\Tutorial\Tutorial.fsproj", "{9CC538AD-2A71-4BB2-86EC-2C3083ACB66C}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{8658D9E5-45F8-4012-AC01-1D03CD469F6F}"
 	ProjectSection(SolutionItems) = preProject
 		NuGet\Recalled.nuspec = NuGet\Recalled.nuspec
@@ -34,28 +42,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{26D384
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BigFib", "Benchmarks\BigFib\BigFib.fsproj", "{9FE70616-AF42-4504-B816-6FFE9AC1238A}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Redefine", "Benchmarks\Redefine\Redefine.fsproj", "{0C56A3F1-1A46-4B27-86EC-50834A620225}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Recalled.Internal", "Libs\Recalled.Internal\Recalled.Internal.fsproj", "{4F566E03-D02B-491E-93D4-E7ACEA2A4936}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tutorial", "Benchmarks\Tutorial\Tutorial.fsproj", "{9CC538AD-2A71-4BB2-86EC-2C3083ACB66C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0C56A3F1-1A46-4B27-86EC-50834A620225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0C56A3F1-1A46-4B27-86EC-50834A620225}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C56A3F1-1A46-4B27-86EC-50834A620225}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -64,19 +56,27 @@ Global
 		{4F566E03-D02B-491E-93D4-E7ACEA2A4936}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F566E03-D02B-491E-93D4-E7ACEA2A4936}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F566E03-D02B-491E-93D4-E7ACEA2A4936}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9CC538AD-2A71-4BB2-86EC-2C3083ACB66C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9CC538AD-2A71-4BB2-86EC-2C3083ACB66C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CC538AD-2A71-4BB2-86EC-2C3083ACB66C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CC538AD-2A71-4BB2-86EC-2C3083ACB66C}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
+		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FE70616-AF42-4504-B816-6FFE9AC1238A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7C29DC2C-BFDB-406F-9AF9-B2E2DD763BCD} = {04A3834D-1C74-498E-972F-E62C426938FC}
+		{4F566E03-D02B-491E-93D4-E7ACEA2A4936} = {04A3834D-1C74-498E-972F-E62C426938FC}
 		{9FE70616-AF42-4504-B816-6FFE9AC1238A} = {3C33842D-FBF9-4D06-B98C-F9E6BF2E9BE3}
 		{0C56A3F1-1A46-4B27-86EC-50834A620225} = {3C33842D-FBF9-4D06-B98C-F9E6BF2E9BE3}
-		{4F566E03-D02B-491E-93D4-E7ACEA2A4936} = {04A3834D-1C74-498E-972F-E62C426938FC}
 		{9CC538AD-2A71-4BB2-86EC-2C3083ACB66C} = {3C33842D-FBF9-4D06-B98C-F9E6BF2E9BE3}
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
