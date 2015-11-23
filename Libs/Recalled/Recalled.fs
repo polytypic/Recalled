@@ -365,11 +365,10 @@ type RunWithLogBuilder (logDir: string) =
     let! result = xW log
     do! Latch.decrement latch
     do! Latch.await latch
-    let! closedAlt = LoggedMap.close log.Old
-    do! closedAlt
+    do! LoggedMap.close log.Old
     do lock log.Failures <| fun () ->
        if log.Failures.Count > 0 then
-         raise (AggregateException log.Failures)
+         raise <| AggregateException log.Failures
     return result
   }
 

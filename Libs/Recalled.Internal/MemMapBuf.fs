@@ -33,7 +33,7 @@ module MemMapBuf =
       mutable file: MemoryMappedFile
       mutable view: MemoryMappedViewAccessor
       mutable ptr: nativeptr<byte>
-      reqs: Mailbox<Req>
+      reqs: Ch<Req>
       mutable numAccessors: int
       mutable isFree: IVar<unit>
     }
@@ -124,34 +124,29 @@ module MemMapBuf =
       ptr = Unchecked.defaultof<_>
       numAccessors = 0
       isFree = IVar ()
-      reqs = Mailbox ()
+      reqs = Ch ()
     }
     doOpenWithCapacity buf (if size = 0L then 65536L else size)
     Job.foreverServer (server buf) >>-.
     buf
 
-  let close buf : Job<Alt<unit>> = Job.delay <| fun () ->
-    let reply = IVar ()
-    buf.reqs *<<+ Close reply >>-. upcast reply
+  let close buf = buf.reqs *<-=>- Close
 
-  let flush buf : Job<Alt<unit>> = Job.delay <| fun () ->
-    let reply = IVar ()
-    buf.reqs *<<+ Flush reply >>-. upcast reply
+  let flush buf = buf.reqs *<-=>- Flush
 
-  let accessFun buf access = Job.delay <| fun () ->
+  let accessFun buf access = Alt.prepareFun <| fun () ->
     let reply = IVar ()
     let access ptr =
       try reply *<= access ptr with e -> reply *<=! e
-    buf.reqs *<<+ Access access >>=. reply
+    buf.reqs *<- Access access ^=>. reply
 
-  let accessJob buf access = Job.delay <| fun () ->
+  let accessJob buf access = Alt.prepareFun <| fun () ->
     let reply = IVar ()
     let access ptr =
-      Job.tryIn <| Job.delayWith access ptr
+      Job.tryInDelay <| fun () -> access ptr
        <| fun x -> reply *<= x
-       <| fun e -> IVar.fillFailure reply e
-    buf.reqs *<<+ Access access >>=. reply
+       <| fun e -> reply *<=! e
+    buf.reqs *<- Access access ^=>. reply
 
-  let append buf align size = Job.delay <| fun () ->
-    let reply = IVar ()
-    buf.reqs *<<+ Append (align, size, reply) >>=. reply
+  let append buf align size =
+    buf.reqs *<-=>- fun reply -> Append (align, size, reply)

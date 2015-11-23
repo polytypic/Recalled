@@ -22,30 +22,30 @@ module MemMapBuf =
   /// Closes the memory mapped buffer.  This must be called explicitly and the
   /// caller must wait for the alternative to make sure anything written to the
   /// buffer really will be persisted to the underlying file.
-  val close: buf: MemMapBuf -> Job<Alt<unit>>
+  val close: buf: MemMapBuf -> Alt<unit>
 
   /// Waits until the buffer is not being accessed and flushes the buffer.  Note
   /// that if you call this from inside an `accessJob` and wait for the reply
   /// then you have a deadlock.
-  val flush: buf: MemMapBuf -> Job<Alt<unit>>
+  val flush: buf: MemMapBuf -> Alt<unit>
 
   /// Grants access to read/write arbitrarily from/to the buffer for the
   /// duration of the given function.  The function is passed the buffer start
   /// address.  After the function returns, the address will no longer be valid.
   val accessFun: buf: MemMapBuf
               -> readFun: (nativeptr<byte> -> 'x)
-              -> Job<'x>
+              -> Alt<'x>
 
   /// Grants access to read/write arbitrarily from/to the buffer for the
   /// duration of the given job.  The job is passed the buffer start address.
   /// After the job returns, the address will no longer be valid.
   val accessJob: buf: MemMapBuf
               -> readJob: (nativeptr<byte> -> #Job<'x>)
-              -> Job<'x>
+              -> Alt<'x>
 
   /// Allocates space from the end of the buffer and return offset to the start
   /// of the allocated space.
   val append: buf: MemMapBuf
            -> align: int
            -> size: int
-           -> Job<PtrInt>
+           -> Alt<PtrInt>

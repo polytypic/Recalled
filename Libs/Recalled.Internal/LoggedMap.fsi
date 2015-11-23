@@ -47,7 +47,7 @@ module LoggedMap =
   /// Closes the logged map.  This must be called explicitly and the caller must
   /// wait for the alternative to make sure everything written to the logged map
   /// really will be persisted.
-  val close: loggedMap: LoggedMap -> Job<Promise<unit>>
+  val close: loggedMap: LoggedMap -> Job<unit>
 
   /// Tries to find an entry from the logged map.  The alternative becomes
   /// available as soon as it is known whether the logged map contains the
@@ -68,9 +68,9 @@ module LoggedMap =
   /// Marks all entries that have not been explicitly searched for in the logged
   /// map as removed.
   val remDead: loggedMap: LoggedMap
-            -> Job<Alt<unit>>
+            -> Job<unit>
 
   /// Grants direct access to the bob storage of the logged map.
   val readFun: loggedMap: LoggedMap
             -> readFun: (nativeptr<byte> -> 'x)
-            -> Job<'x>
+            -> Alt<'x>

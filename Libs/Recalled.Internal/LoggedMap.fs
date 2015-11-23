@@ -38,11 +38,10 @@ module LoggedMap =
 
   let close loggedMap =
     loggedMap.AddIdx >>= fun _ ->
-    Promise.start
-     (MemMapBuf.close loggedMap.AddBuf >>= fun addClosed ->
-      MemMapBuf.close loggedMap.RemBuf >>= fun remClosed ->
-      MemMapBuf.close loggedMap.BobBuf >>= fun bobClosed ->
-      addClosed >>=. remClosed >>=. bobClosed)
+    Job.conIgnore
+      [MemMapBuf.close loggedMap.AddBuf
+       MemMapBuf.close loggedMap.RemBuf
+       MemMapBuf.close loggedMap.BobBuf]
 
   let tryFind (loggedMap: LoggedMap)
               (keyDigest: Digest) = Alt.prepareFun <| fun () ->
@@ -63,10 +62,10 @@ module LoggedMap =
        entry.Info
 
   let readFun (loggedMap: LoggedMap)
-              (readFun: nativeptr<byte> -> 'x) : Job<'x> =
+              (readFun: nativeptr<byte> -> 'x) =
     MemMapBuf.accessFun loggedMap.BobBuf readFun
 
-  let remDead (loggedMap: LoggedMap) : Job<Alt<unit>> =
+  let remDead (loggedMap: LoggedMap) : Job<unit> =
     failwith "XXX"
 
   let justWrite (loggedMap: LoggedMap)
@@ -281,7 +280,7 @@ module LoggedMap =
 
           do! quickSortMed3Job remBufPtr 0 remBufCnt
 
-          let! _ = MemMapBuf.flush loggedMap.RemBuf
+          do! MemMapBuf.flush loggedMap.RemBuf |> Job.queue
 
           do! MemMapBuf.accessJob loggedMap.AddBuf <| fun addBufPtr -> job {
               let addBufBeg = int64 (NativePtr.toNativeInt addBufPtr)
