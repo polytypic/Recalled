@@ -1,4 +1,4 @@
-﻿namespace Recalled
+namespace Recalled
 
 open System.Numerics
 open System

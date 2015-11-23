@@ -1,4 +1,4 @@
-﻿namespace Recalled
+namespace Recalled
 
 open Recalled.Internal
 open Microsoft.FSharp.NativeInterop

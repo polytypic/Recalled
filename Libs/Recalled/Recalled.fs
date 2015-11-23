@@ -1,4 +1,4 @@
-﻿namespace Recalled
+namespace Recalled
 
 open Recalled.Internal
 open Microsoft.FSharp.NativeInterop
@@ -7,8 +7,6 @@ open System.Collections.Generic
 open System.Collections.Concurrent
 open Hopac
 open Hopac.Infixes
-open Hopac.Alt.Infixes
-open Hopac.Job.Infixes
 open Hopac.Extensions
 
 exception CanceledOnFailure
@@ -96,7 +94,7 @@ type [<Sealed>] Result<'x> =
   [<DefaultValue>] val mutable key: Digest
   val info: IVar<LoggedMap.Info>
   val mutable value: option<'x>
-  new (id, pu) = {id = id; pu = pu; info = ivar (); value = None}
+  new (id, pu) = {id = id; pu = pu; info = IVar (); value = None}
 
 type Update<'x> =
   | Value of 'x
@@ -122,13 +120,13 @@ type UpdateBuilder () =
     xU
   member this.ReturnFrom (LogAs xAs: Logged<'x>) : Update<'x> =
     GetLog <| fun log rs ->
-    xAs log rs |>> fun (r, x) -> Required (r, fun () -> Value x)
+    xAs log rs >>- fun (r, x) -> Required (r, fun () -> Value x)
   member this.ReturnFrom (xJ: Job<'x>) : Update<'x> =
-    Job (xJ |>> Value)
+    Job (xJ >>- Value)
     
   member this.Bind (xU: Update<'x>, x2yU: 'x -> Update<'y>) : Update<'y> =
     let inline bindJ (xUJ: Job<Update<_>>) =
-      xUJ |>> fun xU -> this.Bind (xU, x2yU)
+      xUJ >>- fun xU -> this.Bind (xU, x2yU)
     match xU with
      | Value x -> x2yU x
      | Job xUJ -> Job (bindJ xUJ)
@@ -139,9 +137,9 @@ type UpdateBuilder () =
      | GetThis lri2xUJ -> GetThis (fun l r i -> lri2xUJ l r i |> bindJ)
   member this.Bind (LogAs xAs: Logged<'x>, x2yU: 'x -> Update<'y>) : Update<'y> =
     GetLog <| fun log rs ->
-    xAs log rs |>> fun (d, x) -> Required (d, fun () -> x2yU x)
+    xAs log rs >>- fun (d, x) -> Required (d, fun () -> x2yU x)
   member this.Bind (xJ: Job<'x>, x2yU:'x -> Update<'y>) : Update<'y> =
-    Job (xJ |>> x2yU)
+    Job (xJ >>- x2yU)
 
   member this.Combine (uU: Update<unit>, xU: Update<'x>) : Update<'x> =
     this.Bind (uU, fun () -> xU)
@@ -189,7 +187,7 @@ module internal Do =
       let newDeps = ResizeArray<Result> ()
 
       let cancel () =
-        IVar.fillFailure res.info CanceledOnFailure >>.
+        IVar.fillFailure res.info CanceledOnFailure >>=.
         Latch.decrement log.Latch
 
       let failure (e: exn) =
@@ -199,12 +197,12 @@ module internal Do =
          | e ->
            let e' = Exception (sprintf "Failure building %s" id, e)
            lock log.Failures <| fun () -> log.Failures.Add e'
-           IVar.tryFill log.Failed () >>.
-           IVar.fillFailure res.info e' >>.
+           IVar.tryFill log.Failed () >>=.
+           IVar.fillFailure res.info e' >>=.
            Latch.decrement log.Latch
 
       let finish info =
-        res.info <-= info >>= fun () ->
+        res.info *<= info >>= fun () ->
         Latch.decrement log.Latch
 
       let rec depDigest sum i =
@@ -304,7 +302,7 @@ module internal Do =
                   | GetThis lri2xUJ ->
                     lri2xUJ log res newDeps.Count >>= checkDeps
              checkDeps xU)
-         failure) >>%
+         failure) >>-.
       (res :> Result, res)
 
 type LoggedBuilder (id) =
@@ -322,7 +320,7 @@ type WithLogBuilder () =
   member inline this.ReturnFrom (xW: WithLog<'x>) : WithLog<'x> =
     xW
   member this.ReturnFrom (LogAs xAs: Logged<'x>) : WithLog<'x> =
-    fun log -> xAs log DigestSet.empty |>> fun (_, x) -> x
+    fun log -> xAs log DigestSet.empty >>- fun (_, x) -> x
   member inline this.ReturnFrom (xJ: Job<'x>) : WithLog<'x> =
     fun _ -> xJ
 
@@ -359,7 +357,7 @@ type RunWithLogBuilder (logDir: string) =
     let! loggedMap = LoggedMap.create logDir
     let latch = Latch.Now.create 1
     let log =
-      {Failed = ivar ()
+      {Failed = IVar ()
        Latch = latch
        Failures = ResizeArray<_> ()
        Old = loggedMap
@@ -392,7 +390,7 @@ module Recalled =
 
   let watchPU (xPU: PU<'x>) (x: 'x) : Update<unit> =
     GetThis <| fun log res i ->
-    Do.asLogged log DigestSet.empty (sprintf "%d: %s" i res.Id) xPU (Value x) |>> fun (d, x) ->
+    Do.asLogged log DigestSet.empty (sprintf "%d: %s" i res.Id) xPU (Value x) >>- fun (d, x) ->
     Required (d, Value)
 
   let watch (x: 'x) : Update<unit> = watchPU (PU.Get ()) x
@@ -420,12 +418,12 @@ module Recalled =
                   let ptr =
                     NativePtr.toNativeInt ptr + nativeint info.BobOffset
                     |> NativePtr.ofNativeInt
-                  xR.pu.Unpickle ptr) |>> fun value ->
+                  xR.pu.Unpickle ptr) >>- fun value ->
                Value value))
 
   let dep (LogAs xAs: Logged<_>) : Logged<unit> =
     LogAs <| fun log rs ->
-    xAs log rs |>> fun (d, _) -> (d, ())
+    xAs log rs >>- fun (d, _) -> (d, ())
 
   let wait (LogAs xLW: Logged<Result<'x>>) : Logged<'x> =
     LogAs <| fun log rs ->
@@ -441,7 +439,7 @@ module Recalled =
           let ptr =
             NativePtr.toNativeInt ptr + nativeint info.BobOffset
             |> NativePtr.ofNativeInt
-          xR.pu.Unpickle ptr) |>> fun value ->
+          xR.pu.Unpickle ptr) >>- fun value ->
        (d, value)
 
   let getCancelAlt: WithLog<Alt<unit>> =

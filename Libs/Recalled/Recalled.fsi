@@ -1,4 +1,4 @@
-﻿/// Recalled is a library for defining persistent, incremental, parallel
+/// Recalled is a library for defining persistent, incremental, parallel
 /// computations such as build systems.  The main goals for Recalled are to make
 /// it straightforward to define such computations and to scale such
 /// computations.

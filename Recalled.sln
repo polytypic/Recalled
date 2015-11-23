@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 VisualStudioVersion = 12.0.31101.0
@@ -19,7 +19,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{97D87F19-C5BA-4289-A6B5-2336AC2E597D}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.md = LICENSE.md
-		README.md = README.md
 		Recalled.fsx = Recalled.fsx
 	EndProjectSection
 EndProject

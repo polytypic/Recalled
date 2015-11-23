@@ -1,4 +1,4 @@
-﻿module Tutorial
+module Tutorial
 
 open System
 open System.IO

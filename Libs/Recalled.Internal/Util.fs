@@ -1,4 +1,4 @@
-﻿[<AutoOpen>]
+[<AutoOpen>]
 module Recalled.Internal.Util
 
 open Microsoft.FSharp.NativeInterop

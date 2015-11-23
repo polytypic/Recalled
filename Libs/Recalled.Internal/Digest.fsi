@@ -1,4 +1,4 @@
-﻿/// The Recalled.Internal library implements the internal mechanisms used by the
+/// The Recalled.Internal library implements the internal mechanisms used by the
 /// Recalled library and associated tools.  The Recalled.Internal library is not
 /// meant to be directly used by programs written with the Recalled library.
 namespace Recalled.Internal

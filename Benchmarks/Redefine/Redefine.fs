@@ -1,4 +1,4 @@
-﻿module Redefine
+module Redefine
 
 open System.IO
 open System.Diagnostics

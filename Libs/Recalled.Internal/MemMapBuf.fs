@@ -1,4 +1,4 @@
-﻿namespace Recalled.Internal
+namespace Recalled.Internal
 
 open Microsoft.FSharp.NativeInterop
 open System
@@ -6,8 +6,6 @@ open System.IO
 open System.IO.MemoryMappedFiles
 open System.Threading
 open Hopac
-open Hopac.Job.Infixes
-open Hopac.Alt.Infixes
 open Hopac.Infixes
 
 module Cond =
@@ -15,7 +13,7 @@ module Cond =
     if cond () then
       Job.unit ()
     else
-      var <- ivar ()
+      var <- IVar ()
       if cond () then Job.unit () else var :> Job<_>
 
   let inline signal var cond =
@@ -95,11 +93,11 @@ module MemMapBuf =
      | Flush reply ->
        Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
        buf.view.Flush ()
-       reply <-= ()
+       reply *<= ()
      | Close reply ->
        Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
        doClose buf
-       reply <-= ()
+       reply *<= ()
      | Access access ->
        Interlocked.Increment &buf.numAccessors |> ignore
        Job.queue (access buf.ptr >>= fun () ->
@@ -108,11 +106,12 @@ module MemMapBuf =
        let offs = buf.size |> skipTo align
        let size = int64 size
        Job.whenDo (buf.capacity - offs < size)
-         (Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) |>> fun () ->
+         (Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>- fun () ->
           doClose buf
-          doOpenWithCapacity buf (max (offs + size) (buf.capacity + buf.capacity))) >>= fun () ->
+          doOpenWithCapacity
+            buf (max (offs + size) (buf.capacity + buf.capacity))) >>= fun () ->
        buf.size <- offs + size
-       reply <-= offs
+       reply *<= offs
 
   let create (path: string) = Job.delay <| fun () ->
     let size = getFileLengthOr0 path
@@ -124,35 +123,35 @@ module MemMapBuf =
       view = null
       ptr = Unchecked.defaultof<_>
       numAccessors = 0
-      isFree = ivar ()
-      reqs = mb ()
+      isFree = IVar ()
+      reqs = Mailbox ()
     }
     doOpenWithCapacity buf (if size = 0L then 65536L else size)
-    Job.foreverServer (server buf) >>%
+    Job.foreverServer (server buf) >>-.
     buf
 
   let close buf : Job<Alt<unit>> = Job.delay <| fun () ->
-    let reply = ivar ()
-    buf.reqs <<-+ Close reply >>% upcast reply
+    let reply = IVar ()
+    buf.reqs *<<+ Close reply >>-. upcast reply
 
   let flush buf : Job<Alt<unit>> = Job.delay <| fun () ->
-    let reply = ivar ()
-    buf.reqs <<-+ Flush reply >>% upcast reply
+    let reply = IVar ()
+    buf.reqs *<<+ Flush reply >>-. upcast reply
 
   let accessFun buf access = Job.delay <| fun () ->
-    let reply = ivar ()
+    let reply = IVar ()
     let access ptr =
-      try reply <-= access ptr with e -> IVar.fillFailure reply e
-    buf.reqs <<-+ Access access >>. reply
+      try reply *<= access ptr with e -> reply *<=! e
+    buf.reqs *<<+ Access access >>=. reply
 
   let accessJob buf access = Job.delay <| fun () ->
-    let reply = ivar ()
+    let reply = IVar ()
     let access ptr =
       Job.tryIn <| Job.delayWith access ptr
-       <| fun x -> reply <-= x
+       <| fun x -> reply *<= x
        <| fun e -> IVar.fillFailure reply e
-    buf.reqs <<-+ Access access >>. reply
+    buf.reqs *<<+ Access access >>=. reply
 
   let append buf align size = Job.delay <| fun () ->
-    let reply = ivar ()
-    buf.reqs <<-+ Append (align, size, reply) >>. reply
+    let reply = IVar ()
+    buf.reqs *<<+ Append (align, size, reply) >>=. reply

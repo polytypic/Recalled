@@ -4,8 +4,6 @@ open Microsoft.FSharp.NativeInterop
 open Hopac
 open Hopac.Infixes
 open Hopac.Extensions
-open Hopac.Job.Infixes
-open Hopac.Alt.Infixes
 open System
 open System.Diagnostics
 open System.Collections.Generic
@@ -44,10 +42,10 @@ module LoggedMap =
      (MemMapBuf.close loggedMap.AddBuf >>= fun addClosed ->
       MemMapBuf.close loggedMap.RemBuf >>= fun remClosed ->
       MemMapBuf.close loggedMap.BobBuf >>= fun bobClosed ->
-      addClosed >>. remClosed >>. bobClosed)
+      addClosed >>=. remClosed >>=. bobClosed)
 
   let tryFind (loggedMap: LoggedMap)
-              (keyDigest: Digest) : Alt<option<Info>> = Alt.delay <| fun () ->
+              (keyDigest: Digest) = Alt.prepareFun <| fun () ->
     Monitor.Enter loggedMap.Dict
     match loggedMap.Dict.TryGetValue keyDigest with
      | Nothing ->
@@ -55,7 +53,7 @@ module LoggedMap =
          Monitor.Exit loggedMap.Dict
          loggedMap.Ready
        else
-         let info = ivar ()
+         let info = IVar ()
          loggedMap.Dict.Add (keyDigest, {Idx = -1; Live = true; Info = info})
          Monitor.Exit loggedMap.Dict
          info
@@ -113,7 +111,7 @@ module LoggedMap =
         for i=0 to depKeyDigests.Length-1 do
           p <- writeDigest depKeyDigests.[i] p
         p <- writeDigest info.DepDigest p) >>= fun () ->
-    entry.Info <-= Some info >>%
+    entry.Info *<= Some info >>-.
     info
 
   let justAdd (loggedMap: LoggedMap)
@@ -149,7 +147,7 @@ module LoggedMap =
     let idx = idx + 1
     MemMapBuf.append loggedMap.BobBuf sizeof<int64> bobSize' >>= fun bobOffs ->
     MemMapBuf.append loggedMap.AddBuf sizeof<int64> addEntrySize >>= fun addOffs ->
-    loggedMap.AddIdx <<-= idx >>= fun () ->
+    loggedMap.AddIdx *<<= idx >>= fun () ->
 
     entry.Idx <- idx
 
@@ -164,7 +162,7 @@ module LoggedMap =
     if 0UL = (keyDigest.Lo ||| keyDigest.Hi) then
       failwith "Sorry, key digest of Zero not allowed!"
     loggedMap.Ready >>= fun _ ->
-    let entry = {Idx = 0; Live = true; Info = ivar ()}
+    let entry = {Idx = 0; Live = true; Info = IVar ()}
     Monitor.Enter loggedMap.Dict
     match loggedMap.Dict.TryGetValue keyDigest with
      | Nothing ->
@@ -192,7 +190,7 @@ module LoggedMap =
              (fun ptr ->
                 int64 (NativePtr.toNativeInt ptr) + remOffs
                 |> writeIfNot remIdx
-                |> ignore) >>.
+                |> ignore) >>=.
             justAdd loggedMap entry keyDigest depKeyDigests depDigest bobSize bobWrite
 
   type ReadInfo = {
@@ -371,9 +369,9 @@ module LoggedMap =
                           if IVar.Now.isFull request.Info then
                             failwith "Bug"
                           request.Idx <- entry.Idx
-                       return! request.Info <-= info
+                       return! request.Info *<= info
 
-              do! loggedMap.AddIdx <<-= ri.addIdx
+              do! loggedMap.AddIdx *<<= ri.addIdx
 
               // Truncate buffers in case they were not properly closed last time.
               do MemMapBuf.Unsafe.truncate loggedMap.AddBuf (ri.pos - addBufBeg)
@@ -395,13 +393,13 @@ module LoggedMap =
            loggedMap.Dict.Remove kvI.Key |> ignore
 
       // ...until can declare read phase ready.
-      do! loggedMap.Ready <-= None
+      do! loggedMap.Ready *<= None
       do Monitor.Exit loggedMap.Dict
 
       // Answer the unsatisfied finds.
       do! unsatisfied
           |> Seq.iterJob (fun kvI ->
-             kvI.Value.Info <-= None)
+             kvI.Value.Info *<= None)
 
     with e ->
       return! IVar.fillFailure loggedMap.Ready e
@@ -417,8 +415,8 @@ module LoggedMap =
     let! remBuf = MemMapBuf.create (remFile logDir)
     let! bobBuf = MemMapBuf.create (bobFile logDir)
     let loggedMap =
-     {AddIdx = mvar ()
-      Ready = ivar ()
+     {AddIdx = MVar ()
+      Ready = IVar ()
       Dict = Dictionary<_, _> (DigestEqualityComparer ())
       AddBuf = addBuf
       RemBuf = remBuf

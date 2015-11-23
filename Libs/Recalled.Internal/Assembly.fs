@@ -1,4 +1,4 @@
-﻿namespace Recalled.Internal
+namespace Recalled.Internal
 
 open System.Reflection
 open System.Runtime.InteropServices

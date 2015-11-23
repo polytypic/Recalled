@@ -89,16 +89,16 @@
       <Project>{4F566E03-D02B-491E-93D4-E7ACEA2A4936}</Project>
     </ProjectReference>
     <Reference Include="FSharp.Core">
-      <HintPath>..\..\packages\FSharp.Core.3.1.2.1\lib\net40\FSharp.Core.dll</HintPath>
+      <HintPath>..\..\packages\FSharp.Core.4.0.0.1\lib\net40\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="Hopac.Core">
-      <HintPath>..\..\packages\Hopac.0.0.0.46\lib\net45\Hopac.Core.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.1.0\lib\net45\Hopac.Core.dll</HintPath>
     </Reference>
     <Reference Include="Hopac">
-      <HintPath>..\..\packages\Hopac.0.0.0.46\lib\net45\Hopac.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.1.0\lib\net45\Hopac.dll</HintPath>
     </Reference>
     <Reference Include="Hopac.Platform">
-      <HintPath>..\..\packages\Hopac.0.0.0.46\lib\net45\Hopac.Platform.dll</HintPath>
+      <HintPath>..\..\packages\Hopac.0.1.0\lib\net45\Hopac.Platform.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
