@@ -20,8 +20,11 @@ module Cond =
     if cond then IVar.tryFill var () else Job.unit ()
 
 module MemMapBuf =
+  type Access =
+    abstract Do: IVar<'x> * (nativeptr<byte> -> #Job<'x>) -> Job<unit>
+
   type Req =
-   | Access of (nativeptr<byte> -> Job<unit>)
+   | Access of (Access -> Job<unit>)
    | Append of align: int * size: int * IVar<PtrInt>
    | Close of IVar<unit>
    | Flush of IVar<unit>
@@ -88,31 +91,6 @@ module MemMapBuf =
     buf.ptr <- Unchecked.defaultof<_>
     buf.view.SafeMemoryMappedViewHandle.AcquirePointer (&buf.ptr)
 
-  let server buf =
-    buf.reqs >>= function
-     | Flush reply ->
-       Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
-       buf.view.Flush ()
-       reply *<= ()
-     | Close reply ->
-       Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
-       doClose buf
-       reply *<= ()
-     | Access access ->
-       Interlocked.Increment &buf.numAccessors |> ignore
-       Job.queue (access buf.ptr >>= fun () ->
-         Cond.signal buf.isFree (0 = Interlocked.Decrement &buf.numAccessors))
-     | Append (align, size, reply) ->
-       let offs = buf.size |> skipTo align
-       let size = int64 size
-       Job.whenDo (buf.capacity - offs < size)
-         (Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>- fun () ->
-          doClose buf
-          doOpenWithCapacity
-            buf (max (offs + size) (buf.capacity + buf.capacity))) >>= fun () ->
-       buf.size <- offs + size
-       reply *<= offs
-
   let create (path: string) = Job.delay <| fun () ->
     let size = getFileLengthOr0 path
     let buf = {
@@ -127,26 +105,43 @@ module MemMapBuf =
       reqs = Ch ()
     }
     doOpenWithCapacity buf (if size = 0L then 65536L else size)
-    Job.foreverServer (server buf) >>-.
-    buf
+    buf.reqs >>= function
+      | Flush reply ->
+        Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
+        buf.view.Flush ()
+        reply *<= ()
+      | Close reply ->
+        Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>= fun () ->
+        doClose buf
+        reply *<= ()
+      | Access access ->
+        Interlocked.Increment &buf.numAccessors |> ignore
+        Job.queue << access <| {new Access with
+          member t.Do (reply, access) =
+            Job.tryInDelay (fun () -> access buf.ptr)
+              (fun x -> reply *<= x)
+              (fun e -> reply *<=! e) >>= fun () ->
+            Cond.signal buf.isFree (0 = Interlocked.Decrement &buf.numAccessors)}
+      | Append (align, size, reply) ->
+        let offs = buf.size |> skipTo align
+        let size = int64 size
+        Job.whenDo (buf.capacity - offs < size)
+          (Cond.wait (&buf.isFree) (fun () -> 0 = buf.numAccessors) >>- fun () ->
+           doClose buf
+           doOpenWithCapacity
+             buf (max (offs + size) (buf.capacity + buf.capacity))) >>= fun () ->
+        buf.size <- offs + size
+        reply *<= offs
+    |> Job.foreverServer >>-. buf
 
   let close buf = buf.reqs *<-=>- Close
 
   let flush buf = buf.reqs *<-=>- Flush
 
-  let accessFun buf access = Alt.prepareFun <| fun () ->
-    let reply = IVar ()
-    let access ptr =
-      try reply *<= access ptr with e -> reply *<=! e
-    buf.reqs *<- Access access ^=>. reply
+  let accessJob buf access =
+    buf.reqs *<-=>- fun reply -> Access <| fun s -> s.Do (reply, access)
 
-  let accessJob buf access = Alt.prepareFun <| fun () ->
-    let reply = IVar ()
-    let access ptr =
-      Job.tryInDelay <| fun () -> access ptr
-       <| fun x -> reply *<= x
-       <| fun e -> reply *<=! e
-    buf.reqs *<- Access access ^=>. reply
+  let accessFun buf access = access >> Job.result |> accessJob buf
 
   let append buf align size =
     buf.reqs *<-=>- fun reply -> Append (align, size, reply)
