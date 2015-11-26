@@ -270,13 +270,13 @@ module LoggedMap =
       do! MemMapBuf.accessJob loggedMap.RemBuf <| fun remBufPtr -> job {
           let remBufPtr : nativeptr<int32> =
             NativePtr.ofNativeInt (NativePtr.toNativeInt remBufPtr)
-          let remBufCnt =
-            int32 (MemMapBuf.size loggedMap.RemBuf / int64 sizeof<int32>)
+          let! remBufSize = MemMapBuf.size loggedMap.RemBuf
+          let remBufCnt = int32 (remBufSize / int64 sizeof<int32>)
 
           let remBufCnt = findLastNon0 remBufPtr remBufCnt
 
-          do MemMapBuf.Unsafe.truncate loggedMap.RemBuf
-              (int64 sizeof<int32> * int64 remBufCnt)
+          do! MemMapBuf.Unsafe.truncate loggedMap.RemBuf
+               <| int64 sizeof<int32> * int64 remBufCnt
 
           do! quickSortMed3Job remBufPtr 0 remBufCnt
 
@@ -284,7 +284,8 @@ module LoggedMap =
 
           do! MemMapBuf.accessJob loggedMap.AddBuf <| fun addBufPtr -> job {
               let addBufBeg = int64 (NativePtr.toNativeInt addBufPtr)
-              let addBufEnd = addBufBeg + MemMapBuf.size loggedMap.AddBuf
+              let! addBufSize = MemMapBuf.size loggedMap.AddBuf
+              let addBufEnd = addBufBeg + addBufSize
 
               let ri : ReadInfo = {
                   remIdx    = 0
@@ -373,8 +374,8 @@ module LoggedMap =
               do! loggedMap.AddIdx *<<= ri.addIdx
 
               // Truncate buffers in case they were not properly closed last time.
-              do MemMapBuf.Unsafe.truncate loggedMap.AddBuf (ri.pos - addBufBeg)
-              do MemMapBuf.Unsafe.truncate loggedMap.BobBuf ri.bobOffset
+              do! MemMapBuf.Unsafe.truncate loggedMap.AddBuf (ri.pos - addBufBeg)
+              do! MemMapBuf.Unsafe.truncate loggedMap.BobBuf ri.bobOffset
             }
         }
 

@@ -11,13 +11,13 @@ module MemMapBuf =
   val create: path: string -> Job<MemMapBuf>
 
   /// Returns the current size of the buffer.
-  val size: buf: MemMapBuf -> PtrInt
+  val size: buf: MemMapBuf -> Alt<PtrInt>
 
   /// Unsafe operations on memory mapped buffers.
   module Unsafe =
     /// Reduce the size of buffer.  This operation is safe only when the memory
     /// mapped buffer is not concurrenly accessed by other threads.
-    val truncate: buf: MemMapBuf -> PtrInt -> unit
+    val truncate: buf: MemMapBuf -> PtrInt -> Alt<unit>
 
   /// Closes the memory mapped buffer.  This must be called explicitly and the
   /// caller must wait for the alternative to make sure anything written to the
