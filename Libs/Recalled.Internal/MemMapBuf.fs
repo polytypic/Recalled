@@ -1,10 +1,8 @@
 namespace Recalled.Internal
 
-open Microsoft.FSharp.NativeInterop
 open System
 open System.IO
 open System.IO.MemoryMappedFiles
-open System.Threading
 open Hopac
 open Hopac.Infixes
 
