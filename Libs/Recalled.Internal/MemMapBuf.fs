@@ -77,10 +77,10 @@ module MemMapBuf =
          mmb.accessCh ^=> fun access ->
            Job.queue << access <| {new Access with
              member t.Do (reply, access) =
-               Job.tryInDelay (fun () -> access st.ptr)
-                 (fun x -> reply *<= x)
-                 (fun e -> reply *<=! e) >>=.
-               finishedCh *<- ()} >>-. {st with n = st.n+1}
+               Job.tryInDelay <| fun () -> access st.ptr
+                 <| fun x -> reply *<= x
+                 <| fun e -> reply *<=! e
+               >>=. finishedCh *<- ()} >>-. {st with n = st.n+1}
          mmb.appendCh ^=> fun (align, size, reply) ->
            let offs = st.size |> skipTo align
            let size = int64 size
@@ -89,9 +89,7 @@ module MemMapBuf =
            if st.capacity < newSize
            then Job.forN st.n finishedCh >>= fun () ->
                 doClose st
-                doOpen <| max newSize (2L * st.capacity)
-                       <| newSize
-                |> finish
+                doOpen <| max newSize (2L * st.capacity) <| newSize |> finish
            else finish {st with size = newSize}
          mmb.sizeCh ^=> fun reply ->
            reply *<= st.size >>-. st
@@ -114,9 +112,8 @@ module MemMapBuf =
 
     let size = getFileLengthOr0 path
     let size = if size = 0L then 65536L else size
-    Job.iterateServer
-       <| doOpen size size
-       <| function st -> if st.n = 0 then idle st else busy st
+    Job.iterateServer <| doOpen size size <| fun st ->
+          if st.n = 0 then idle st else busy st
     >>-. mmb
 
   let size buf = buf.sizeCh *<-=>- id
