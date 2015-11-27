@@ -1,0 +1,14 @@
+NUGET
+  remote: /Users/vesakarv/Projects/Fs/Infers.Fresh
+  specs:
+    FSharp.Core (4.0.0.1) - framework: >= net45
+    Infers (0.2.1) - framework: >= net45
+      FSharp.Core (>= 4.0.0.1)
+    Infers.Rep (0.2.1) - framework: >= net45
+      FSharp.Core (>= 4.0.0.1)
+      Infers (>= 0.2.1)
+  remote: https://nuget.org/api/v2
+  specs:
+    Hopac (0.1.1) - framework: >= net45
+      FSharp.Core (>= 4.0.0.1)
+    NuGet.CommandLine (2.8.6)

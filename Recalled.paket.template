@@ -1,0 +1,42 @@
+type
+        file
+id
+        Recalled
+version
+        0.1.0
+summary
+        A library for defining persistent, incremental, parallel computations
+        such as build systems.
+authors
+        Vesa Karvonen
+owners
+        Vesa Karvonen
+licenseUrl
+        https://github.com/polytypic/Recalled/blob/master/LICENSE.md
+projectUrl
+        https://github.com/polytypic/Recalled
+requireLicenseAcceptance
+        false
+description
+        Recalled is a library for defining persistent, incremental, parallel
+        computations such as build systems.  The two goals for Recalled are to
+        make it straightforward to define such computations and to effectively
+        scale such computations by utililizing all CPU cores and by sharing
+        results among a network of workstations.
+releaseNotes
+        This is an experimental version of Recalled and is not recommended for
+        production use.
+copyright
+        © Vesa Karvonen
+tags
+        F# fsharp parallel build
+dependencies
+        FSharp.Core >= 4.0.0.1
+        Hopac >= 0.1.1
+        Infers >= 0.2.1
+        Infers.Rep >= 0.2.1
+files
+        Libs/Recalled/bin/Release/Recalled.dll ==> lib/net45
+        Libs/Recalled/bin/Release/Recalled.xml ==> lib/net45
+        Libs/Recalled/bin/Release/Recalled.Internal.dll ==> lib/net45
+        Libs/Recalled/bin/Release/Recalled.Internal.xml ==> lib/net45
