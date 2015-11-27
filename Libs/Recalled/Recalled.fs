@@ -135,7 +135,7 @@ type UpdateBuilder () =
      | GetLog lrs2xUJ -> GetLog (fun l rs -> lrs2xUJ l rs |> bindJ)
      | GetDigest d2xUJ -> GetDigest (d2xUJ >> bindJ)
      | GetThis lri2xUJ -> GetThis (fun l r i -> lri2xUJ l r i |> bindJ)
-  member this.Bind (LogAs xAs: Logged<'x>, x2yU: 'x -> Update<'y>) : Update<'y> =
+  member this.Bind (LogAs xAs: Logged<'x>, x2yU: 'x -> Update<'y>) =
     GetLog <| fun log rs ->
     xAs log rs >>- fun (d, x) -> Required (d, fun () -> x2yU x)
   member this.Bind (xJ: Job<'x>, x2yU:'x -> Update<'y>) : Update<'y> =
@@ -308,7 +308,7 @@ module internal Do =
 type LoggedBuilder (id) =
   inherit UpdateBuilder ()
   member this.Run (xU: Update<'x>) : Logged<Result<'x>> =
-    LogAs <| fun log rs -> Do.asLogged log rs id (PU.Get ()) xU
+    LogAs <| fun log rs -> Do.asLogged log rs id PU.pu xU
 
 type WithLogBuilder () =
   member inline this.Delay (u2xW: unit -> WithLog<'x>) : WithLog<'x> =
@@ -324,19 +324,19 @@ type WithLogBuilder () =
   member inline this.ReturnFrom (xJ: Job<'x>) : WithLog<'x> =
     fun _ -> xJ
 
-  member inline this.Bind (xW: WithLog<'x>, x2yW: 'x -> WithLog<'y>) : WithLog<'y> =
+  member inline this.Bind (xW: WithLog<'x>, x2yW: 'x -> WithLog<'y>) =
     fun log -> xW log >>= fun x -> x2yW x log
-  member this.Bind (LogAs xAs: Logged<'x>, x2yW: 'x -> WithLog<'y>) : WithLog<'y> =
+  member this.Bind (LogAs xAs: Logged<'x>, x2yW: 'x -> WithLog<'y>) =
     fun log -> xAs log DigestSet.empty >>= fun (_, x) -> x2yW x log
-  member inline this.Bind (xJ: Job<'x>, x2yW: 'x -> WithLog<'y>) : WithLog<'y> =
+  member inline this.Bind (xJ: Job<'x>, x2yW: 'x -> WithLog<'y>) =
     fun log -> xJ >>= fun x -> x2yW x log
 
-  member inline this.Combine (uW: WithLog<unit>, xW: WithLog<'x>) : WithLog<'x> =
+  member inline this.Combine (uW: WithLog<unit>, xW: WithLog<'x>) =
     this.Bind (uW, fun () -> xW)
 
-  member inline this.TryFinally (xW: WithLog<'x>, fin: unit -> unit) : WithLog<'x> =
+  member inline this.TryFinally (xW: WithLog<'x>, fin: unit -> unit) =
     fun log -> Job.tryFinallyFun (Job.delayWith xW log) fin
-  member inline this.TryWith (xW: WithLog<'x>, e2xW: exn -> WithLog<'x>) : WithLog<'x> =
+  member inline this.TryWith (xW: WithLog<'x>, e2xW: exn -> WithLog<'x>) =
     fun log -> Job.tryWith (Job.delayWith xW log) (fun e -> e2xW e log)
 
   member inline this.Using (x: 'x, x2yW: 'x -> WithLog<'y>) : WithLog<'y> =
@@ -389,10 +389,10 @@ module Recalled =
 
   let watchPU (xPU: PU<'x>) (x: 'x) : Update<unit> =
     GetThis <| fun log res i ->
-    Do.asLogged log DigestSet.empty (sprintf "%d: %s" i res.Id) xPU (Value x) >>- fun (d, x) ->
-    Required (d, Value)
+    Do.asLogged log DigestSet.empty (sprintf "%d: %s" i res.Id) xPU (Value x)
+    >>- fun (d, x) -> Required (d, Value)
 
-  let watch (x: 'x) : Update<unit> = watchPU (PU.Get ()) x
+  let watch (x: 'x) : Update<unit> = watchPU PU.pu x
 
   let digest: Update<Digest> =
     GetDigest (Job.result << Value)
@@ -445,7 +445,7 @@ module Recalled =
     fun log -> Job.result (log.Failed :> Alt<_>)
 
 module Seq =
-  let mapUpdate (x2yU: 'x -> Update<'y>) (xs: seq<'x>) : Update<ResizeArray<'y>> =
+  let mapUpdate (x2yU: 'x -> Update<'y>) (xs: seq<'x>) =
     Job << Job.thunk <| fun () ->
     let xs = xs.GetEnumerator ()
     let ys = ResizeArray<_> ()

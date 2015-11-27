@@ -40,18 +40,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Infers">
-      <HintPath>..\..\packages\Infers.0.0.0.6\lib\net45\Infers.dll</HintPath>
-    </Reference>
-    <Reference Include="Infers.Basic">
-      <HintPath>..\..\packages\Infers.0.0.0.6\lib\net45\Infers.Basic.dll</HintPath>
-    </Reference>
-    <Reference Include="Infers.Core">
-      <HintPath>..\..\packages\Infers.0.0.0.6\lib\net45\Infers.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Infers.Rep">
-      <HintPath>..\..\packages\Infers.0.0.0.6\lib\net45\Infers.Rep.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -67,6 +55,12 @@
     </Reference>
     <Reference Include="Hopac.Platform">
       <HintPath>..\..\packages\Hopac.0.1.1\lib\net45\Hopac.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="Infers">
+      <HintPath>..\..\packages\Infers.0.2.1\lib\net45\Infers.dll</HintPath>
+    </Reference>
+    <Reference Include="Infers.Core">
+      <HintPath>..\..\packages\Infers.0.2.1\lib\net45\Infers.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -46,145 +46,108 @@ type [<AbstractClass>] PU<'x> =
   /// Deserialize value from memory starting at the specified address.
   abstract Unpickle: nativeptr<byte> -> 'x
 
-/// Represents a capability to serialize values of type `'t` and is open to be
-/// combined and extended.
-type OpenPU<'t>
+module PU =
 
-/// Represents a capability to serialize a part of a product type.
-type ProductPU<'e, 'es, 't>
+  /// Generate PU for given type.
+  val pu<'x> : PU<'x>
 
-/// Represents a capability to serialize a subset of a union type.
-type UnionPU<'c, 'cs, 't>
+  /// Represents a capability to serialize values of type `'t` and is open to be
+  /// combined and extended.
+  type OpenPU<'t>
 
-/// Provides inference rules for a datatype generic serialization capability.
-#if DOC
-///
-/// The methods of this class aside from `Get` are ordinarily not called
-/// directly by client code, but are rather called indirectly by `Get` to
-/// construct the desired serialization capability.
-///
-/// Please note that the method signatures can be seen as a specification of
-/// which types are supported by the inference rules.
-#endif
-type [<InferenceRules (StaticMap = StaticMap.Results)>] PU =
-  /// Returns a previously generated serialization capability or attempts to
-  /// generate one for the specified type `'t`.
-  static member Get: unit -> PU<'t>
+  /// Represents a capability to serialize a part of a product type.
+  type ProductPU<'e, 'r, 'o, 't>
 
-  // ---------------------------------------------------------------------------
+  /// Represents a capability to serialize a subset of a union type.
+  type UnionPU<'p, 'o, 't>
 
-  /// Empty default constructor.
-  new: unit -> PU
+  /// Provides inference rules for a datatype generic serialization capability.
+  #if DOC
+  ///
+  /// The methods of this class aside from `Get` are ordinarily not called
+  /// directly by client code, but are rather called indirectly by `Get` to
+  /// construct the desired serialization capability.
+  ///
+  /// Please note that the method signatures can be seen as a specification of
+  /// which types are supported by the inference rules.
+  #endif
+  type PU =
+    inherit Rules
+    new: unit -> PU
 
-  // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-  /// Completes the serialization capability for a serializable type.
-  member toPU: OpenPU<'t> -> PU<'t>
+    static member toPU: OpenPU<'t> -> PU<'t>
 
-  // Rec -----------------------------------------------------------------------
+    // Rec ---------------------------------------------------------------------
 
-  /// Capability to compute serialization capabilities for recursive types.
-  member fix: unit -> Rec<OpenPU<'t>>
+    static member fix: unit -> Rec<OpenPU<'t>>
 
-  // Base Types ----------------------------------------------------------------
+    // Base Types --------------------------------------------------------------
 
-  /// Serialization capability for the `unit` type.
-  member unit: OpenPU<unit>
+    static member unit: OpenPU<unit>
 
-  /// Serialization capability for the `bool` type.
-  member bool: OpenPU<bool>
+    static member bool: OpenPU<bool>
 
-  /// Serialization capability for the `int8` type.
-  member int8: OpenPU<int8>
-  /// Serialization capability for the `int16` type.
-  member int16: OpenPU<int16>
-  /// Serialization capability for the `int32` type.
-  member int32: OpenPU<int32>
-  /// Serialization capability for the `int64` type.
-  member int64: OpenPU<int64>
+    static member int8: OpenPU<int8>
+    static member int16: OpenPU<int16>
+    static member int32: OpenPU<int32>
+    static member int64: OpenPU<int64>
 
-  /// Serialization capability for the `uint8` type.
-  member uint8: OpenPU<uint8>
-  /// Serialization capability for the `uint16` type.
-  member uint16: OpenPU<uint16>
-  /// Serialization capability for the `uint32` type.
-  member uint32: OpenPU<uint32>
-  /// Serialization capability for the `uint64` type.
-  member uint64: OpenPU<uint64>
+    static member uint8: OpenPU<uint8>
+    static member uint16: OpenPU<uint16>
+    static member uint32: OpenPU<uint32>
+    static member uint64: OpenPU<uint64>
 
-  /// Serialization capability for the `float32` type.
-  member float32: OpenPU<float32>
-  /// Serialization capability for the `float` type.
-  member float64: OpenPU<float>
+    static member float32: OpenPU<float32>
+    static member float64: OpenPU<float>
 
-  /// Serialization capability for the `char` type.
-  member char: OpenPU<char>
-  /// Serialization capability for the `string` type.
-  member string: OpenPU<string>
+    static member char: OpenPU<char>
+    static member string: OpenPU<string>
 
-  /// Serialization capability for the `DateTime` type.
-  member DateTime: OpenPU<DateTime>
+    static member DateTime: OpenPU<DateTime>
 
-  /// Serialization capability for the `Digest` type.
-  member Digest: OpenPU<Internal.Digest>
+    static member Digest: OpenPU<Internal.Digest>
 
-  /// Serialization capability for the `BigInteger` type.
-  member BigInteger: OpenPU<BigInteger>
+    static member BigInteger: OpenPU<BigInteger>
 
-  /// Serialization capability for the `array<byte>` type.  Unlike the general
-  /// `array` rule, this version is optimized for arrays of bytes.
-  member bytes: OpenPU<array<byte>>
+    static member bytes: OpenPU<array<byte>>
 
-  // Special optimizations -----------------------------------------------------
+    // Special optimizations ---------------------------------------------------
 
-  /// Serialization capability for lists of serializable values.  Unlike the
-  /// general rules for arbitrary union types, this version treats the list as a
-  /// sequence of elements and is typically more efficient.
-  member list: OpenPU<'t> -> OpenPU<list<'t>>
+    static member list: OpenPU<'t> -> OpenPU<list<'t>>
 
-  // Refs and Arrays -----------------------------------------------------------
+    // Refs and Arrays ---------------------------------------------------------
 
-  /// Serialization capabability for arrays of serializable values.
-  member array: OpenPU<'t> -> OpenPU<array<'t>>
+    static member array: OpenPU<'t> -> OpenPU<array<'t>>
 
-  // Discriminated Unions ------------------------------------------------------
+    // Discriminated Unions ----------------------------------------------------
 
-  /// Serialization capability for an empty case of a union type.
-  member case: Case<Empty, 'cs, 't>
-         -> UnionPU<Empty, 'cs, 't>
+    static member case: Case<Empty, 'o, 't>
+                  -> UnionPU<Empty, 'o, 't>
 
-  /// Serialization capability for a non-empty case of a union type.
-  member case: Case<'ls,      'cs, 't>
-        * ProductPU<'ls, 'ls,      't>
-         -> UnionPU<'ls,      'cs, 't>
+    static member case: Case<'p,      'o, 't>
+                 * ProductPU<'p, 'p,  'o,  't>
+                  -> UnionPU<'p,      'o, 't>
 
-  /// Serialization capability for multiple cases of a union type.
-  member plus: UnionPU<       'c      , Choice<'c, 'cs>, 't>
-             * UnionPU<           'cs ,            'cs , 't>
-            -> UnionPU<Choice<'c, 'cs>, Choice<'c, 'cs>, 't>
+    static member choice: UnionPU<       'p     , Choice<'p, 'o>, 't>
+                        * UnionPU<           'o ,            'o , 't>
+                       -> UnionPU<Choice<'p, 'o>, Choice<'p, 'o>, 't>
 
-  /// Serialization capability for an arbitrary union type.
-  member union: Rep
-            * Union<          't>
-         * AsChoice<'cs,      't>
-          * UnionPU<'cs, 'cs, 't>
-          -> OpenPU<          't>
+    static member sum: AsChoices<'s,     't>
+                       * UnionPU<'s, 's, 't>
+                       -> OpenPU<        't>
 
-  // Tuples and Records --------------------------------------------------------
+    // Tuples and Records ------------------------------------------------------
 
-  /// Serialization capability for an element of a product type.
-  member elem: Elem<'e, 'es, 't>
-           * OpenPU<'e         >
-       -> ProductPU<'e, 'es, 't>
+    static member elem: Elem<'e, 'r, 'o, 't>
+                    * OpenPU<'e            >
+                -> ProductPU<'e, 'r, 'o, 't>
 
-  /// Serialization capability for multiple elements of a product type.
-  member times: ProductPU<    'e      , And<'e, 'es>, 't>
-              * ProductPU<        'es ,         'es , 't>
-             -> ProductPU<And<'e, 'es>, And<'e, 'es>, 't>
+    static member pair: ProductPU<     'e     , Pair<'e, 'r>, 'o, 't>
+                      * ProductPU<         'r ,          'r , 'o, 't>
+                     -> ProductPU<Pair<'e, 'r>, Pair<'e, 'r>, 'o, 't>
 
-  /// Serialization capability for an arbitrary product type.
-  member product: Rep
-            * Product<          't>
-          * AsProduct<'es,      't>
-          * ProductPU<'es, 'es, 't>
-            -> OpenPU<          't>
+    static member product: AsPairs<'p,     'o, 't>
+                       * ProductPU<'p, 'p, 'o, 't>
+                         -> OpenPU<            't>
