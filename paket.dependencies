@@ -1,4 +1,4 @@
-source /Users/vesakarv/Projects/Fs/Infers.Fresh
+source https://www.nuget.org/api/v2/
 
 nuget FSharp.Core 4.0.0.1 framework: >= net45
 nuget Hopac 0.1.1 framework: >= net45

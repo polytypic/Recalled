@@ -1,9 +1,9 @@
-*.exe
 *.nupkg
 *.suo
 *.userprefs
 *~
 .\#*
+.paket/paket.exe
 .recall
 \#*\#
 bin
