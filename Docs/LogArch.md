@@ -157,7 +157,7 @@ maximum IO bandwidth.
 
 Here is a picture of a possible log state:
 
-<img src="http://vesakarvonen.github.io/Recalled/LogDiagram.svg"/>
+<img src="http://polytypic.github.io/Recalled/LogDiagram.svg"/>
 
 At the top are the *remove* entries.  In the middle are the *add* entries.  In
 the bottom are the *bob* entries.  For every add there is a corresponding bob.
