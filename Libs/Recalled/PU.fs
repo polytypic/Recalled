@@ -24,9 +24,9 @@ module PU =
   type RecPU<'x> () =
     inherit InternalPU<'x> ()
     [<DefaultValue>] val mutable impl: InternalPU<'x>
-    override this.Size (x, i) = this.impl.Size (&x, i)
-    override this.Dopickle (x, p) = this.impl.Dopickle (&x, p)
-    override this.Unpickle (p, x) = this.impl.Unpickle (p, &x)
+    override t.Size (x, i) = t.impl.Size (&x, i)
+    override t.Dopickle (x, p) = t.impl.Dopickle (&x, p)
+    override t.Unpickle (p, x) = t.impl.Unpickle (p, &x)
 
   type ProductPU<'e, 'r, 'o, 't> = P of InternalPU<'e>
   type UnionPU<'p, 'o, 't> = U of list<InternalPU<'t>>
@@ -50,30 +50,30 @@ module PU =
 
     let inline mkNative () : OpenPU<'x> =
       O {new InternalPU<'x> () with
-           override this.Size (_, p) =
+           override t.Size (_, p) =
              p
              |> skipTo sizeof<'x>
              |> skipBy sizeof<'x>
-           override this.Dopickle (x, p) =
+           override t.Dopickle (x, p) =
              p
              |> clearIfNotTo sizeof<'x>
              |> writeIfNot x
-           override this.Unpickle (p, x) =
+           override t.Unpickle (p, x) =
              p
              |> skipTo sizeof<'x>
              |> readTo &x}
 
     let inline mkNativeBy (toNative: 'x -> 'n) (ofNative: 'n -> 'x) =
       O {new InternalPU<'x> () with
-           override this.Size (_, p) =
+           override t.Size (_, p) =
              p
              |> skipTo sizeof<'n>
              |> skipBy sizeof<'n>
-           override this.Dopickle (x, p) =
+           override t.Dopickle (x, p) =
              p
              |> clearIfNotTo sizeof<'n>
              |> writeIfNot (toNative x)
-           override this.Unpickle (p, x) =
+           override t.Unpickle (p, x) =
              let mutable (n: 'n) = Unchecked.defaultof<_>
              let p =
                p
@@ -85,12 +85,12 @@ module PU =
     let inline mkBytesBy (toBytes: 'x -> array<byte>)
                          (ofBytes: array<byte> -> 'x) =
       O {new InternalPU<'x> () with
-           override this.Size (x, p) =
+           override t.Size (x, p) =
              let x = toBytes x
              p
              |> skipTo sizeof<int>
              |> skipBy (sizeof<int> + x.Length)
-           override this.Dopickle (x, p) =
+           override t.Dopickle (x, p) =
              let x = toBytes x
              let mutable p =
                p
@@ -99,7 +99,7 @@ module PU =
              for i=0 to x.Length-1 do
                p <- writeIfNot x.[i] p
              p
-           override this.Unpickle (p, x) =
+           override t.Unpickle (p, x) =
              let mutable p = skipTo sizeof<int> p
              let n = read p
              p <- skipBy sizeof<int> p
@@ -111,15 +111,15 @@ module PU =
 
     let inline mkConst (value: 'x) =
       {new InternalPU<'x> () with
-         override this.Size (x, p) = p
-         override this.Dopickle (x, p) = p
-         override this.Unpickle (p, x) = x <- value ; p}
+         override t.Size (x, p) = p
+         override t.Dopickle (x, p) = p
+         override t.Unpickle (p, x) = x <- value ; p}
 
     let inline mkSeq (toArray: 'xs -> array<'x>)
                      (ofArray: array<'x> -> 'xs)
                      (O e: OpenPU<'x>) =
       O {new InternalPU<'xs> () with
-           override this.Size (x, p) =
+           override t.Size (x, p) =
              let x = toArray x
              let mutable p =
                p
@@ -128,7 +128,7 @@ module PU =
              for i=0 to x.Length-1 do
                p <- e.Size (&x.[i], p)
              p
-           override this.Dopickle (x, p) =
+           override t.Dopickle (x, p) =
              let x = toArray x
              let mutable p =
                p
@@ -137,7 +137,7 @@ module PU =
              for i=0 to x.Length-1 do
                p <- e.Dopickle (&x.[i], p)
              p
-           override this.Unpickle (p, x) =
+           override t.Unpickle (p, x) =
              let mutable n = 0
              let mutable p =
                p
@@ -156,26 +156,26 @@ module PU =
                          (P fs: ProductPU<         'r ,          'r , 'o, 't>)
                               : ProductPU<Pair<'e, 'r>, Pair<'e, 'r>, 'o, 't> =
       P {new InternalPU<Pair<'e, 'r>> () with
-           override this.Size (ffs, p) =
+           override t.Size (ffs, p) =
              let p = f.Size (&ffs.Elem, p)
              fs.Size (&ffs.Rest, p)
-           override this.Dopickle (ffs, p) =
+           override t.Dopickle (ffs, p) =
              let p = f.Dopickle (&ffs.Elem, p)
              fs.Dopickle (&ffs.Rest, p)
-           override this.Unpickle (p, ffs) =
+           override t.Unpickle (p, ffs) =
              let p = f.Unpickle (p, &ffs.Elem)
              fs.Unpickle (p, &ffs.Rest)}
 
     let inline mkTupleOrNonRecursiveRecord (asP: AsPairs<'p, 'o, 't>)
                                            (P ppu: ProductPU<'p, 'p, 'o, 't>) =
       {new InternalPU<'t> () with
-         override this.Size (x, p) =
+         override t.Size (x, p) =
            let mutable px = asP.ToPairs x
            ppu.Size (&px, p)
-         override this.Dopickle (x, p) =
+         override t.Dopickle (x, p) =
            let mutable px = asP.ToPairs x
            ppu.Dopickle (&px, p)
-         override this.Unpickle (p, x) =
+         override t.Unpickle (p, x) =
            let mutable px = Unchecked.defaultof<_>
            let p = ppu.Unpickle (p, &px)
            x <- asP.Create (&px)
@@ -186,15 +186,15 @@ module PU =
       if 256 < cs.Length then
         failwith "Unions with more than 256 cases are not yet supported"
       O {new InternalPU<'t> () with
-           override this.Size (x, p) =
+           override t.Size (x, p) =
              let p = skipBy sizeof<uint8> p
              let i = asC.Tag x
              cs.[i].Size (&x, p)
-           override this.Dopickle (x, p) =
+           override t.Dopickle (x, p) =
              let i = asC.Tag x
              let p = writeIfNot (uint8 i) p
              cs.[i].Dopickle (&x, p)
-           override this.Unpickle (p, x) =
+           override t.Unpickle (p, x) =
              let i = int32 (read p : uint8)
              let p = skipBy sizeof<uint8> p
              cs.[i].Unpickle (p, &x)}
@@ -204,16 +204,16 @@ module PU =
 
     static member toPU (O pu: OpenPU<'x>) : PU<'x> =
       {new PU<'x> () with
-         override this.Size (x) =
+         override t.Size (x) =
            let mutable x = x
            let sz = pu.Size (&x, 0L)
            if sz > int64 Int32.MaxValue then
              failwith "Over 2GB objects are not supported."
            int sz
-         override this.Dopickle (x, p) =
+         override t.Dopickle (x, p) =
            let mutable x = x
            pu.Dopickle (&x, int64 (NativePtr.toNativeInt p)) |> ignore
-         override this.Unpickle (p) =
+         override t.Unpickle (p) =
            let mutable x = Unchecked.defaultof<_>
            pu.Unpickle (int64 (NativePtr.toNativeInt p), &x) |> ignore
            x}
@@ -247,11 +247,11 @@ module PU =
     static member char: OpenPU<char> = mkNative ()
     static member string: OpenPU<string> =
       O {new InternalPU<string> () with
-           override this.Size (x, p) =
+           override t.Size (x, p) =
              p
              |> skipTo sizeof<int>
              |> skipBy (sizeof<int> + sizeof<char> * x.Length)
-           override this.Dopickle (x, p) =
+           override t.Dopickle (x, p) =
              let mutable p =
                p
                |> clearIfNotTo sizeof<int>
@@ -259,7 +259,7 @@ module PU =
              for i=0 to x.Length-1 do
                p <- writeIfNot x.[i] p
              p
-           override this.Unpickle (p, x) =
+           override t.Unpickle (p, x) =
              let mutable p = skipTo sizeof<int> p
              let n = read p
              p <- skipBy sizeof<int> p
@@ -274,16 +274,16 @@ module PU =
 
     static member Digest: OpenPU<Digest> =
       O {new InternalPU<Digest> () with
-           override this.Size (x, p) =
+           override t.Size (x, p) =
              p
              |> skipTo sizeof<uint64>
              |> skipBy (2 * sizeof<uint64>)
-           override this.Dopickle (x, p) =
+           override t.Dopickle (x, p) =
              p
              |> clearIfNotTo sizeof<uint64>
              |> writeIfNot x.Lo
              |> writeIfNot x.Hi
-           override this.Unpickle (p, x) =
+           override t.Unpickle (p, x) =
              p
              |> skipTo sizeof<uint64>
              |> readTo &x.Lo

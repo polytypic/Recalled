@@ -1,0 +1,5 @@
+#!/bin/bash -e
+
+if [ -d .gh-pages ] ; then
+  ./FsiRefGen/run --out .gh-pages --name Recalled -- Libs/Recalled/*.fsi
+fi

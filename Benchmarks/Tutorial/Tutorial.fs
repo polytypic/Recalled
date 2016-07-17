@@ -44,7 +44,7 @@ let sumLinesOfFiles (fileListPath: string) : Logged<Result<int>> =
   }
 
 [<EntryPoint>]
-let main argv = 
+let main _ =
   let sum : int = run <| recall ".recall" {
     return! sumLinesOfFiles "foo" |> wait
   }

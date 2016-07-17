@@ -27,7 +27,7 @@ let rec fib n : Logged<Result<BigInteger>> = log ("fib: " + n.ToString ()) {
 }
 
 [<EntryPoint>]
-let main argv =
+let main _ =
   try
     let mutable n = 1I
     for i=1 to 16 do

@@ -63,7 +63,7 @@ let test (stage: Logged<Result<int>>) =
   printfn "Result: %d" res2
 
 [<EntryPoint>]
-let Start argv =
+let Start _ =
   if Directory.Exists ".recall" then
     Directory.Delete (".recall", true)
   [stage1; stage2; stage3]

@@ -3,10 +3,10 @@
 *.userprefs
 *~
 .\#*
+.gh-pages
 .paket/paket.exe
 .recall
 \#*\#
 bin
-gh-pages
 obj
 packages

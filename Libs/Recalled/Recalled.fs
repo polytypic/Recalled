@@ -187,7 +187,7 @@ module internal Do =
       let newDeps = ResizeArray<Result> ()
 
       let cancel () =
-        IVar.fillFailure res.info CanceledOnFailure >>=.
+        res.info *<=! CanceledOnFailure >>=.
         Latch.decrement log.Latch
 
       let failure (e: exn) =
@@ -197,9 +197,9 @@ module internal Do =
          | e ->
            let e' = Exception (sprintf "Failure building %s" id, e)
            lock log.Failures <| fun () -> log.Failures.Add e'
-           IVar.tryFill log.Failed () >>=.
-           IVar.fillFailure res.info e' >>=.
-           Latch.decrement log.Latch
+           IVar.tryFill log.Failed ()
+           >>=. res.info *<=! e'
+           >>=. Latch.decrement log.Latch
 
       let finish info =
         res.info *<= info >>= fun () ->
@@ -219,7 +219,7 @@ module internal Do =
         let depKeys = Array.zeroCreate newDeps.Count
         for i=0 to depKeys.Length-1 do
           newDeps.[i].CopyKey (&depKeys.[i])
-        LoggedMap.add log.Old res.key depKeys (!depDigest)
+        LoggedMap.add log.Old res.key depKeys !depDigest
          (res.pu.Size x)
          (fun ptr -> res.pu.Dopickle (x, ptr) |> ignore) >>=
         finish
@@ -254,7 +254,7 @@ module internal Do =
                  lrs2xUJ log rs >>= build
                | GetDigest d2xUJ ->
                  depDigest (ref res.key) 0 >>= fun digest ->
-                 d2xUJ (!digest) >>= build
+                 d2xUJ !digest >>= build
                | GetThis lri2xUJ ->
                  lri2xUJ log res newDeps.Count >>= build
 
@@ -298,7 +298,7 @@ module internal Do =
                     lrs2xUJ log rs >>= checkDeps
                   | GetDigest d2xUJ ->
                     depDigest (ref res.key) 0 >>= fun digest ->
-                    d2xUJ (!digest) >>= checkDeps
+                    d2xUJ !digest >>= checkDeps
                   | GetThis lri2xUJ ->
                     lri2xUJ log res newDeps.Count >>= checkDeps
              checkDeps xU)
@@ -315,7 +315,7 @@ type WithLogBuilder () =
     fun log -> u2xW () log
 
   member inline this.Return (x: 'x) : WithLog<'x> =
-    fun log -> Job.result x
+    fun _ -> Job.result x
 
   member inline this.ReturnFrom (xW: WithLog<'x>) : WithLog<'x> =
     xW
@@ -349,7 +349,7 @@ type WithLogBuilder () =
     fun log -> Job.whileDo c (Job.delayWith uW log)
 
   member inline this.Zero () : WithLog<unit> =
-    fun log -> Job.unit ()
+    fun _ -> Job.unit ()
 
 type RunWithLogBuilder (logDir: string) =
   inherit WithLogBuilder ()
@@ -390,7 +390,7 @@ module Recalled =
   let watchPU (xPU: PU<'x>) (x: 'x) : Update<unit> =
     GetThis <| fun log res i ->
     Do.asLogged log DigestSet.empty (sprintf "%d: %s" i res.Id) xPU (Value x)
-    >>- fun (d, x) -> Required (d, Value)
+    >>- fun (d, _) -> Required (d, Value)
 
   let watch (x: 'x) : Update<unit> = watchPU PU.pu x
 
@@ -404,21 +404,18 @@ module Recalled =
 
   let read (xR: Result<'x>) : Update<'x> =
     Read (xR,
-          xR.info >>= fun info ->
+          xR.info >>- fun info ->
           match xR.value with
            | Some value ->
              xR.value <- None
-             Job.result (Value value)
+             Value value
            | None ->
-             Job.result
-              (GetLog <| fun log _ ->
-               LoggedMap.readFun log.Old
-                (fun ptr ->
-                  let ptr =
-                    NativePtr.toNativeInt ptr + nativeint info.BobOffset
-                    |> NativePtr.ofNativeInt
-                  xR.pu.Unpickle ptr) >>- fun value ->
-               Value value))
+             GetLog <| fun log _ ->
+             LoggedMap.readFun log.Old ^ fun ptr ->
+                  NativePtr.toNativeInt ptr + nativeint info.BobOffset
+                  |> NativePtr.ofNativeInt
+                  |> xR.pu.Unpickle
+             >>- Value)
 
   let dep (LogAs xAs: Logged<_>) : Logged<unit> =
     LogAs <| fun log rs ->
@@ -433,13 +430,11 @@ module Recalled =
        xR.value <- None
        Job.result (d, value)
      | None ->
-       LoggedMap.readFun log.Old
-        (fun ptr ->
-          let ptr =
+       LoggedMap.readFun log.Old ^ fun ptr ->
             NativePtr.toNativeInt ptr + nativeint info.BobOffset
             |> NativePtr.ofNativeInt
-          xR.pu.Unpickle ptr) >>- fun value ->
-       (d, value)
+            |> xR.pu.Unpickle
+       >>- fun value -> (d, value)
 
   let getCancelAlt: WithLog<Alt<unit>> =
     fun log -> Job.result (log.Failed :> Alt<_>)
