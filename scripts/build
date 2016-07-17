@@ -32,8 +32,18 @@ done
 
 scripts/refgen
 
-for EXE in Benchmarks/*/bin/*/*.exe ; do
-  rm -rf .recall
-  $RUN $EXE
-  $RUN $EXE
+rm -rf .recall
+
+for BENCHMARK in `ls Benchmarks` ; do
+  if [ -e Benchmarks/$BENCHMARK/.skip ] ; then
+    continue
+  fi
+
+  for CONFIG in Debug Release ; do
+    EXE=Benchmarks/$BENCHMARK/bin/$CONFIG/$BENCHMARK.exe
+
+    $RUN $EXE
+    $RUN $EXE
+    rm -rf .recall
+  done
 done
