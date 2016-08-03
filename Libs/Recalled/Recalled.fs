@@ -355,7 +355,7 @@ type RunWithLogBuilder (logDir: string) =
   inherit WithLogBuilder ()
   member this.Run (xW: WithLog<'x>) : Job<'x> = job {
     let! loggedMap = LoggedMap.create logDir
-    let latch = Latch.Now.create 1
+    let latch = Latch 1
     let log =
       {Failed = IVar ()
        Latch = latch

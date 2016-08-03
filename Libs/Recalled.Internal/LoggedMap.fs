@@ -356,7 +356,7 @@ module LoggedMap =
                     let entry = {
                         Idx = ri.addIdx
                         Live = false
-                        Info = IVar.Now.createFull info
+                        Info = IVar info
                       }
 
                     do Monitor.Enter loggedMap.Dict
