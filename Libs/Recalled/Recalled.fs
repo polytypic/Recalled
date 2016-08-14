@@ -335,9 +335,9 @@ type WithLogBuilder () =
     this.Bind (uW, fun () -> xW)
 
   member inline this.TryFinally (xW: WithLog<'x>, fin: unit -> unit) =
-    fun log -> Job.tryFinallyFun (Job.delayWith xW log) fin
+    fun log -> Job.tryFinallyFunDelay (fun () -> xW log) fin
   member inline this.TryWith (xW: WithLog<'x>, e2xW: exn -> WithLog<'x>) =
-    fun log -> Job.tryWith (Job.delayWith xW log) (fun e -> e2xW e log)
+    fun log -> Job.tryWithDelay (fun () -> xW log) (fun e -> e2xW e log)
 
   member inline this.Using (x: 'x, x2yW: 'x -> WithLog<'y>) : WithLog<'y> =
     fun log -> Job.using x (fun x -> x2yW x log)
@@ -346,7 +346,7 @@ type WithLogBuilder () =
     fun log -> Seq.iterJob (fun x -> x2uW x log) xs
 
   member this.While (c: unit -> bool, uW: WithLog<unit>) : WithLog<unit> =
-    fun log -> Job.whileDo c (Job.delayWith uW log)
+    fun log -> Job.whileDoDelay c (fun () -> uW log)
 
   member inline this.Zero () : WithLog<unit> =
     fun _ -> Job.unit ()
