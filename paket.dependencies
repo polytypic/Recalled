@@ -1,6 +1,7 @@
 source https://www.nuget.org/api/v2/
+framework: NET45
 
-nuget FSharp.Core >= 4.0.0.1 framework: >= net45
-nuget Hopac >= 0.3.2 framework: >= net45
-nuget Infers >= 0.2.3 framework: >= net45
-nuget Infers.Rep >= 0.2.3 framework: >= net45
+nuget FSharp.Core >= 4.0.0.1
+nuget Hopac >= 0.3.9
+nuget Infers >= 0.2.3
+nuget Infers.Rep >= 0.2.3
