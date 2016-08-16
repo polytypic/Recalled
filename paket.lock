@@ -2,7 +2,7 @@ FRAMEWORK: NET45
 NUGET
   remote: https://www.nuget.org/api/v2
     FSharp.Core (4.0.0.1)
-    Hopac (0.3.9)
+    Hopac (0.3.10)
       FSharp.Core (>= 3.1.2.5)
     Infers (0.2.3)
       FSharp.Core (>= 3.1.2.5)
